@@ -800,149 +800,280 @@
     function renderOrders() {
 
       const app =
-        document.getElementById(
-          'app'
-        );
-
-
-      if (
-        orders.length === 0
-      ) {
-
+        document.getElementById('app');
+    
+    
+      if (!orders || orders.length === 0) {
+    
         app.innerHTML = `
-
           <div class="empty">
-
             📭 วันนี้ยังไม่มีออเดอร์
-
           </div>
-
         `;
-
+    
         return;
-
       }
-
-
+    
+    
+      /*
+       * =====================================
+       * กรองออเดอร์ตามสถานะ
+       * =====================================
+       */
+    
+      let filteredOrders;
+    
+    
+      if (currentFilter === 'ALL') {
+    
+        filteredOrders =
+          orders.slice();
+    
+      } else {
+    
+        filteredOrders =
+          orders.filter(
+            function(order) {
+    
+              return (
+                String(order.status || '')
+                  .toUpperCase() ===
+                currentFilter
+              );
+    
+            }
+          );
+    
+      }
+    
+    
+      /*
+       * =====================================
+       * ถ้าไม่มีออเดอร์ในสถานะที่เลือก
+       * =====================================
+       */
+    
+      if (
+        filteredOrders.length === 0
+      ) {
+    
+        const filterNames = {
+    
+          NEW:
+            '🆕 ออเดอร์ใหม่',
+    
+          PREPARING:
+            '👨‍🍳 กำลังทำ',
+    
+          READY:
+            '✅ พร้อมรับ',
+    
+          COMPLETED:
+            '✔️ เสร็จแล้ว'
+    
+        };
+    
+    
+        app.innerHTML = `
+    
+          <div class="empty">
+    
+            ${
+              currentFilter === 'ALL'
+                ? '📭 วันนี้ยังไม่มีออเดอร์'
+                : (
+                    'ไม่มีออเดอร์ในสถานะ ' +
+                    (
+                      filterNames[
+                        currentFilter
+                      ] ||
+                      currentFilter
+                    )
+                  )
+            }
+    
+          </div>
+    
+        `;
+    
+        return;
+      }
+    
+    
+      /*
+       * =====================================
+       * แบ่งกลุ่มสำหรับหน้า ALL
+       * =====================================
+       */
+    
       const groups = [
-
+    
         {
           status: 'NEW',
           title: '🆕 ออเดอร์ใหม่'
         },
-      
+    
         {
           status: 'PREPARING',
           title: '👨‍🍳 กำลังทำ'
         },
-      
+    
         {
           status: 'READY',
           title: '✅ พร้อมรับ'
         },
-      
+    
         {
           status: 'COMPLETED',
           title: '✔️ เสร็จแล้ว'
         },
-      
+    
         {
           status: 'CANCELLED',
           title: '❌ ยกเลิก'
         }
-      
+    
       ];
-
-
+    
+    
       let html = '';
-
-
-      groups.forEach(
-        function(group) {
-
-          const groupOrders =
-            orders.filter(
-              function(order) {
-          
-                if (
-                  currentFilter === 'ALL'
-                ) {
-                
-                  return (
-                    order.status ===
-                    group.status
-                  );
-                
-                }
-                
-                
-                // ถ้าเลือกสถานะเฉพาะ
-                // ให้แสดงเฉพาะสถานะนั้น
-                return (
-                  order.status ===
-                  currentFilter
-                );
-              }
-            );
-
-
-          if (
-            groupOrders.length === 0
-          ) {
-
-            return;
-
-          }
-
-
-          html += `
-
-            <div class="section">
-
-              <div
-                class="section-title">
-
-                ${group.title}
-
-              </div>
-
-          `;
-
-
-          groupOrders.forEach(
-            function(order) {
-
-              html +=
-                renderOrderCard(
-                  order
-                );
-
+    
+    
+      /*
+       * =====================================
+       * ถ้าเลือกสถานะเฉพาะ
+       * แสดงแค่หัวข้อเดียว
+       * =====================================
+       */
+    
+      if (
+        currentFilter !== 'ALL'
+      ) {
+    
+        const group =
+          groups.find(
+            function(item) {
+    
+              return (
+                item.status ===
+                currentFilter
+              );
+    
             }
           );
-
-
-          html += `
-
+    
+    
+        const title =
+          group
+            ? group.title
+            : currentFilter;
+    
+    
+        html += `
+    
+          <div class="section">
+    
+            <div class="section-title">
+              ${title}
             </div>
-
-          `;
-
-        }
-      );
-
-
+    
+        `;
+    
+    
+        filteredOrders.forEach(
+          function(order) {
+    
+            html +=
+              renderOrderCard(order);
+    
+          }
+        );
+    
+    
+        html += `
+    
+          </div>
+    
+        `;
+    
+    
+      } else {
+    
+        /*
+         * =====================================
+         * หน้า ALL
+         * แสดงทุกสถานะเป็นกลุ่ม
+         * =====================================
+         */
+    
+        groups.forEach(
+          function(group) {
+    
+            const groupOrders =
+              filteredOrders.filter(
+                function(order) {
+    
+                  return (
+                    String(
+                      order.status || ''
+                    ).toUpperCase() ===
+                    group.status
+                  );
+    
+                }
+              );
+    
+    
+            if (
+              groupOrders.length === 0
+            ) {
+    
+              return;
+    
+            }
+    
+    
+            html += `
+    
+              <div class="section">
+    
+                <div class="section-title">
+                  ${group.title}
+                </div>
+    
+            `;
+    
+    
+            groupOrders.forEach(
+              function(order) {
+    
+                html +=
+                  renderOrderCard(order);
+    
+              }
+            );
+    
+    
+            html += `
+    
+              </div>
+    
+            `;
+    
+          }
+        );
+    
+      }
+    
+    
       app.innerHTML =
         html ||
         `
-
           <div class="empty">
-
             ไม่มีออเดอร์ที่ต้องดำเนินการ
-
           </div>
-
         `;
-
+    
     }
 
     function setOrderFilter(
