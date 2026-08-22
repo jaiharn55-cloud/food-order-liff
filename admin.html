@@ -143,17 +143,45 @@
     .summary-card {
 
       background: white;
-
+    
       border-radius: 12px;
-
+    
       padding: 13px;
-
+    
       box-shadow:
         0 1px 5px
         rgba(0,0,0,.07);
-
+    
       text-align: center;
-
+    
+      cursor: pointer;
+    
+      transition:
+        transform .15s,
+        box-shadow .15s;
+    
+    }
+    
+    
+    .summary-card:hover {
+    
+      transform: translateY(-2px);
+    
+      box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.12);
+    
+    }
+    
+    
+    .summary-card.active {
+    
+      border: 2px solid #06c755;
+    
+      box-shadow:
+        0 0 0 2px
+        rgba(6,199,85,.12);
+    
     }
 
 
@@ -555,59 +583,6 @@
       }
 
     }
-
-    .filter-bar {
-
-  display: flex;
-
-  gap: 8px;
-
-  flex-wrap: wrap;
-
-  margin-bottom: 15px;
-
-}
-
-
-.filter-btn {
-
-  border: none;
-
-  background: white;
-
-  color: #555;
-
-  padding: 10px 13px;
-
-  border-radius: 10px;
-
-  font-size: 13px;
-
-  font-weight: bold;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 1px 5px
-    rgba(0,0,0,.08);
-
-}
-
-
-.filter-btn.active {
-
-  background: #06c755;
-
-  color: white;
-
-}
-
-
-.filter-btn:active {
-
-  transform: scale(.97);
-
-}
     
   </style>
 
@@ -660,52 +635,6 @@
       class="summary">
     </div>
 
-    <div class="filter-bar">
-
-    <button
-      class="filter-btn active"
-      data-filter="ALL"
-      onclick="setOrderFilter('ALL')">
-      📋 ทั้งหมด
-    </button>
-  
-    <button
-      class="filter-btn"
-      data-filter="NEW"
-      onclick="setOrderFilter('NEW')">
-      🆕 ใหม่
-    </button>
-  
-    <button
-      class="filter-btn"
-      data-filter="PREPARING"
-      onclick="setOrderFilter('PREPARING')">
-      👨‍🍳 กำลังทำ
-    </button>
-  
-    <button
-      class="filter-btn"
-      data-filter="READY"
-      onclick="setOrderFilter('READY')">
-      ✅ พร้อมรับ
-    </button>
-  
-    <button
-      class="filter-btn"
-      data-filter="COMPLETED"
-      onclick="setOrderFilter('COMPLETED')">
-      ✔️ เสร็จแล้ว
-    </button>
-  
-    <button
-      class="filter-btn"
-      data-filter="CANCELLED"
-      onclick="setOrderFilter('CANCELLED')">
-      ❌ ยกเลิก
-    </button>
-  
-  </div>
-
     <div
       id="app">
 
@@ -748,93 +677,117 @@
 
       const countNew =
         orders.filter(
-          o => o.status === 'NEW'
+          function(order) {
+            return order.status === 'NEW';
+          }
         ).length;
-
-
+    
+    
       const countPreparing =
         orders.filter(
-          o =>
-            o.status ===
-            'PREPARING'
+          function(order) {
+            return order.status === 'PREPARING';
+          }
         ).length;
-
-
+    
+    
       const countReady =
         orders.filter(
-          o =>
-            o.status ===
-            'READY'
+          function(order) {
+            return order.status === 'READY';
+          }
         ).length;
-
-
+    
+    
       const countCompleted =
         orders.filter(
-          o =>
-            o.status ===
-            'COMPLETED'
+          function(order) {
+            return order.status === 'COMPLETED';
+          }
         ).length;
-
-
+    
+    
       document
-        .getElementById(
-          'summary'
-        )
+        .getElementById('summary')
         .innerHTML = `
-
-          <div class="summary-card">
-
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'NEW'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('NEW')">
+    
             <div class="summary-number">
               ${countNew}
             </div>
-
+    
             <div class="summary-label">
               🆕 ออเดอร์ใหม่
             </div>
-
+    
           </div>
-
-
-          <div class="summary-card">
-
+    
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'PREPARING'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('PREPARING')">
+    
             <div class="summary-number">
               ${countPreparing}
             </div>
-
+    
             <div class="summary-label">
               👨‍🍳 กำลังทำ
             </div>
-
+    
           </div>
-
-
-          <div class="summary-card">
-
+    
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'READY'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('READY')">
+    
             <div class="summary-number">
               ${countReady}
             </div>
-
+    
             <div class="summary-label">
               ✅ พร้อมรับ
             </div>
-
+    
           </div>
-
-
-          <div class="summary-card">
-
+    
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'COMPLETED'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('COMPLETED')">
+    
             <div class="summary-number">
               ${countCompleted}
             </div>
-
+    
             <div class="summary-label">
               ✔️ เสร็จแล้ว
             </div>
-
+    
           </div>
-
+    
         `;
-
+    
     }
 
 
@@ -914,20 +867,21 @@
                 if (
                   currentFilter === 'ALL'
                 ) {
-          
+                
                   return (
                     order.status ===
                     group.status
                   );
-          
+                
                 }
-          
-          
+                
+                
+                // ถ้าเลือกสถานะเฉพาะ
+                // ให้แสดงเฉพาะสถานะนั้น
                 return (
                   order.status ===
                   currentFilter
                 );
-          
               }
             );
 
@@ -992,126 +946,28 @@
     }
 
     function setOrderFilter(
-  filter
-) {
-
-  currentFilter =
-    filter;
-
-
-  document
-    .querySelectorAll(
-      '.filter-btn'
-    )
-    .forEach(
-      function(button) {
-
-        button.classList.toggle(
-          'active',
-          button.dataset.filter ===
-          filter
-        );
-
+      filter
+    ) {
+    
+      if (
+        currentFilter === filter
+      ) {
+    
+        currentFilter = 'ALL';
+    
+      } else {
+    
+        currentFilter = filter;
+    
       }
-    );
+    
+    
+      renderSummary();
+    
+      renderOrders();
+    
+    }
 
-
-  renderOrders();
-
-}
-
-
-function updateFilterCounts() {
-
-  const counts = {
-
-    ALL:
-      orders.length,
-
-    NEW:
-      orders.filter(
-        function(order) {
-          return order.status === 'NEW';
-        }
-      ).length,
-
-    PREPARING:
-      orders.filter(
-        function(order) {
-          return order.status === 'PREPARING';
-        }
-      ).length,
-
-    READY:
-      orders.filter(
-        function(order) {
-          return order.status === 'READY';
-        }
-      ).length,
-
-    COMPLETED:
-      orders.filter(
-        function(order) {
-          return order.status === 'COMPLETED';
-        }
-      ).length,
-
-    CANCELLED:
-      orders.filter(
-        function(order) {
-          return order.status === 'CANCELLED';
-        }
-      ).length
-
-  };
-
-
-  const labels = {
-
-    ALL:
-      '📋 ทั้งหมด',
-
-    NEW:
-      '🆕 ใหม่',
-
-    PREPARING:
-      '👨‍🍳 กำลังทำ',
-
-    READY:
-      '✅ พร้อมรับ',
-
-    COMPLETED:
-      '✔️ เสร็จแล้ว',
-
-    CANCELLED:
-      '❌ ยกเลิก'
-
-  };
-
-
-  document
-    .querySelectorAll(
-      '.filter-btn'
-    )
-    .forEach(
-      function(button) {
-
-        const filter =
-          button.dataset.filter;
-
-        const count =
-          counts[filter] ?? 0;
-
-
-        button.textContent =
-          labels[filter] +
-          ' ' +
-          count;
-
-      }
-    );
-
-}
 
     /*
      * =====================================
@@ -1845,8 +1701,6 @@ async function loadOrders() {
 
 
     renderSummary();
-
-    updateFilterCounts();
 
     renderOrders();
 
