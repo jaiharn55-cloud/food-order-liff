@@ -579,6 +579,11 @@
           id="today">
         </div>
 
+        <div
+          class="date"
+          id="lastUpdated">
+        </div>
+
       </div>
 
 
@@ -639,12 +644,9 @@
      * โหลดออเดอร์
      * =====================================
      */
-
-    async function loadOrders() {
-
-      try {
-
-        document
+    
+/*
+       document
           .getElementById('app')
           .innerHTML = `
 
@@ -655,6 +657,7 @@
             </div>
 
           `;
+*/
 
 
         const response =
@@ -708,7 +711,20 @@
         renderSummary();
 
         renderOrders();
-
+        
+        document
+          .getElementById('lastUpdated')
+          .textContent =
+            'อัปเดตล่าสุด ' +
+            new Date()
+              .toLocaleTimeString(
+                'th-TH',
+                {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit'
+                }
+              );
 
       } catch (error) {
 
@@ -1006,20 +1022,21 @@
 
       let pickupText =
         'รับตอนนี้';
-
-
+      
+      
       if (
         order.pickupType ===
         'SCHEDULED'
       ) {
-
+      
         pickupText =
-          '🕐 ช่วงเวลา ' +
+          '🕐 รับเวลา ' +
           (
+            order.pickupTime ||
             order.pickupSlot ||
             '-'
           );
-
+      
       }
 
 
@@ -1624,18 +1641,133 @@
      * เริ่มต้น
      * =====================================
      */
+    let isLoadingOrders = false;
 
-    loadOrders();
+
+async function loadOrders() {
+
+  if (isLoadingOrders) {
+
+    return;
+
+  }
 
 
-    /*
-     * Auto refresh ทุก 15 วินาที
-     */
+  isLoadingOrders = true;
 
-    setInterval(
-      loadOrders,
-      15000
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL +
+        '?action=getOrders'
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      'ORDERS:',
+      data
     );
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        'ไม่สามารถโหลดออเดอร์ได้'
+      );
+
+    }
+
+
+    orders =
+      data.orders || [];
+
+
+    document
+      .getElementById('today')
+      .textContent =
+        'วันที่ ' +
+        data.date;
+
+
+    renderSummary();
+
+    renderOrders();
+    
+    
+    document
+      .getElementById('lastUpdated')
+      .textContent =
+        'อัปเดตล่าสุด ' +
+        new Date()
+          .toLocaleTimeString(
+            'th-TH',
+            {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            }
+          );
+
+  } catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    document
+      .getElementById('app')
+      .innerHTML = `
+
+        <div class="error">
+
+          ❌ โหลดออเดอร์ไม่สำเร็จ
+
+          <br><br>
+
+          ${escapeHtml(
+            error.message ||
+            String(error)
+          )}
+
+        </div>
+
+      `;
+
+   } finally {
+
+    isLoadingOrders = false;
+
+  }
+
+}
+
+// โหลดครั้งแรก
+loadOrders();
+
+
+// Auto refresh ทุก 60 วินาที
+setInterval(
+  loadOrders,
+  60000
+);
 
   </script>
 
