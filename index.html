@@ -1538,10 +1538,10 @@
             ${
               disabled
                 ? 'มีคิวรอ ' +
-                  Number(slot.waiting || slot.used || 0) +
+                  Number(slot.waiting ?? 0) +
                   ' คิว • เต็มแล้ว'
                 : 'มีคิวรอ ' +
-                  Number(slot.waiting || slot.used || 0) +
+                  Number(slot.waiting ?? 0) +
                   ' คิว'
             }
 
