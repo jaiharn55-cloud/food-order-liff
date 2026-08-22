@@ -1537,11 +1537,11 @@
 
             ${
               disabled
-                ? 'เต็มแล้ว'
-                : 'เหลือ ' +
-                  Number(
-                    slot.remaining
-                  ) +
+                ? 'มีคิวรอ ' +
+                  Number(slot.waiting || slot.used || 0) +
+                  ' คิว • เต็มแล้ว'
+                : 'มีคิวรอ ' +
+                  Number(slot.waiting || slot.used || 0) +
                   ' คิว'
             }
 
