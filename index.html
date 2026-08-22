@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>ร้านข้าวแกง - สั่งอาหาร</title>
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f5f5;
+      font-family: Arial, "Noto Sans Thai", sans-serif;
+    }
+
+    .header {
+      background: #06c755;
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .status {
+      color: #666;
+      font-size: 14px;
+      margin-top: 15px;
+      word-break: break-word;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="header">
+
+    <h1>🍱 ร้านข้าวแกง ตามสั่ง</h1>
+
+    <p>ระบบสั่งอาหารผ่าน LINE</p>
+
+  </div>
+
+
+  <div class="container">
+
+    <div class="card">
+
+      <h2>กำลังเตรียมระบบ...</h2>
+
+      <div
+        id="status"
+        class="status">
+
+        STEP 1: โหลดหน้าเว็บสำเร็จ
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    const LIFF_ID =
+      '2011202604-C2aNSUPF';
+
+
+    async function startLIFF() {
+
+      const status =
+        document.getElementById('status');
+
+
+      try {
+
+        status.innerText =
+          'STEP 2: กำลังเริ่ม LIFF...';
+
+
+        console.log(
+          'Current URL:',
+          window.location.href
+        );
+
+
+        await liff.init({
+
+          liffId: LIFF_ID
+
+        });
+
+
+        status.innerText =
+          'STEP 3: LIFF ทำงานสำเร็จ ✅';
+
+
+        console.log(
+          'LIFF initialized successfully'
+        );
+
+
+        console.log(
+          'In Client:',
+          liff.isInClient()
+        );
+
+
+        console.log(
+          'Logged In:',
+          liff.isLoggedIn()
+        );
+
+
+      } catch (error) {
+
+        status.innerText =
+          '❌ LIFF ERROR: ' +
+          (
+            error.message ||
+            String(error)
+          );
+
+
+        console.error(
+          'LIFF ERROR:',
+          error
+        );
+
+      }
+
+    }
+
+
+    window.onload =
+      startLIFF;
+
+  </script>
+
+</body>
+
+</html>
