@@ -1243,6 +1243,7 @@
           onclick="
             updateStatus(
               '${escapeJs(order.orderId)}',
+              '${escapeJs(order.date)}',
               'PREPARING'
             )
           ">
@@ -1256,6 +1257,7 @@
           onclick="
             updateStatus(
               '${escapeJs(order.orderId)}',
+              '${escapeJs(order.date)}',
               'CANCELLED'
             )
           ">
@@ -1280,6 +1282,7 @@
           onclick="
             updateStatus(
               '${escapeJs(order.orderId)}',
+              '${escapeJs(order.date)}',
               'READY'
             )
           ">
@@ -1304,6 +1307,7 @@
           onclick="
             updateStatus(
               '${escapeJs(order.orderId)}',
+              '${escapeJs(order.date)}',
               'COMPLETED'
             )
           ">
@@ -1381,6 +1385,7 @@
 
     async function updateStatus(
       orderId,
+      orderDate,
       status
     ) {
 
@@ -1445,6 +1450,9 @@
 
                   orderId:
                     orderId,
+
+                  orderDate:
+                    orderDate,
 
                   status:
                     status
