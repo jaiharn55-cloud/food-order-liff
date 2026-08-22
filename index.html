@@ -2148,12 +2148,59 @@ async function submitOrder() {
      * ==========================
      */
 
-    showOrderSuccess(
-      result
+
+    cart = [];
+
+    cart = [];
+
+
+// ==========================================
+// โหลดข้อมูลร้านใหม่หลังสร้าง Order สำเร็จ
+// เพื่ออัปเดตจำนวนคิว
+// ==========================================
+
+try {
+
+  const refreshResponse =
+    await fetch(
+      API_URL +
+      '?action=getInitialData'
     );
 
 
-    cart = [];
+  if (refreshResponse.ok) {
+
+    const refreshedData =
+      await refreshResponse.json();
+
+
+    if (
+      refreshedData &&
+      Array.isArray(
+        refreshedData.slots
+      )
+    ) {
+
+      DATA =
+        refreshedData;
+
+    }
+
+  }
+
+} catch (refreshError) {
+
+  console.error(
+    'ไม่สามารถรีเฟรชจำนวนคิว:',
+    refreshError
+  );
+
+}
+
+
+showOrderSuccess(
+  result
+);
 
 
   } catch (error) {
@@ -2301,7 +2348,7 @@ async function submitOrder() {
 
       <button
         class="btn-green full"
-        onclick="renderMenu()">
+        onclick="reloadStoreData()">
 
         🍱 สั่งอาหารเพิ่ม
 
@@ -2404,6 +2451,63 @@ async function submitOrder() {
       );
 
   }
+
+  async function reloadStoreData() {
+
+  try {
+
+    showLoading(
+      'กำลังอัปเดตเมนูและจำนวนคิว...'
+    );
+
+
+    const response =
+      await fetch(
+        API_URL +
+        '?action=getInitialData'
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'ไม่สามารถโหลดข้อมูลร้านได้'
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    DATA =
+      data;
+
+
+    currentCategory =
+      'ทั้งหมด';
+
+
+    renderMenu();
+
+
+  } catch (error) {
+
+    console.error(
+      'RELOAD ERROR:',
+      error
+    );
+
+
+    showError(
+      error.message ||
+      String(error)
+    );
+
+  }
+
+}
 
 </script>
 
