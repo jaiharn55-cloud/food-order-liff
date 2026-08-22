@@ -1231,122 +1231,146 @@
      * =====================================
      */
 
-    function renderActions(
-      order
-    ) {
+    function renderActions(order) {
 
-      if (
-        order.status ===
-        'NEW'
-      ) {
+  if (order.status === 'NEW') {
 
-        return `
+    return `
+      <div class="actions">
 
-          <div class="actions">
+        <button
+          class="btn btn-primary"
+          onclick="
+            updateStatus(
+              '${escapeJs(order.orderId)}',
+              'PREPARING'
+            )
+          ">
 
-            <button
-              class="btn btn-primary"
-              onclick="
-                updateStatus(
-                  '${escapeJs(
-                    order.orderId
-                  )}',
-                  'PREPARING'
-                )
-              ">
+          👨‍🍳 รับออเดอร์
 
-              👨‍🍳 รับออเดอร์
+        </button>
 
-            </button>
+        <button
+          class="btn btn-red"
+          onclick="
+            updateStatus(
+              '${escapeJs(order.orderId)}',
+              'CANCELLED'
+            )
+          ">
 
+          ❌ ยกเลิก
 
-            <button
-              class="btn btn-red"
-              onclick="
-                updateStatus(
-                  '${escapeJs(
-                    order.orderId
-                  )}',
-                  'CANCELLED'
-                )
-              ">
+        </button>
 
-              ยกเลิก
+      </div>
+    `;
 
-            </button>
-
-          </div>
-
-        `;
-
-      }
+  }
 
 
-      if (
-        order.status ===
-        'PREPARING'
-      ) {
+  if (order.status === 'PREPARING') {
 
-        return `
+    return `
+      <div class="actions">
 
-          <div class="actions">
+        <button
+          class="btn btn-blue"
+          onclick="
+            updateStatus(
+              '${escapeJs(order.orderId)}',
+              'READY'
+            )
+          ">
 
-            <button
-              class="btn btn-blue"
-              onclick="
-                updateStatus(
-                  '${escapeJs(
-                    order.orderId
-                  )}',
-                  'READY'
-                )
-              ">
+          ✅ พร้อมรับ
 
-              ✅ พร้อมรับ
+        </button>
 
-            </button>
+      </div>
+    `;
 
-          </div>
-
-        `;
-
-      }
+  }
 
 
-      if (
-        order.status ===
-        'READY'
-      ) {
+  if (order.status === 'READY') {
 
-        return `
+    return `
+      <div class="actions">
 
-          <div class="actions">
+        <button
+          class="btn btn-primary"
+          onclick="
+            updateStatus(
+              '${escapeJs(order.orderId)}',
+              'COMPLETED'
+            )
+          ">
 
-            <button
-              class="btn btn-primary"
-              onclick="
-                updateStatus(
-                  '${escapeJs(
-                    order.orderId
-                  )}',
-                  'COMPLETED'
-                )
-              ">
+          ✔️ ลูกค้ารับแล้ว
 
-              ✔️ ลูกค้ารับแล้ว
+        </button>
 
-            </button>
+      </div>
+    `;
 
-          </div>
-
-        `;
-
-      }
+  }
 
 
-      return '';
+  if (order.status === 'COMPLETED') {
 
-    }
+    return `
+      <div class="actions">
+
+        <div
+          style="
+            width:100%;
+            text-align:center;
+            padding:10px;
+            color:#666;
+            background:#f3f3f3;
+            border-radius:9px;
+          ">
+
+          ✔️ ออเดอร์เสร็จสิ้น
+
+        </div>
+
+      </div>
+    `;
+
+  }
+
+
+  if (order.status === 'CANCELLED') {
+
+    return `
+      <div class="actions">
+
+        <div
+          style="
+            width:100%;
+            text-align:center;
+            padding:10px;
+            color:#b00020;
+            background:#ffe8e8;
+            border-radius:9px;
+          ">
+
+          ❌ ออเดอร์ถูกยกเลิก
+
+        </div>
+
+      </div>
+    `;
+
+  }
+
+
+  return '';
+
+}
 
 
     /*
