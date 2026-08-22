@@ -556,6 +556,59 @@
 
     }
 
+    .filter-bar {
+
+  display: flex;
+
+  gap: 8px;
+
+  flex-wrap: wrap;
+
+  margin-bottom: 15px;
+
+}
+
+
+.filter-btn {
+
+  border: none;
+
+  background: white;
+
+  color: #555;
+
+  padding: 10px 13px;
+
+  border-radius: 10px;
+
+  font-size: 13px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 1px 5px
+    rgba(0,0,0,.08);
+
+}
+
+
+.filter-btn.active {
+
+  background: #06c755;
+
+  color: white;
+
+}
+
+
+.filter-btn:active {
+
+  transform: scale(.97);
+
+}
+    
   </style>
 
 </head>
@@ -607,6 +660,51 @@
       class="summary">
     </div>
 
+    <div class="filter-bar">
+
+    <button
+      class="filter-btn active"
+      data-filter="ALL"
+      onclick="setOrderFilter('ALL')">
+      📋 ทั้งหมด
+    </button>
+  
+    <button
+      class="filter-btn"
+      data-filter="NEW"
+      onclick="setOrderFilter('NEW')">
+      🆕 ใหม่
+    </button>
+  
+    <button
+      class="filter-btn"
+      data-filter="PREPARING"
+      onclick="setOrderFilter('PREPARING')">
+      👨‍🍳 กำลังทำ
+    </button>
+  
+    <button
+      class="filter-btn"
+      data-filter="READY"
+      onclick="setOrderFilter('READY')">
+      ✅ พร้อมรับ
+    </button>
+  
+    <button
+      class="filter-btn"
+      data-filter="COMPLETED"
+      onclick="setOrderFilter('COMPLETED')">
+      ✔️ เสร็จแล้ว
+    </button>
+  
+    <button
+      class="filter-btn"
+      data-filter="CANCELLED"
+      onclick="setOrderFilter('CANCELLED')">
+      ❌ ยกเลิก
+    </button>
+  
+  </div>
 
     <div
       id="app">
@@ -637,6 +735,8 @@
 
 
     let orders = [];
+    
+    let currentFilter = 'ALL';
 
     /*
      * =====================================
@@ -775,28 +875,29 @@
 
         {
           status: 'NEW',
-          title:
-            '🆕 ออเดอร์ใหม่'
+          title: '🆕 ออเดอร์ใหม่'
         },
-
+      
         {
           status: 'PREPARING',
-          title:
-            '👨‍🍳 กำลังทำ'
+          title: '👨‍🍳 กำลังทำ'
         },
-
+      
         {
           status: 'READY',
-          title:
-            '✅ พร้อมรับ'
+          title: '✅ พร้อมรับ'
         },
-
+      
         {
           status: 'COMPLETED',
-          title:
-            '✔️ เสร็จแล้ว'
+          title: '✔️ เสร็จแล้ว'
+        },
+      
+        {
+          status: 'CANCELLED',
+          title: '❌ ยกเลิก'
         }
-
+      
       ];
 
 
@@ -809,12 +910,24 @@
           const groupOrders =
             orders.filter(
               function(order) {
-
+          
+                if (
+                  currentFilter === 'ALL'
+                ) {
+          
+                  return (
+                    order.status ===
+                    group.status
+                  );
+          
+                }
+          
+          
                 return (
                   order.status ===
-                  group.status
+                  currentFilter
                 );
-
+          
               }
             );
 
@@ -878,6 +991,127 @@
 
     }
 
+    function setOrderFilter(
+  filter
+) {
+
+  currentFilter =
+    filter;
+
+
+  document
+    .querySelectorAll(
+      '.filter-btn'
+    )
+    .forEach(
+      function(button) {
+
+        button.classList.toggle(
+          'active',
+          button.dataset.filter ===
+          filter
+        );
+
+      }
+    );
+
+
+  renderOrders();
+
+}
+
+
+function updateFilterCounts() {
+
+  const counts = {
+
+    ALL:
+      orders.length,
+
+    NEW:
+      orders.filter(
+        function(order) {
+          return order.status === 'NEW';
+        }
+      ).length,
+
+    PREPARING:
+      orders.filter(
+        function(order) {
+          return order.status === 'PREPARING';
+        }
+      ).length,
+
+    READY:
+      orders.filter(
+        function(order) {
+          return order.status === 'READY';
+        }
+      ).length,
+
+    COMPLETED:
+      orders.filter(
+        function(order) {
+          return order.status === 'COMPLETED';
+        }
+      ).length,
+
+    CANCELLED:
+      orders.filter(
+        function(order) {
+          return order.status === 'CANCELLED';
+        }
+      ).length
+
+  };
+
+
+  const labels = {
+
+    ALL:
+      '📋 ทั้งหมด',
+
+    NEW:
+      '🆕 ใหม่',
+
+    PREPARING:
+      '👨‍🍳 กำลังทำ',
+
+    READY:
+      '✅ พร้อมรับ',
+
+    COMPLETED:
+      '✔️ เสร็จแล้ว',
+
+    CANCELLED:
+      '❌ ยกเลิก'
+
+  };
+
+
+  document
+    .querySelectorAll(
+      '.filter-btn'
+    )
+    .forEach(
+      function(button) {
+
+        const filter =
+          button.dataset.filter;
+
+        const count =
+          counts[filter] ?? 0;
+
+
+        button.textContent =
+          labels[filter] +
+          ' ' +
+          count;
+
+      }
+    );
+
+}
 
     /*
      * =====================================
@@ -1611,6 +1845,8 @@ async function loadOrders() {
 
 
     renderSummary();
+
+    updateFilterCounts();
 
     renderOrders();
 
