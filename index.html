@@ -233,22 +233,37 @@
 
   window.onload = async function() {
 
-    try {
+  try {
 
-      await startLIFF();
+    console.log('STEP 1: PAGE LOADED');
 
-      await loadData();
+    await startLIFF();
 
-    } catch (error) {
+    console.log('STEP 3: LIFF SUCCESS');
 
-      showError(
-        error.message ||
-        String(error)
-      );
+    showLoading(
+      'STEP 4: กำลังโหลดข้อมูลจาก Google Sheets...'
+    );
 
-    }
+    await loadData();
 
-  };
+    console.log('STEP 5: DATA LOADED');
+
+  } catch (error) {
+
+    console.error(
+      'START ERROR:',
+      error
+    );
+
+    showError(
+      error.message ||
+      String(error)
+    );
+
+  }
+
+};
 
 
   /*
@@ -259,17 +274,23 @@
 
   async function startLIFF() {
 
-    await liff.init({
+  showLoading(
+    'STEP 2: กำลังเริ่ม LIFF...'
+  );
 
-      liffId: LIFF_ID
 
-    });
+  await liff.init({
 
-    console.log(
-      'LIFF initialized'
-    );
+    liffId: LIFF_ID
 
-  }
+  });
+
+
+  console.log(
+    'LIFF initialized successfully'
+  );
+
+}
 
 
   /*
@@ -280,57 +301,78 @@
 
   async function loadData() {
 
-    showLoading(
-      'กำลังโหลดเมนู...'
+  showLoading(
+    'STEP 4: กำลังเชื่อมต่อ Google Sheets...'
+  );
+
+  const url =
+    API_URL +
+    '?action=getInitialData';
+
+
+  console.log(
+    'API URL:',
+    url
+  );
+
+
+  const response =
+    await fetch(url);
+
+
+  console.log(
+    'API RESPONSE:',
+    response.status
+  );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      'API ตอบกลับผิดพลาด: HTTP ' +
+      response.status
     );
 
-
-    const url =
-      API_URL +
-      '?action=getInitialData';
+  }
 
 
-    const response =
-      await fetch(url);
+  const data =
+    await response.json();
 
 
-    if (!response.ok) {
-
-      throw new Error(
-        'ไม่สามารถเชื่อมต่อระบบร้านได้'
-      );
-
-    }
+  console.log(
+    'API DATA:',
+    data
+  );
 
 
-    const data =
-      await response.json();
+  if (
+    !data ||
+    !Array.isArray(data.menus)
+  ) {
 
-
-    if (
-      !data ||
-      !Array.isArray(data.menus)
-    ) {
-
-      throw new Error(
-        'ข้อมูลเมนูไม่ถูกต้อง'
-      );
-
-    }
-
-
-    DATA = data;
-
-
-    console.log(
-      'DATA:',
-      DATA
+    throw new Error(
+      'ข้อมูลเมนูจาก API ไม่ถูกต้อง'
     );
 
+  }
+
+
+  DATA = data;
+
+
+  showLoading(
+    'STEP 5: โหลดข้อมูลสำเร็จ กำลังสร้างเมนู...'
+  );
+
+
+  setTimeout(function() {
 
     renderMenu();
 
-  }
+  }, 100);
+
+}
 
 
   /*
