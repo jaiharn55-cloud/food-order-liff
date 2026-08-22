@@ -638,125 +638,6 @@
 
     let orders = [];
 
-
-    /*
-     * =====================================
-     * โหลดออเดอร์
-     * =====================================
-     */
-    
-/*
-       document
-          .getElementById('app')
-          .innerHTML = `
-
-            <div class="loading">
-
-              🔄 กำลังโหลดออเดอร์...
-
-            </div>
-
-          `;
-*/
-
-
-        const response =
-          await fetch(
-            API_URL +
-            '?action=getOrders'
-          );
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            'HTTP ' +
-            response.status
-          );
-
-        }
-
-
-        const data =
-          await response.json();
-
-
-        console.log(
-          'ORDERS:',
-          data
-        );
-
-
-        if (!data.success) {
-
-          throw new Error(
-            data.error ||
-            'ไม่สามารถโหลดออเดอร์ได้'
-          );
-
-        }
-
-
-        orders =
-          data.orders || [];
-
-
-        document
-          .getElementById('today')
-          .textContent =
-            'วันที่ ' +
-            data.date;
-
-
-        renderSummary();
-
-        renderOrders();
-        
-        document
-          .getElementById('lastUpdated')
-          .textContent =
-            'อัปเดตล่าสุด ' +
-            new Date()
-              .toLocaleTimeString(
-                'th-TH',
-                {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit'
-                }
-              );
-
-      } catch (error) {
-
-        console.error(
-          error
-        );
-
-
-        document
-          .getElementById('app')
-          .innerHTML = `
-
-            <div class="error">
-
-              ❌ โหลดออเดอร์ไม่สำเร็จ
-
-              <br><br>
-
-              ${escapeHtml(
-                error.message ||
-                String(error)
-              )}
-
-            </div>
-
-          `;
-
-      }
-
-    }
-
-
     /*
      * =====================================
      * สรุปจำนวน
@@ -1647,28 +1528,51 @@
 async function loadOrders() {
 
   if (isLoadingOrders) {
-
     return;
-
   }
-
 
   isLoadingOrders = true;
 
-
   try {
 
-    const response =
-      await fetch(
-        API_URL +
-        '?action=getOrders'
+    const controller =
+      new AbortController();
+
+    const timeout =
+      setTimeout(
+        function() {
+          controller.abort();
+        },
+        10000
       );
+
+
+    let response;
+
+    try {
+
+      response =
+        await fetch(
+          API_URL +
+          '?action=getOrders',
+          {
+            method: 'GET',
+            cache: 'no-store',
+            signal: controller.signal
+          }
+        );
+
+    } finally {
+
+      clearTimeout(timeout);
+
+    }
 
 
     if (!response.ok) {
 
       throw new Error(
-        'HTTP ' +
+        'Backend HTTP Error: ' +
         response.status
       );
 
@@ -1709,8 +1613,8 @@ async function loadOrders() {
     renderSummary();
 
     renderOrders();
-    
-    
+
+
     document
       .getElementById('lastUpdated')
       .textContent =
@@ -1725,9 +1629,11 @@ async function loadOrders() {
             }
           );
 
+
   } catch (error) {
 
     console.error(
+      'LOAD ORDERS ERROR:',
       error
     );
 
@@ -1751,13 +1657,15 @@ async function loadOrders() {
 
       `;
 
-   } finally {
+
+  } finally {
 
     isLoadingOrders = false;
 
   }
 
 }
+
 
 // โหลดครั้งแรก
 loadOrders();
@@ -1766,7 +1674,7 @@ loadOrders();
 // Auto refresh ทุก 60 วินาที
 setInterval(
   loadOrders,
-  30000
+  60000
 );
 
   </script>
