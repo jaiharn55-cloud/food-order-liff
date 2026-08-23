@@ -1064,6 +1064,324 @@
       }
     }
 
+
+    .menu-manage-btn {
+      border: none;
+      background: #fff7df;
+      color: #8a5a00;
+      padding: 9px 11px;
+      border-radius: 9px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .menu-manager-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10001;
+      background: rgba(0,0,0,.45);
+      padding: 14px;
+      overflow-y: auto;
+    }
+
+    .menu-manager-backdrop.show {
+      display: block;
+    }
+
+    .menu-manager-panel {
+      width: min(1050px, 100%);
+      margin: 14px auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 12px 45px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+
+    .menu-manager-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #06c755;
+      color: white;
+    }
+
+    .menu-manager-head-title {
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .menu-manager-close {
+      border: none;
+      background: rgba(255,255,255,.2);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .menu-manager-body {
+      padding: 14px;
+    }
+
+    .menu-toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .menu-search {
+      flex: 1 1 260px;
+      min-width: 180px;
+      border: 1px solid #ddd;
+      border-radius: 9px;
+      padding: 10px 11px;
+      font-size: 14px;
+    }
+
+    .menu-filter {
+      border: 1px solid #ddd;
+      border-radius: 9px;
+      padding: 10px 11px;
+      background: white;
+      min-width: 150px;
+    }
+
+    .menu-add-btn {
+      border: none;
+      border-radius: 9px;
+      padding: 10px 13px;
+      background: #06c755;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .menu-manager-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .menu-item-card {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      border: 1px solid #e6e6e6;
+      border-radius: 12px;
+      padding: 9px;
+      background: #fff;
+    }
+
+    .menu-item-image {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      object-fit: cover;
+      background: #f3f3f3;
+      border: 1px solid #eee;
+    }
+
+    .menu-item-image.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 28px;
+    }
+
+    .menu-item-name {
+      font-weight: 900;
+      font-size: 15px;
+    }
+
+    .menu-item-meta {
+      color: #666;
+      font-size: 12px;
+      margin-top: 3px;
+      line-height: 1.45;
+    }
+
+    .menu-item-status {
+      display: inline-block;
+      margin-top: 5px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .menu-item-status.on {
+      color: #087a37;
+    }
+
+    .menu-item-status.off {
+      color: #b00020;
+    }
+
+    .menu-item-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .menu-action-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 9px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .menu-action-edit {
+      background: #e7f0ff;
+      color: #1757a6;
+    }
+
+    .menu-action-off {
+      background: #ffe6e6;
+      color: #b00020;
+    }
+
+    .menu-action-on {
+      background: #e5f8ec;
+      color: #087a37;
+    }
+
+    .menu-empty {
+      padding: 30px 12px;
+      text-align: center;
+      color: #888;
+    }
+
+    .menu-form-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10002;
+      background: rgba(0,0,0,.5);
+      padding: 14px;
+      overflow-y: auto;
+    }
+
+    .menu-form-backdrop.show {
+      display: block;
+    }
+
+    .menu-form-panel {
+      width: min(650px, 100%);
+      margin: 20px auto;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 45px rgba(0,0,0,.25);
+    }
+
+    .menu-form-body {
+      padding: 16px;
+    }
+
+    .menu-form-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .menu-form-grid label {
+      font-size: 12px;
+      color: #666;
+      font-weight: 800;
+    }
+
+    .menu-form-grid input,
+    .menu-form-grid textarea,
+    .menu-form-grid select {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 9px;
+      padding: 10px;
+      font-size: 14px;
+      margin-top: 5px;
+      box-sizing: border-box;
+    }
+
+    .menu-form-grid textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .menu-form-image-wrap {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .menu-form-image-preview {
+      width: 86px;
+      height: 86px;
+      object-fit: cover;
+      border-radius: 11px;
+      background: #f3f3f3;
+      border: 1px solid #eee;
+    }
+
+    .menu-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .menu-form-save {
+      border: none;
+      border-radius: 9px;
+      padding: 10px 14px;
+      background: #06c755;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .menu-form-cancel {
+      border: none;
+      border-radius: 9px;
+      padding: 10px 14px;
+      background: #ececec;
+      color: #444;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .menu-manager-note {
+      color: #777;
+      font-size: 11px;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 700px) {
+      .menu-item-card {
+        grid-template-columns: 58px minmax(0, 1fr);
+      }
+
+      .menu-item-image {
+        width: 58px;
+        height: 58px;
+      }
+
+      .menu-item-actions {
+        grid-column: 1 / -1;
+        justify-content: stretch;
+      }
+
+      .menu-item-actions button {
+        flex: 1;
+      }
+    }
+
   </style>
 
 </head>
@@ -1129,7 +1447,14 @@
 
         </button>
 
+        
         <button
+          class="menu-manage-btn"
+          onclick="openMenuManager()"
+        >
+          🍛 จัดการเมนู
+        </button>
+<button
           class="settings-btn"
           onclick="openSettings()">
 
@@ -1146,6 +1471,217 @@
 
 
 
+
+  <div
+    id="menuManagerBackdrop"
+    class="menu-manager-backdrop"
+    onclick="menuManagerBackdropClick(event)"
+  >
+
+    <div class="menu-manager-panel">
+
+      <div class="menu-manager-head">
+
+        <div class="menu-manager-head-title">
+          🍛 จัดการเมนู
+        </div>
+
+        <button
+          class="menu-manager-close"
+          onclick="closeMenuManager()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div class="menu-manager-body">
+
+        <div class="menu-toolbar">
+
+          <input
+            id="menuSearchInput"
+            class="menu-search"
+            type="search"
+            placeholder="🔎 ค้นหาเมนู..."
+            oninput="renderMenuManager()"
+          >
+
+          <select
+            id="menuStatusFilter"
+            class="menu-filter"
+            onchange="renderMenuManager()"
+          >
+            <option value="ALL">ทั้งหมด</option>
+            <option value="ON">🟢 กำลังขาย</option>
+            <option value="OFF">🔴 ของหมด / ปิดขาย</option>
+          </select>
+
+          <button
+            class="menu-add-btn"
+            onclick="openMenuForm()"
+          >
+            ➕ เพิ่มเมนู
+          </button>
+
+        </div>
+
+        <div
+          id="menuManagerList"
+          class="menu-manager-list"
+        ></div>
+
+        <div class="menu-manager-note">
+          💡 แนะนำให้ใช้ “ปิดขาย” เมื่อของหมดแทนการลบ เพื่อไม่ให้กระทบข้อมูลออเดอร์เก่า
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="menuFormBackdrop"
+    class="menu-form-backdrop"
+    onclick="menuFormBackdropClick(event)"
+  >
+
+    <div class="menu-form-panel">
+
+      <div class="menu-manager-head">
+
+        <div
+          id="menuFormTitle"
+          class="menu-manager-head-title"
+        >
+          ➕ เพิ่มเมนู
+        </div>
+
+        <button
+          class="menu-manager-close"
+          onclick="closeMenuForm()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div class="menu-form-body">
+
+        <form
+          id="menuForm"
+          class="menu-form-grid"
+          onsubmit="saveMenuFromForm(event)"
+        >
+
+          <input
+            id="menuFormId"
+            type="hidden"
+          >
+
+          <div>
+            <label>ชื่อเมนู</label>
+            <input
+              id="menuFormName"
+              required
+              maxlength="120"
+              placeholder="เช่น กะเพราไก่"
+            >
+          </div>
+
+          <div>
+            <label>ราคา</label>
+            <input
+              id="menuFormPrice"
+              type="number"
+              min="0"
+              step="1"
+              required
+              placeholder="50"
+            >
+          </div>
+
+          <div>
+            <label>หมวดหมู่</label>
+            <input
+              id="menuFormCategory"
+              maxlength="80"
+              placeholder="อาหารจานเดียว"
+            >
+          </div>
+
+          <div>
+            <label>รายละเอียด</label>
+            <textarea
+              id="menuFormDescription"
+              maxlength="500"
+              placeholder="รายละเอียดเพิ่มเติมของอาหาร"
+            ></textarea>
+          </div>
+
+          <div>
+
+            <label>รูปอาหาร</label>
+
+            <div class="menu-form-image-wrap">
+
+              <img
+                id="menuFormImagePreview"
+                class="menu-form-image-preview"
+                alt="รูปอาหาร"
+              >
+
+              <div style="flex:1">
+
+                <input
+                  id="menuFormImageFile"
+                  type="file"
+                  accept="image/*"
+                  onchange="previewMenuImage(event)"
+                >
+
+                <div
+                  class="menu-manager-note"
+                >
+                  รองรับ JPG / PNG สูงสุดประมาณ 4 MB
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="menu-form-actions">
+
+            <button
+              type="button"
+              class="menu-form-cancel"
+              onclick="closeMenuForm()"
+            >
+              ยกเลิก
+            </button>
+
+            <button
+              type="submit"
+              class="menu-form-save"
+            >
+              💾 บันทึกเมนู
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
   <div
     id="settingsBackdrop"
     class="settings-backdrop"
@@ -1160,109 +1696,6 @@
       </div>
 
       <div class="settings-body">
-
-        <div class="settings-section">
-
-          <div class="settings-section-title">
-            🍛 จัดการเมนู
-          </div>
-
-          <div class="settings-note">
-            เพิ่ม แก้ไขรูป/ราคา และปิดขายชั่วคราวได้ทันที
-          </div>
-
-          <div id="adminMenuList" class="admin-menu-list">
-            <div class="settings-note">
-              กำลังโหลดเมนู...
-            </div>
-          </div>
-
-          <div class="settings-actions">
-            <button
-              class="settings-action blue"
-              onclick="openAddMenuForm()"
-            >
-              ➕ เพิ่มเมนู
-            </button>
-          </div>
-
-          <div
-            id="menuEditor"
-            class="menu-editor"
-            style="display:none"
-          >
-
-            <div class="settings-section-title">
-              ✏️ <span id="menuEditorTitle">เพิ่มเมนู</span>
-            </div>
-
-            <input id="menuEditorId" type="hidden">
-
-            <div class="settings-field">
-              <label>ชื่อเมนู</label>
-              <input id="menuEditorName" placeholder="เช่น กะเพราไก่">
-            </div>
-
-            <div class="settings-field">
-              <label>ราคา</label>
-              <input
-                id="menuEditorPrice"
-                type="number"
-                min="0"
-                step="1"
-                placeholder="50"
-              >
-            </div>
-
-            <div class="settings-field">
-              <label>หมวดหมู่</label>
-              <input id="menuEditorCategory" placeholder="เช่น อาหารจานเดียว">
-            </div>
-
-            <div class="settings-field">
-              <label>รายละเอียด</label>
-              <input id="menuEditorDescription" placeholder="รายละเอียดเมนู">
-            </div>
-
-            <div class="settings-field">
-              <label>รูปอาหาร</label>
-              <input
-                id="menuEditorImageFile"
-                type="file"
-                accept="image/*"
-                onchange="previewMenuImage(event)"
-              >
-              <div class="settings-note">
-                เลือกรูปจากมือถือ/แท็บเล็ตได้ ระบบจะย่อรูปก่อนส่ง
-              </div>
-              <img
-                id="menuEditorImagePreview"
-                class="menu-image-preview"
-                style="display:none"
-                alt="รูปอาหาร"
-              >
-            </div>
-
-            <div class="settings-actions">
-              <button
-                class="settings-action blue"
-                onclick="saveMenuFromEditor()"
-              >
-                💾 บันทึกเมนู
-              </button>
-
-              <button
-                class="settings-action"
-                onclick="closeMenuEditor()"
-              >
-                ยกเลิก
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-
 
         <div class="settings-section">
 
@@ -2836,6 +3269,870 @@
      * เริ่มต้น
      * =====================================
      */
+
+
+    /* =====================================
+     * STANDALONE MENU MANAGER
+     * ===================================== */
+
+    let adminMenus_ = [];
+    let menuFormImageUrl_ = '';
+
+
+    async function openMenuManager() {
+
+      const modal =
+        document.getElementById(
+          'menuManagerBackdrop'
+        );
+
+      if (!modal) return;
+
+      modal.classList.add('show');
+
+      try {
+
+        await loadAdminSettings_();
+
+        renderMenuManager();
+
+      } catch (error) {
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    function closeMenuManager() {
+
+      const modal =
+        document.getElementById(
+          'menuManagerBackdrop'
+        );
+
+      if (modal) {
+        modal.classList.remove('show');
+      }
+
+      closeMenuForm();
+
+    }
+
+
+    function menuManagerBackdropClick(
+      event
+    ) {
+
+      if (
+        event.target &&
+        event.target.id ===
+        'menuManagerBackdrop'
+      ) {
+        closeMenuManager();
+      }
+
+    }
+
+
+    async function loadAdminSettings_() {
+
+      const response =
+        await fetch(
+          API_URL +
+          '?action=getAdminSettings',
+          {
+            method: 'GET'
+          }
+        );
+
+      if (!response.ok) {
+
+        throw new Error(
+          'โหลดข้อมูลเมนูไม่สำเร็จ'
+        );
+
+      }
+
+      const result =
+        await response.json();
+
+      if (
+        !result ||
+        !result.success
+      ) {
+
+        throw new Error(
+          result &&
+          result.error
+            ? result.error
+            : 'โหลดข้อมูลเมนูไม่สำเร็จ'
+        );
+
+      }
+
+      adminMenus_ =
+        Array.isArray(
+          result.menus
+        )
+          ? result.menus
+          : [];
+
+      return result;
+
+    }
+
+
+    function renderMenuManager() {
+
+      const list =
+        document.getElementById(
+          'menuManagerList'
+        );
+
+      if (!list) return;
+
+      const search =
+        String(
+          document.getElementById(
+            'menuSearchInput'
+          )?.value ||
+          ''
+        )
+        .trim()
+        .toLowerCase();
+
+      const filter =
+        String(
+          document.getElementById(
+            'menuStatusFilter'
+          )?.value ||
+          'ALL'
+        );
+
+      const visible =
+        adminMenus_.filter(
+          function(menu) {
+
+            const matchesSearch =
+              !search ||
+              String(
+                menu.name || ''
+              )
+              .toLowerCase()
+              .includes(search) ||
+              String(
+                menu.category || ''
+              )
+              .toLowerCase()
+              .includes(search);
+
+            if (!matchesSearch) {
+              return false;
+            }
+
+            if (
+              filter === 'ON'
+            ) {
+              return !!menu.available;
+            }
+
+            if (
+              filter === 'OFF'
+            ) {
+              return !menu.available;
+            }
+
+            return true;
+
+          }
+        );
+
+      if (!visible.length) {
+
+        list.innerHTML =
+          `
+            <div class="menu-empty">
+              ยังไม่มีเมนูที่ตรงกับการค้นหา
+            </div>
+          `;
+
+        return;
+
+      }
+
+
+      list.innerHTML =
+        visible.map(
+          function(menu) {
+
+            const image =
+              String(
+                menu.image || ''
+              ).trim();
+
+            const imageHtml =
+              image
+                ? `
+                    <img
+                      class="menu-item-image"
+                      src="${escapeHtml(image)}"
+                      alt="${escapeHtml(menu.name)}"
+                    >
+                  `
+                : `
+                    <div
+                      class="menu-item-image empty"
+                    >
+                      🍛
+                    </div>
+                  `;
+
+            const statusClass =
+              menu.available
+                ? 'on'
+                : 'off';
+
+            const statusText =
+              menu.available
+                ? '🟢 กำลังขาย'
+                : '🔴 ปิดขาย / ของหมด';
+
+            return `
+              <div class="menu-item-card">
+
+                ${imageHtml}
+
+                <div>
+
+                  <div class="menu-item-name">
+                    ${escapeHtml(menu.name || '-')}
+                  </div>
+
+                  <div class="menu-item-meta">
+                    ${Number(menu.price || 0).toLocaleString('th-TH')} บาท
+                    ${menu.category ? ' • ' + escapeHtml(menu.category) : ''}
+                  </div>
+
+                  <div
+                    class="menu-item-status ${statusClass}"
+                  >
+                    ${statusText}
+                  </div>
+
+                </div>
+
+                <div class="menu-item-actions">
+
+                  <button
+                    class="menu-action-btn menu-action-edit"
+                    onclick="openMenuForm('${escapeJs(menu.id)}')"
+                  >
+                    ✏️ แก้ไข
+                  </button>
+
+                  ${
+                    menu.available
+                      ? `
+                          <button
+                            class="menu-action-btn menu-action-off"
+                            onclick="toggleMenuAvailability('${escapeJs(menu.id)}', false)"
+                          >
+                            🔴 ปิดขาย
+                          </button>
+                        `
+                      : `
+                          <button
+                            class="menu-action-btn menu-action-on"
+                            onclick="toggleMenuAvailability('${escapeJs(menu.id)}', true)"
+                          >
+                            🟢 เปิดขาย
+                          </button>
+                        `
+                  }
+
+                </div>
+
+              </div>
+            `;
+
+          }
+        )
+        .join('');
+
+    }
+
+
+    function findAdminMenu_(
+      menuId
+    ) {
+
+      return adminMenus_.find(
+        function(menu) {
+
+          return String(
+            menu.id
+          ) === String(
+            menuId
+          );
+
+        }
+      );
+
+    }
+
+
+    function openMenuForm(
+      menuId
+    ) {
+
+      const modal =
+        document.getElementById(
+          'menuFormBackdrop'
+        );
+
+      if (!modal) return;
+
+      const menu =
+        menuId
+          ? findAdminMenu_(
+              menuId
+            )
+          : null;
+
+      document.getElementById(
+        'menuFormTitle'
+      ).textContent =
+        menu
+          ? '✏️ แก้ไขเมนู'
+          : '➕ เพิ่มเมนู';
+
+
+      document.getElementById(
+        'menuFormId'
+      ).value =
+        menu
+          ? String(
+              menu.id || ''
+            )
+          : '';
+
+
+      document.getElementById(
+        'menuFormName'
+      ).value =
+        menu
+          ? String(
+              menu.name || ''
+            )
+          : '';
+
+
+      document.getElementById(
+        'menuFormPrice'
+      ).value =
+        menu
+          ? String(
+              menu.price || 0
+            )
+          : '';
+
+
+      document.getElementById(
+        'menuFormCategory'
+      ).value =
+        menu
+          ? String(
+              menu.category || ''
+            )
+          : '';
+
+
+      document.getElementById(
+        'menuFormDescription'
+      ).value =
+        menu
+          ? String(
+              menu.description || ''
+            )
+          : '';
+
+
+      menuFormImageUrl_ =
+        menu
+          ? String(
+              menu.image || ''
+            )
+          : '';
+
+
+      document.getElementById(
+        'menuFormImageFile'
+      ).value =
+        '';
+
+
+      document.getElementById(
+        'menuFormImagePreview'
+      ).src =
+        menuFormImageUrl_ ||
+        createPlaceholderMenuImage_();
+
+
+      modal.classList.add(
+        'show'
+      );
+
+    }
+
+
+    function closeMenuForm() {
+
+      const modal =
+        document.getElementById(
+          'menuFormBackdrop'
+        );
+
+      if (modal) {
+        modal.classList.remove(
+          'show'
+        );
+      }
+
+    }
+
+
+    function menuFormBackdropClick(
+      event
+    ) {
+
+      if (
+        event.target &&
+        event.target.id ===
+        'menuFormBackdrop'
+      ) {
+
+        closeMenuForm();
+
+      }
+
+    }
+
+
+    function createPlaceholderMenuImage_() {
+
+      return (
+        'data:image/svg+xml;charset=UTF-8,' +
+        encodeURIComponent(
+          `
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="180"
+              height="180"
+            >
+              <rect
+                width="100%"
+                height="100%"
+                fill="#f3f3f3"
+              />
+              <text
+                x="50%"
+                y="52%"
+                text-anchor="middle"
+                font-size="70"
+              >
+                🍛
+              </text>
+            </svg>
+          `
+        )
+      );
+
+    }
+
+
+    function previewMenuImage(
+      event
+    ) {
+
+      const file =
+        event &&
+        event.target &&
+        event.target.files &&
+        event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      if (
+        !file.type.startsWith(
+          'image/'
+        )
+      ) {
+
+        alert(
+          'กรุณาเลือกไฟล์รูปภาพ'
+        );
+
+        return;
+
+      }
+
+      if (
+        file.size >
+        4 * 1024 * 1024
+      ) {
+
+        alert(
+          'รูปใหญ่เกิน 4 MB'
+        );
+
+        event.target.value =
+          '';
+
+        return;
+
+      }
+
+      const reader =
+        new FileReader();
+
+      reader.onload =
+        function(loadEvent) {
+
+          document.getElementById(
+            'menuFormImagePreview'
+          ).src =
+            loadEvent.target.result;
+
+        };
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+
+
+    async function saveMenuFromForm(
+      event
+    ) {
+
+      event.preventDefault();
+
+      const id =
+        String(
+          document.getElementById(
+            'menuFormId'
+          ).value ||
+          ''
+        ).trim();
+
+      const oldMenu =
+        id
+          ? findAdminMenu_(
+              id
+            )
+          : null;
+
+      const file =
+        document.getElementById(
+          'menuFormImageFile'
+        ).files[0];
+
+      let imageUrl =
+        menuFormImageUrl_ || '';
+
+
+      try {
+
+        if (file) {
+
+          const dataUrl =
+            await readFileAsDataUrl_(
+              file
+            );
+
+          const uploadResponse =
+            await fetch(
+              API_URL,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type':
+                    'text/plain;charset=utf-8'
+                },
+                body:
+                  JSON.stringify({
+                    action:
+                      'uploadAdminImage',
+                    image: {
+                      dataUrl:
+                        dataUrl,
+                      fileName:
+                        file.name
+                    }
+                  })
+              }
+            );
+
+          const uploadResult =
+            await uploadResponse.json();
+
+          if (
+            !uploadResult.success
+          ) {
+
+            throw new Error(
+              uploadResult.error ||
+              'อัปโหลดรูปไม่สำเร็จ'
+            );
+
+          }
+
+          imageUrl =
+            uploadResult.url || '';
+
+        }
+
+
+        const menu = {
+
+          id: id,
+
+          name:
+            document.getElementById(
+              'menuFormName'
+            ).value.trim(),
+
+          price:
+            Number(
+              document.getElementById(
+                'menuFormPrice'
+              ).value || 0
+            ),
+
+          category:
+            document.getElementById(
+              'menuFormCategory'
+            ).value.trim(),
+
+          description:
+            document.getElementById(
+              'menuFormDescription'
+            ).value.trim(),
+
+          image:
+            imageUrl,
+
+          available:
+            oldMenu
+              ? !!oldMenu.available
+              : true
+
+        };
+
+
+        let action =
+          id
+            ? 'saveMenu'
+            : 'createMenu';
+
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'text/plain;charset=utf-8'
+              },
+              body:
+                JSON.stringify({
+                  action:
+                    action,
+                  menu:
+                    menu
+                })
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (
+          !result ||
+          !result.success
+        ) {
+
+          throw new Error(
+            result &&
+            result.error
+              ? result.error
+              : 'บันทึกเมนูไม่สำเร็จ'
+          );
+
+        }
+
+
+        closeMenuForm();
+
+        await loadAdminSettings_();
+
+        renderMenuManager();
+
+
+      } catch (error) {
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    function readFileAsDataUrl_(
+      file
+    ) {
+
+      return new Promise(
+        function(resolve, reject) {
+
+          const reader =
+            new FileReader();
+
+          reader.onload =
+            function() {
+
+              resolve(
+                reader.result
+              );
+
+            };
+
+          reader.onerror =
+            function() {
+
+              reject(
+                new Error(
+                  'อ่านรูปไม่สำเร็จ'
+                )
+              );
+
+            };
+
+          reader.readAsDataURL(
+            file
+          );
+
+        }
+      );
+
+    }
+
+
+    async function toggleMenuAvailability(
+      menuId,
+      available
+    ) {
+
+      const menu =
+        findAdminMenu_(
+          menuId
+        );
+
+      if (!menu) {
+        return;
+      }
+
+      const actionText =
+        available
+          ? 'เปิดขาย'
+          : 'ปิดขาย';
+
+      if (
+        !confirm(
+          actionText +
+          ' "' +
+          menu.name +
+          '" ใช่หรือไม่?'
+        )
+      ) {
+        return;
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'text/plain;charset=utf-8'
+              },
+              body:
+                JSON.stringify({
+                  action:
+                    'toggleMenuAvailable',
+                  menuId:
+                    menuId,
+                  available:
+                    available
+                })
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (
+          !result ||
+          !result.success
+        ) {
+
+          throw new Error(
+            result &&
+            result.error
+              ? result.error
+              : 'เปลี่ยนสถานะเมนูไม่สำเร็จ'
+          );
+
+        }
+
+
+        menu.available =
+          available;
+
+        renderMenuManager();
+
+
+      } catch (error) {
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
 
     /* =====================================
      * SETTINGS / SOUND / WAKE LOCK
