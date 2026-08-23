@@ -197,6 +197,13 @@ textarea.field,input.field{width:100%;border:1px solid #ddd;border-radius:10px;p
   }
 }
 
+
+.my-orders-btn{width:100%;margin-top:9px;border:1px solid #006b38;background:#fff;color:#006b38;padding:10px 12px;border-radius:10px;font-weight:900}
+.order-history-card{background:#fff;border-radius:14px;padding:12px;margin-bottom:9px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.order-history-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.order-history-id{font-size:22px;font-weight:1000;color:#006b38}
+.order-history-status{font-size:12px;font-weight:900;text-align:right}.order-history-status.new,.order-history-status.preparing{color:#c06a00}.order-history-status.ready{color:#087a37}.order-history-status.completed{color:#777}.order-history-status.cancelled{color:#b00020}
+.order-history-item{font-size:12px;color:#555;margin-top:4px}
 </style>
 </head>
 <body>
@@ -313,6 +320,7 @@ function renderMenu(){
     '<div class="container">'+
       renderSpecialSection()+
       renderDailySection()+
+      '<button class="my-orders-btn" onclick="openMyOrders()">📋 ออเดอร์ของฉัน</button>'+
       '<div class="section"><h2>🍛 เมนูตามสั่ง</h2><small>เมนูประจำร้าน</small></div>'+
       '<div class="category-bar">'+mainCats.map(cat=>'<button class="category-btn '+(currentCategory===cat?'active':'')+'" onclick="selectCategory(\''+escapeJs(cat)+'\')">'+escapeHtml(cat)+'</button>').join("")+'</div>'+
       '<div id="menuList"></div>'+
@@ -1016,11 +1024,105 @@ function showInlineError(message){
   document.getElementById("app").innerHTML='<div class="header"><h1>⚠️ ตรวจสอบข้อมูล</h1></div><div class="container"><div class="card" style="text-align:center"><div style="color:#b00020;font-weight:900">'+escapeHtml(message)+'</div><button class="btn-green" style="margin-top:12px" onclick="openCart()">← กลับไปแก้ไข</button></div></div>';
 }
 function showOrderSuccessV3(result){
-  const slot=DATA.slots?.find(s=>s.id===result.pickupSlot);
-  const pickupText=result.pickupType==="SCHEDULED"&&slot?slot.start+" - "+slot.end:"รับเร็วที่สุด";
-  const payText={CASH:"💵 เงินสด",QR:"📱 PromptPay",GOVERNMENT:"🏛️ โครงการรัฐ / ถุงเงิน"}[result.payment]||result.payment||"";
-  document.getElementById("app").innerHTML='<div class="header"><h1>✅ สั่งอาหารสำเร็จ</h1><p>ร้านได้รับออเดอร์แล้ว</p></div><div class="container"><div class="card success-order"><div class="mini-help">หมายเลขออเดอร์</div><div class="order-id">'+escapeHtml(result.orderId||"")+'</div><div class="summary-total">'+Number(result.total||0).toLocaleString("th-TH")+' บาท</div><div class="card" style="margin-top:14px"><div>🕐 รับอาหาร <b>'+escapeHtml(pickupText)+'</b></div><div style="margin-top:8px">'+escapeHtml(payText)+'</div></div><div class="mini-help">กรุณาจำเลขออเดอร์แล้วแจ้งที่ร้านเมื่อมารับ</div></div><button class="btn-green" style="width:100%" onclick="loadData()">🍱 สั่งอาหารเพิ่ม</button></div>';
+  const slot = DATA.slots?.find(function(s){ return s.id === result.pickupSlot; });
+  const pickupText = result.pickupType === 'SCHEDULED' && slot ? slot.start + ' - ' + slot.end : 'รับเร็วที่สุด';
+  const payText = {CASH:'💵 เงินสด',QR:'📱 PromptPay',GOVERNMENT:'🏛️ โครงการรัฐ / ถุงเงิน'}[result.payment] || result.payment || '';
+
+  document.getElementById('app').innerHTML = `
+    <div class="header"><h1>✅ สั่งอาหารสำเร็จ</h1><p>ร้านได้รับออเดอร์แล้ว</p></div>
+    <div class="container">
+      <div class="card success-order">
+        <div class="mini-help">หมายเลขออเดอร์</div>
+        <div class="order-id">${escapeHtml(result.orderId || '')}</div>
+        <div class="summary-total">${Number(result.total || 0).toLocaleString('th-TH')} บาท</div>
+        <div class="card" style="margin-top:14px">
+          <div>🕐 รับอาหาร <b>${escapeHtml(pickupText)}</b></div>
+          <div style="margin-top:8px">${escapeHtml(payText)}</div>
+        </div>
+        <div class="mini-help">ไม่ต้องจำเลขออเดอร์ กด “ออเดอร์ของฉัน” เพื่อดูออเดอร์ล่าสุดได้</div>
+      </div>
+      <button class="btn-green" style="width:100%" onclick="openMyOrders()">📋 ดูออเดอร์ของฉัน</button>
+      <button class="my-orders-btn" onclick="loadData()">🍱 สั่งอาหารเพิ่ม</button>
+    </div>
+  `;
 }
+
+async function getCurrentUserId_(){
+  if(typeof liff === 'undefined') throw new Error('ไม่สามารถเชื่อมต่อ LINE ได้');
+  try{
+    const profile = await liff.getProfile();
+    if(profile && profile.userId) return profile.userId;
+  }catch(error){
+    if(!liff.isLoggedIn() && !liff.isInClient()){
+      liff.login({redirectUri:window.location.href});
+      return null;
+    }
+  }
+  throw new Error('ไม่พบข้อมูล LINE User กรุณาเปิดหน้านี้จาก LINE ใหม่');
+}
+
+function orderStatusText_(status){
+  const map={NEW:'🆕 ออเดอร์ใหม่',PREPARING:'👨‍🍳 กำลังทำ',READY:'✅ พร้อมรับ',COMPLETED:'✔️ เสร็จแล้ว',CANCELLED:'❌ ยกเลิก'};
+  return map[String(status||'').toUpperCase()] || String(status||'');
+}
+
+function orderPaymentText_(value){
+  const map={CASH:'💵 เงินสด',QR:'📱 PromptPay',GOVERNMENT:'🏛️ โครงการรัฐ / ถุงเงิน'};
+  return map[String(value||'').toUpperCase()] || String(value||'');
+}
+
+async function openMyOrders(){
+  try{
+    showLoading('กำลังโหลดออเดอร์ของคุณ...');
+    const userId = await getCurrentUserId_();
+    if(!userId) return;
+
+    const response = await fetch(API_URL + '?action=getMyOrders&userId=' + encodeURIComponent(userId));
+    if(!response.ok) throw new Error('โหลดออเดอร์ของคุณไม่สำเร็จ');
+    const result = await response.json();
+    if(!result || !result.success) throw new Error(result && result.error ? result.error : 'โหลดออเดอร์ของคุณไม่สำเร็จ');
+
+    const orders = Array.isArray(result.orders) ? result.orders : [];
+    let html = `
+      <div class="header"><h1>📋 ออเดอร์ของฉัน</h1><p>ไม่ต้องจำเลขออเดอร์</p></div>
+      <div class="container">
+    `;
+
+    if(!orders.length){
+      html += '<div class="card empty">ยังไม่มีออเดอร์ของคุณวันนี้</div>';
+    }else{
+      orders.forEach(function(order){
+        const status = String(order.status || '').toLowerCase();
+        html += `
+          <div class="order-history-card">
+            <div class="order-history-head">
+              <div>
+                <div class="mini-help">${escapeHtml(order.date)} ${escapeHtml(order.time || '')}</div>
+                <div class="order-history-id">${escapeHtml(order.orderId)}</div>
+              </div>
+              <div class="order-history-status ${escapeHtml(status)}">${escapeHtml(orderStatusText_(order.status))}</div>
+            </div>
+            <div class="mini-help" style="margin-top:6px">🕐 ${escapeHtml(order.pickupTime || 'รับเร็วที่สุด')}</div>
+            <div class="mini-help" style="margin-top:4px">${escapeHtml(orderPaymentText_(order.payment))} • ${Number(order.total || 0).toLocaleString('th-TH')} บาท</div>
+            ${(order.items || []).map(function(item){
+              return '<div class="order-history-item">'+escapeHtml(item.menuName)+' × '+Number(item.qty || 0)+(item.options ? ' • '+escapeHtml(item.options) : '')+'</div>';
+            }).join('')}
+          </div>
+        `;
+      });
+    }
+
+    html += `
+        <button class="btn-green" style="width:100%" onclick="loadData()">← กลับไปเลือกเมนู</button>
+      </div>
+    `;
+
+    document.getElementById('app').innerHTML = html;
+  }catch(error){
+    showInlineError(error.message || String(error));
+  }
+}
+
 function showLoading(message){document.getElementById("app").innerHTML='<div class="loading"><h2>🍱 ร้านข้าวแกง ตามสั่ง</h2><div>'+escapeHtml(message)+'</div></div>';}
 </script>
 </body>
