@@ -1,0 +1,2686 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>
+    ร้านข้าวแกง - หน้าร้าน
+  </title>
+
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+
+    body {
+
+      margin: 0;
+
+      font-family:
+        Arial,
+        "Noto Sans Thai",
+        sans-serif;
+
+      background: #f4f5f7;
+
+      color: #222;
+
+    }
+
+
+    .header {
+
+      position: sticky;
+
+      top: 0;
+
+      z-index: 10;
+
+      background: #06c755;
+
+      color: white;
+
+      padding: 16px;
+
+      box-shadow:
+        0 2px 8px
+        rgba(0,0,0,.12);
+
+    }
+
+
+    .header-row {
+
+      max-width: 1000px;
+
+      margin: auto;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      gap: 10px;
+
+    }
+
+
+    .title {
+
+      font-size: 21px;
+
+      font-weight: bold;
+
+    }
+
+
+    .date {
+
+      font-size: 13px;
+
+      margin-top: 4px;
+
+      opacity: .9;
+
+    }
+
+
+    .refresh {
+
+      border: none;
+
+      background: white;
+
+      color: #06a84f;
+
+      padding: 9px 13px;
+
+      border-radius: 9px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+    }
+
+
+    .container {
+
+      max-width: 1000px;
+
+      margin: auto;
+
+      padding: 15px;
+
+    }
+
+
+    .summary {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(4, 1fr);
+
+      gap: 10px;
+
+      margin-bottom: 15px;
+
+    }
+
+
+    .summary-card {
+
+      background: white;
+    
+      border-radius: 12px;
+    
+      padding: 13px;
+    
+      box-shadow:
+        0 1px 5px
+        rgba(0,0,0,.07);
+    
+      text-align: center;
+    
+      cursor: pointer;
+    
+      transition:
+        transform .15s,
+        box-shadow .15s;
+    
+    }
+    
+    
+    .summary-card:hover {
+    
+      transform: translateY(-2px);
+    
+      box-shadow:
+        0 3px 10px
+        rgba(0,0,0,.12);
+    
+    }
+    
+    
+    .summary-card.active {
+    
+      border: 2px solid #06c755;
+    
+      box-shadow:
+        0 0 0 2px
+        rgba(6,199,85,.12);
+    
+    }
+
+
+    .summary-number {
+
+      font-size: 27px;
+
+      font-weight: bold;
+
+    }
+
+
+    .summary-label {
+
+      font-size: 13px;
+
+      color: #666;
+
+      margin-top: 4px;
+
+    }
+
+
+    .section {
+
+      margin-top: 20px;
+
+    }
+
+
+    .section-title {
+
+      font-size: 18px;
+
+      font-weight: bold;
+
+      margin-bottom: 10px;
+
+    }
+
+
+    
+    /* =====================================
+     * LOCAL NEW ORDER NOTIFICATION
+     * ===================================== */
+
+    .new-order-alert {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      width: min(92vw, 420px);
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #06c755;
+      color: white;
+      box-shadow: 0 8px 30px rgba(0,0,0,.22);
+      cursor: pointer;
+      animation: newOrderPulse 1s ease-in-out infinite;
+    }
+
+    .new-order-alert.show {
+      display: block;
+    }
+
+    .new-order-alert-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .new-order-alert-detail {
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @keyframes newOrderPulse {
+      0%, 100% {
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        transform: translateX(-50%) scale(1.025);
+      }
+    }
+
+    .notification-test-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 7px 10px;
+      background: #06c755;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+.order-card {
+
+      background: white;
+
+      border-radius: 14px;
+
+      margin-bottom: 12px;
+
+      padding: 15px;
+
+      box-shadow:
+        0 2px 7px
+        rgba(0,0,0,.08);
+
+    }
+
+
+    .order-top {
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: flex-start;
+
+      gap: 10px;
+
+    }
+
+
+    .order-id {
+
+      font-size: 27px;
+
+      font-weight: bold;
+
+    }
+
+
+    .order-time {
+
+      color: #666;
+
+      font-size: 13px;
+
+      margin-top: 3px;
+
+    }
+
+
+    .status {
+
+      padding: 6px 9px;
+
+      border-radius: 8px;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
+      white-space: nowrap;
+
+    }
+
+
+    .status-new {
+
+      background: #fff0d6;
+
+      color: #a15b00;
+
+    }
+
+
+    .status-preparing {
+
+      background: #e7f0ff;
+
+      color: #1757a6;
+
+    }
+
+
+    .status-ready {
+
+      background: #e5f8ec;
+
+      color: #087a37;
+
+    }
+
+
+    .status-completed {
+
+      background: #eeeeee;
+
+      color: #666;
+
+    }
+
+
+    .customer {
+
+      margin-top: 12px;
+
+      font-weight: bold;
+
+    }
+
+
+    .pickup {
+
+      margin-top: 6px;
+
+      padding: 9px;
+
+      background: #f5f5f5;
+
+      border-radius: 9px;
+
+      font-size: 14px;
+
+    }
+
+
+    .items {
+
+      margin-top: 12px;
+
+      border-top:
+        1px solid #eee;
+
+      padding-top: 10px;
+
+    }
+
+
+    .item {
+
+      padding: 8px 0;
+
+      border-bottom:
+        1px dashed #ddd;
+
+    }
+
+
+    .item:last-child {
+
+      border-bottom: none;
+
+    }
+
+
+    .item-name {
+
+      font-weight: bold;
+
+    }
+
+
+    .item-detail {
+
+      color: #666;
+
+      font-size: 13px;
+
+      margin-top: 3px;
+
+    }
+
+
+    .remark {
+
+      margin-top: 10px;
+
+      padding: 9px;
+
+      background: #fff8df;
+
+      border-radius: 8px;
+
+      font-size: 13px;
+
+    }
+
+
+    .order-bottom {
+
+      margin-top: 13px;
+
+      padding-top: 12px;
+
+      border-top:
+        1px solid #eee;
+
+      display: flex;
+
+      justify-content: space-between;
+
+      align-items: center;
+
+      gap: 10px;
+
+    }
+
+
+    .total {
+
+      font-size: 20px;
+
+      font-weight: bold;
+
+    }
+
+
+    .payment {
+
+      font-size: 13px;
+
+      color: #666;
+
+    }
+
+
+    .payment-status {
+
+      margin-top: 6px;
+
+      font-size: 13px;
+
+      font-weight: bold;
+
+    }
+
+
+    .payment-unpaid {
+
+      color: #c62828;
+
+    }
+
+
+    .payment-pending {
+
+      color: #b26a00;
+
+    }
+
+
+    .payment-paid {
+
+      color: #087a37;
+
+    }
+
+
+    .payment-refunded {
+
+      color: #666;
+
+    }
+
+
+    .payment-actions {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 7px;
+
+      margin-top: 9px;
+
+    }
+
+
+    .payment-btn {
+
+      border: none;
+
+      padding: 9px 10px;
+
+      border-radius: 8px;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+    }
+
+
+    .payment-btn-green {
+
+      background: #e5f8ec;
+
+      color: #087a37;
+
+    }
+
+
+    .payment-btn-yellow {
+
+      background: #fff4d6;
+
+      color: #8a5a00;
+
+    }
+
+
+    .payment-btn-gray {
+
+      background: #eeeeee;
+
+      color: #555;
+
+    }
+
+
+    .actions {
+
+      display: flex;
+
+      gap: 8px;
+
+      margin-top: 12px;
+
+    }
+
+
+    .btn {
+
+      flex: 1;
+
+      border: none;
+
+      padding: 12px;
+
+      border-radius: 9px;
+
+      font-size: 14px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+    }
+
+
+    .btn-primary {
+
+      background: #06c755;
+
+      color: white;
+
+    }
+
+
+    .btn-blue {
+
+      background: #2878d8;
+
+      color: white;
+
+    }
+
+
+    .btn-gray {
+
+      background: #e9e9e9;
+
+      color: #333;
+
+    }
+
+
+    .btn-red {
+
+      background: #ffe4e4;
+
+      color: #b00020;
+
+    }
+
+
+    .empty {
+
+      background: white;
+
+      border-radius: 12px;
+
+      padding: 30px 15px;
+
+      text-align: center;
+
+      color: #777;
+
+    }
+
+
+    .loading {
+
+      text-align: center;
+
+      padding: 40px 15px;
+
+      color: #666;
+
+    }
+
+
+    .error {
+
+      background: #ffe7e7;
+
+      color: #a00000;
+
+      padding: 13px;
+
+      border-radius: 10px;
+
+      margin-bottom: 15px;
+
+    }
+
+
+    @media (
+      max-width: 650px
+    ) {
+
+      .summary {
+
+        grid-template-columns:
+          repeat(2, 1fr);
+
+      }
+
+
+      .order-top {
+
+        align-items: center;
+
+      }
+
+
+      .order-bottom {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+      }
+
+    }
+    
+  </style>
+
+</head>
+
+
+<body>
+
+  <div
+    id="newOrderAlert"
+    class="new-order-alert"
+    onclick="dismissNewOrderAlert()"
+  >
+    <div
+      class="new-order-alert-title"
+      id="newOrderAlertTitle"
+    >🔔 มีออเดอร์ใหม่!</div>
+
+    <div
+      class="new-order-alert-detail"
+      id="newOrderAlertDetail"
+    >กรุณามาดูที่หน้าร้าน</div>
+  </div>
+
+
+
+
+  <div class="header">
+
+    <div class="header-row">
+
+      <div>
+
+        <div class="title">
+          🍱 ร้านข้าวแกง ตามสั่ง
+        </div>
+
+        <div
+          class="date"
+          id="today">
+        </div>
+
+        <div
+          class="date"
+          id="lastUpdated">
+        </div>
+
+      </div>
+
+
+      <button
+        class="refresh"
+        onclick="loadOrders()">
+
+        🔄 รีเฟรช
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="container">
+
+    <div
+      id="summary"
+      class="summary">
+    </div>
+
+    <div
+      id="app">
+
+      <div class="loading">
+
+        กำลังโหลดออเดอร์...
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <script>
+
+    /*
+     * =====================================
+     * API URL
+     * =====================================
+     *
+     * ใช้ URL /exec ตัวเดียวกับระบบ LIFF
+     */
+
+    const API_URL =
+      'https://script.google.com/macros/s/AKfycbxawZU8dYjnixWed3eVoUPqA88PAtZmCwTgyJghOtcP9e4iqJQDghzrrQslK2X2CO3S/exec';
+
+
+    let orders = [];
+    
+    let currentFilter = 'ALL';
+
+    /*
+     * =====================================
+     * สรุปจำนวน
+     * =====================================
+     */
+
+    function renderSummary() {
+
+      const countNew =
+        orders.filter(
+          function(order) {
+            return order.status === 'NEW';
+          }
+        ).length;
+    
+    
+      const countPreparing =
+        orders.filter(
+          function(order) {
+            return order.status === 'PREPARING';
+          }
+        ).length;
+    
+    
+      const countReady =
+        orders.filter(
+          function(order) {
+            return order.status === 'READY';
+          }
+        ).length;
+    
+    
+      const countCompleted =
+        orders.filter(
+          function(order) {
+            return order.status === 'COMPLETED';
+          }
+        ).length;
+    
+    
+      document
+        .getElementById('summary')
+        .innerHTML = `
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'NEW'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('NEW')">
+    
+            <div class="summary-number">
+              ${countNew}
+            </div>
+    
+            <div class="summary-label">
+              🆕 ออเดอร์ใหม่
+            </div>
+    
+          </div>
+    
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'PREPARING'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('PREPARING')">
+    
+            <div class="summary-number">
+              ${countPreparing}
+            </div>
+    
+            <div class="summary-label">
+              👨‍🍳 กำลังทำ
+            </div>
+    
+          </div>
+    
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'READY'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('READY')">
+    
+            <div class="summary-number">
+              ${countReady}
+            </div>
+    
+            <div class="summary-label">
+              ✅ พร้อมรับ
+            </div>
+    
+          </div>
+    
+    
+          <div
+            class="summary-card ${
+              currentFilter === 'COMPLETED'
+                ? 'active'
+                : ''
+            }"
+            onclick="setOrderFilter('COMPLETED')">
+    
+            <div class="summary-number">
+              ${countCompleted}
+            </div>
+    
+            <div class="summary-label">
+              ✔️ เสร็จแล้ว
+            </div>
+    
+          </div>
+    
+        `;
+    
+    }
+
+
+    /*
+     * =====================================
+     * แสดงออเดอร์
+     * =====================================
+     */
+
+    function renderOrders() {
+
+      const app =
+        document.getElementById('app');
+    
+    
+      if (!orders || orders.length === 0) {
+    
+        app.innerHTML = `
+          <div class="empty">
+            📭 วันนี้ยังไม่มีออเดอร์
+          </div>
+        `;
+    
+        return;
+      }
+    
+    
+      /*
+       * =====================================
+       * กรองออเดอร์ตามสถานะ
+       * =====================================
+       */
+    
+      let filteredOrders;
+    
+    
+      if (currentFilter === 'ALL') {
+    
+        filteredOrders =
+          orders.slice();
+    
+      } else {
+    
+        filteredOrders =
+          orders.filter(
+            function(order) {
+    
+              return (
+                String(order.status || '')
+                  .toUpperCase() ===
+                currentFilter
+              );
+    
+            }
+          );
+    
+      }
+    
+    
+      /*
+       * =====================================
+       * ถ้าไม่มีออเดอร์ในสถานะที่เลือก
+       * =====================================
+       */
+    
+      if (
+        filteredOrders.length === 0
+      ) {
+    
+        const filterNames = {
+    
+          NEW:
+            '🆕 ออเดอร์ใหม่',
+    
+          PREPARING:
+            '👨‍🍳 กำลังทำ',
+    
+          READY:
+            '✅ พร้อมรับ',
+    
+          COMPLETED:
+            '✔️ เสร็จแล้ว'
+    
+        };
+    
+    
+        app.innerHTML = `
+    
+          <div class="empty">
+    
+            ${
+              currentFilter === 'ALL'
+                ? '📭 วันนี้ยังไม่มีออเดอร์'
+                : (
+                    'ไม่มีออเดอร์ในสถานะ ' +
+                    (
+                      filterNames[
+                        currentFilter
+                      ] ||
+                      currentFilter
+                    )
+                  )
+            }
+    
+          </div>
+    
+        `;
+    
+        return;
+      }
+    
+    
+      /*
+       * =====================================
+       * แบ่งกลุ่มสำหรับหน้า ALL
+       * =====================================
+       */
+    
+      const groups = [
+    
+        {
+          status: 'NEW',
+          title: '🆕 ออเดอร์ใหม่'
+        },
+    
+        {
+          status: 'PREPARING',
+          title: '👨‍🍳 กำลังทำ'
+        },
+    
+        {
+          status: 'READY',
+          title: '✅ พร้อมรับ'
+        },
+    
+        {
+          status: 'COMPLETED',
+          title: '✔️ เสร็จแล้ว'
+        },
+    
+        {
+          status: 'CANCELLED',
+          title: '❌ ยกเลิก'
+        }
+    
+      ];
+    
+    
+      let html = '';
+    
+    
+      /*
+       * =====================================
+       * ถ้าเลือกสถานะเฉพาะ
+       * แสดงแค่หัวข้อเดียว
+       * =====================================
+       */
+    
+      if (
+        currentFilter !== 'ALL'
+      ) {
+    
+        const group =
+          groups.find(
+            function(item) {
+    
+              return (
+                item.status ===
+                currentFilter
+              );
+    
+            }
+          );
+    
+    
+        const title =
+          group
+            ? group.title
+            : currentFilter;
+    
+    
+        html += `
+    
+          <div class="section">
+    
+            <div class="section-title">
+              ${title}
+            </div>
+    
+        `;
+    
+    
+        filteredOrders.forEach(
+          function(order) {
+    
+            html +=
+              renderOrderCard(order);
+    
+          }
+        );
+    
+    
+        html += `
+    
+          </div>
+    
+        `;
+    
+    
+      } else {
+    
+        /*
+         * =====================================
+         * หน้า ALL
+         * แสดงทุกสถานะเป็นกลุ่ม
+         * =====================================
+         */
+    
+        groups.forEach(
+          function(group) {
+    
+            const groupOrders =
+              filteredOrders.filter(
+                function(order) {
+    
+                  return (
+                    String(
+                      order.status || ''
+                    ).toUpperCase() ===
+                    group.status
+                  );
+    
+                }
+              );
+    
+    
+            if (
+              groupOrders.length === 0
+            ) {
+    
+              return;
+    
+            }
+    
+    
+            html += `
+    
+              <div class="section">
+    
+                <div class="section-title">
+                  ${group.title}
+                </div>
+    
+            `;
+    
+    
+            groupOrders.forEach(
+              function(order) {
+    
+                html +=
+                  renderOrderCard(order);
+    
+              }
+            );
+    
+    
+            html += `
+    
+              </div>
+    
+            `;
+    
+          }
+        );
+    
+      }
+    
+    
+      app.innerHTML =
+        html ||
+        `
+          <div class="empty">
+            ไม่มีออเดอร์ที่ต้องดำเนินการ
+          </div>
+        `;
+    
+    }
+
+    function setOrderFilter(
+      filter
+    ) {
+    
+      if (
+        currentFilter === filter
+      ) {
+    
+        currentFilter = 'ALL';
+    
+      } else {
+    
+        currentFilter = filter;
+    
+      }
+    
+    
+      renderSummary();
+    
+      renderOrders();
+    
+    }
+
+
+    /*
+     * =====================================
+     * การ์ดออเดอร์
+     * =====================================
+     */
+
+    function renderOrderCard(
+      order
+    ) {
+
+      const statusClass =
+        getStatusClass(
+          order.status
+        );
+
+
+      const statusText =
+        getStatusText(
+          order.status
+        );
+
+
+      let pickupText =
+        'รับตอนนี้';
+      
+      
+      if (
+        order.pickupType ===
+        'SCHEDULED'
+      ) {
+      
+        pickupText =
+          '🕐 รับเวลา ' +
+          (
+            order.pickupTime ||
+            order.pickupSlot ||
+            '-'
+          );
+      
+      }
+
+
+      let itemsHtml = '';
+
+
+      (
+        order.items || []
+      ).forEach(
+        function(item) {
+
+          let optionText =
+            item.options || '';
+
+
+          let remarkText =
+            item.remark || '';
+
+
+          itemsHtml += `
+
+            <div class="item">
+
+              <div class="item-name">
+
+                ${escapeHtml(
+                  item.menuName
+                )}
+
+                ×
+                ${Number(
+                  item.qty
+                )}
+
+              </div>
+
+
+              ${
+                optionText
+                  ? `
+                    <div class="item-detail">
+
+                      ตัวเลือก:
+                      ${escapeHtml(
+                        optionText
+                      )}
+
+                    </div>
+                  `
+                  : ''
+              }
+
+
+              ${
+                remarkText
+                  ? `
+                    <div class="item-detail">
+
+                      📝
+                      ${escapeHtml(
+                        remarkText
+                      )}
+
+                    </div>
+                  `
+                  : ''
+              }
+
+            </div>
+
+          `;
+
+        }
+      );
+
+
+      return `
+
+        <div class="order-card">
+
+          <div class="order-top">
+
+            <div>
+
+              <div class="order-id">
+
+                ${escapeHtml(
+                  order.orderId
+                )}
+
+              </div>
+
+
+              <div class="order-time">
+
+                สั่งเวลา
+                ${escapeHtml(
+                  order.time
+                )}
+
+              </div>
+
+            </div>
+
+
+            <div
+              class="status ${statusClass}">
+
+              ${statusText}
+
+            </div>
+
+          </div>
+
+
+          <div class="customer">
+
+            👤
+            ${escapeHtml(
+              order.customerName ||
+              '-'
+            )}
+
+          </div>
+
+
+          <div class="pickup">
+
+            ${escapeHtml(
+              pickupText
+            )}
+
+          </div>
+
+
+          <div class="items">
+
+            ${itemsHtml}
+
+          </div>
+
+
+          ${
+            order.remark
+              ? `
+                <div class="remark">
+
+                  📝 หมายเหตุ:
+                  ${escapeHtml(
+                    order.remark
+                  )}
+
+                </div>
+              `
+              : ''
+          }
+
+
+          <div class="order-bottom">
+
+            <div>
+
+              <div class="total">
+
+                ${Number(
+                  order.total
+                ).toLocaleString()}
+
+                บาท
+
+              </div>
+
+
+              <div class="payment">
+
+                ${
+                  order.payment ===
+                  'CASH'
+                    ? '💵 เงินสด'
+                    : '📱 QR Payment'
+                }
+
+                ${renderPaymentStatus(order)}
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          ${renderActions(order)}
+
+        </div>
+
+      `;
+
+    }
+
+
+    /*
+     * =====================================
+     * ปุ่มเปลี่ยนสถานะ
+     * =====================================
+     */
+
+    function renderActions(order) {
+
+      let orderActions = '';
+
+      if (order.status === 'NEW') {
+
+        orderActions = `
+          <div class="actions">
+
+            <button
+              class="btn btn-primary"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'PREPARING'
+                )
+              ">
+
+              👨‍🍳 รับออเดอร์
+
+            </button>
+
+            <button
+              class="btn btn-red"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'CANCELLED'
+                )
+              ">
+
+              ❌ ยกเลิก
+
+            </button>
+
+          </div>
+        `;
+
+      } else if (order.status === 'PREPARING') {
+
+        orderActions = `
+          <div class="actions">
+
+            <button
+              class="btn btn-blue"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'READY'
+                )
+              ">
+
+              ✅ พร้อมรับ
+
+            </button>
+
+          </div>
+        `;
+
+      } else if (order.status === 'READY') {
+
+        orderActions = `
+          <div class="actions">
+
+            <button
+              class="btn btn-primary"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'COMPLETED'
+                )
+              ">
+
+              ✔️ ลูกค้ารับแล้ว
+
+            </button>
+
+          </div>
+        `;
+
+      } else if (order.status === 'COMPLETED') {
+
+        orderActions = `
+          <div class="actions">
+
+            <div
+              style="
+                width:100%;
+                text-align:center;
+                padding:10px;
+                color:#666;
+                background:#f3f3f3;
+                border-radius:9px;
+              ">
+
+              ✔️ ออเดอร์เสร็จสิ้น
+
+            </div>
+
+          </div>
+        `;
+
+      } else if (order.status === 'CANCELLED') {
+
+        orderActions = `
+          <div class="actions">
+
+            <div
+              style="
+                width:100%;
+                text-align:center;
+                padding:10px;
+                color:#b00020;
+                background:#ffe8e8;
+                border-radius:9px;
+              ">
+
+              ❌ ออเดอร์ถูกยกเลิก
+
+            </div>
+
+          </div>
+        `;
+
+      }
+
+      /*
+       * Payment actions are intentionally independent
+       * from order status, so COMPLETED orders can still
+       * be marked PAID.
+       */
+
+      return (
+        orderActions +
+        renderPaymentActions(order)
+      );
+
+    }
+
+
+    function renderPaymentStatus(order) {
+
+      const status =
+        String(
+          order.paymentStatus ||
+          'UNPAID'
+        ).toUpperCase();
+
+      const map = {
+
+        UNPAID: {
+          text: '🔴 ยังไม่ชำระ',
+          cls: 'payment-unpaid'
+        },
+
+        PENDING: {
+          text: '🟡 รอตรวจสอบ',
+          cls: 'payment-pending'
+        },
+
+        PAID: {
+          text: '🟢 ชำระแล้ว',
+          cls: 'payment-paid'
+        },
+
+        REFUNDED: {
+          text: '⚪ คืนเงินแล้ว',
+          cls: 'payment-refunded'
+        }
+
+      };
+
+      const item =
+        map[status] ||
+        map.UNPAID;
+
+      return `
+        <div
+          class="payment-status ${item.cls}"
+        >
+          ${item.text}
+        </div>
+      `;
+
+    }
+
+
+    function renderPaymentActions(order) {
+
+      if (
+        String(order.status || '')
+          .toUpperCase() ===
+        'CANCELLED'
+      ) {
+
+        return '';
+
+      }
+
+      const paymentStatus =
+        String(
+          order.paymentStatus ||
+          'UNPAID'
+        ).toUpperCase();
+
+      let buttons = '';
+
+      if (paymentStatus !== 'PAID') {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-green"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'PAID'
+              )
+            "
+          >
+            💰 รับชำระแล้ว
+          </button>
+        `;
+
+      }
+
+      /*
+       * PENDING ใช้กับการชำระแบบ QR เท่านั้น
+       * เงินสดที่ PAID แล้วไม่ควรมีปุ่ม "รอตรวจสอบ"
+       */
+      if (
+        paymentStatus !== 'PENDING' &&
+        paymentStatus !== 'PAID' &&
+        order.payment !== 'CASH'
+      ) {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-yellow"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'PENDING'
+              )
+            "
+          >
+            ⏳ รอตรวจสอบ
+          </button>
+        `;
+
+      }
+
+      if (
+        paymentStatus === 'PAID'
+      ) {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-gray"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'REFUNDED'
+              )
+            "
+          >
+            ↩️ คืนเงิน
+          </button>
+        `;
+
+      }
+
+      if (
+        paymentStatus === 'REFUNDED'
+      ) {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-green"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'PAID'
+              )
+            "
+          >
+            ↩️ เปลี่ยนกลับเป็นชำระแล้ว
+          </button>
+        `;
+
+      }
+
+      if (!buttons) {
+        return '';
+      }
+
+      return `
+        <div
+          style="
+            margin-top:10px;
+            padding-top:10px;
+            border-top:1px dashed #ddd;
+          "
+        >
+
+          <div
+            style="
+              font-size:12px;
+              color:#777;
+              margin-bottom:4px;
+              font-weight:bold;
+            "
+          >
+            💳 การชำระเงิน
+          </div>
+
+          <div class="payment-actions">
+            ${buttons}
+          </div>
+
+        </div>
+      `;
+
+    }
+
+
+    /*
+     * =====================================
+     * ส่งเปลี่ยนสถานะ
+     * =====================================
+     */
+
+    async function updateStatus(
+      orderId,
+      orderDate,
+      status
+    ) {
+
+      const statusNames = {
+
+        PREPARING:
+          'กำลังทำ',
+
+        READY:
+          'พร้อมรับ',
+
+        COMPLETED:
+          'เสร็จแล้ว',
+
+        CANCELLED:
+          'ยกเลิก'
+
+      };
+
+
+      const text =
+        statusNames[status] ||
+        status;
+
+
+      if (
+        !confirm(
+          'เปลี่ยน ' +
+          orderId +
+          ' เป็น "' +
+          text +
+          '" ?'
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+
+              method: 'POST',
+
+              headers: {
+
+                'Content-Type':
+                  'text/plain;charset=utf-8'
+
+              },
+
+              body:
+                JSON.stringify({
+
+                  action:
+                    'updateOrderStatus',
+
+                  orderId:
+                    orderId,
+
+                  orderDate:
+                    orderDate,
+
+                  status:
+                    status
+
+                })
+
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (
+          !result.success
+        ) {
+
+          throw new Error(
+            result.error ||
+            'เปลี่ยนสถานะไม่สำเร็จ'
+          );
+
+        }
+
+
+        await loadOrders();
+
+
+      } catch (error) {
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    async function updatePaymentStatus(
+      orderId,
+      orderDate,
+      paymentStatus
+    ) {
+
+      const names = {
+
+        UNPAID:
+          'ยังไม่ชำระ',
+
+        PENDING:
+          'รอตรวจสอบ',
+
+        PAID:
+          'ชำระแล้ว',
+
+        REFUNDED:
+          'คืนเงินแล้ว'
+
+      };
+
+      const target =
+        names[paymentStatus] ||
+        paymentStatus;
+
+      if (
+        !confirm(
+          'เปลี่ยนสถานะการชำระเงินของ ' +
+          orderId +
+          ' เป็น "' +
+          target +
+          '" ?'
+        )
+      ) {
+
+        return;
+
+      }
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+
+              method: 'POST',
+
+              headers: {
+
+                'Content-Type':
+                  'text/plain;charset=utf-8'
+
+              },
+
+              body:
+                JSON.stringify({
+
+                  action:
+                    'updatePaymentStatus',
+
+                  orderId:
+                    orderId,
+
+                  orderDate:
+                    orderDate,
+
+                  paymentStatus:
+                    paymentStatus
+
+                })
+
+            }
+          );
+
+        const result =
+          await response.json();
+
+        if (
+          !result.success
+        ) {
+
+          throw new Error(
+            result.error ||
+            'เปลี่ยนสถานะการชำระเงินไม่สำเร็จ'
+          );
+
+        }
+
+        await loadOrders();
+
+      } catch (error) {
+
+        console.error(
+          'PAYMENT STATUS ERROR:',
+          error
+        );
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    /*
+     * =====================================
+     * Helpers
+     * =====================================
+     */
+
+    function getStatusClass(
+      status
+    ) {
+
+      if (
+        status === 'NEW'
+      ) {
+
+        return 'status-new';
+
+      }
+
+
+      if (
+        status ===
+        'PREPARING'
+      ) {
+
+        return 'status-preparing';
+
+      }
+
+
+      if (
+        status === 'READY'
+      ) {
+
+        return 'status-ready';
+
+      }
+
+
+      return 'status-completed';
+
+    }
+
+
+    function getStatusText(
+      status
+    ) {
+
+      const map = {
+
+        NEW:
+          '🆕 ใหม่',
+
+        PREPARING:
+          '👨‍🍳 กำลังทำ',
+
+        READY:
+          '✅ พร้อมรับ',
+
+        COMPLETED:
+          '✔️ เสร็จแล้ว',
+
+        CANCELLED:
+          '❌ ยกเลิก'
+
+      };
+
+
+      return (
+        map[status] ||
+        status
+      );
+
+    }
+
+
+    function escapeHtml(
+      value
+    ) {
+
+      return String(
+        value ?? ''
+      )
+      .replace(
+        /&/g,
+        '&amp;'
+      )
+      .replace(
+        /</g,
+        '&lt;'
+      )
+      .replace(
+        />/g,
+        '&gt;'
+      )
+      .replace(
+        /"/g,
+        '&quot;'
+      )
+      .replace(
+        /'/g,
+        '&#039;'
+      );
+
+    }
+
+
+    function escapeJs(
+      value
+    ) {
+
+      return String(
+        value ?? ''
+      )
+      .replace(
+        /\\/g,
+        '\\\\'
+      )
+      .replace(
+        /'/g,
+        "\\'"
+      );
+
+    }
+
+
+    /*
+     * =====================================
+     * เริ่มต้น
+     * =====================================
+     */
+    let isLoadingOrders = false;
+
+
+async 
+    /* =====================================
+     * LOCAL NEW ORDER NOTIFICATION
+     * ตรวจทุกครั้งที่ Admin refresh ออเดอร์
+     * ===================================== */
+
+    let knownOrderIds =
+      new Set();
+
+    let notificationInitialized =
+      false;
+
+    let newOrderAudioContext =
+      null;
+
+    let newOrderAlertTimer =
+      null;
+
+
+    function ensureNewOrderAudio_() {
+
+      try {
+
+        if (!newOrderAudioContext) {
+
+          const AudioContextClass =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+          if (!AudioContextClass) {
+            return null;
+          }
+
+          newOrderAudioContext =
+            new AudioContextClass();
+
+        }
+
+        if (
+          newOrderAudioContext.state ===
+          'suspended'
+        ) {
+
+          newOrderAudioContext
+            .resume()
+            .catch(function() {});
+
+        }
+
+        return newOrderAudioContext;
+
+      } catch (error) {
+
+        console.warn(
+          'Audio not available:',
+          error
+        );
+
+        return null;
+
+      }
+
+    }
+
+
+    function playNewOrderSound_() {
+
+      const ctx =
+        ensureNewOrderAudio_();
+
+      if (!ctx) {
+        return;
+      }
+
+      try {
+
+        const now =
+          ctx.currentTime;
+
+        [0, 0.20, 0.40].forEach(
+          function(offset, index) {
+
+            const oscillator =
+              ctx.createOscillator();
+
+            const gain =
+              ctx.createGain();
+
+            oscillator.type =
+              'sine';
+
+            oscillator.frequency.value =
+              index === 2
+                ? 1046
+                : 880;
+
+            gain.gain.setValueAtTime(
+              0,
+              now + offset
+            );
+
+            gain.gain.linearRampToValueAtTime(
+              0.18,
+              now + offset + 0.02
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+              0.001,
+              now + offset + 0.16
+            );
+
+            oscillator.connect(gain);
+
+            gain.connect(
+              ctx.destination
+            );
+
+            oscillator.start(
+              now + offset
+            );
+
+            oscillator.stop(
+              now + offset + 0.18
+            );
+
+          }
+        );
+
+      } catch (error) {
+
+        console.warn(
+          'Cannot play notification sound:',
+          error
+        );
+
+      }
+
+    }
+
+
+    function showNewOrderAlert_(
+      order
+    ) {
+
+      const alert =
+        document.getElementById(
+          'newOrderAlert'
+        );
+
+      const title =
+        document.getElementById(
+          'newOrderAlertTitle'
+        );
+
+      const detail =
+        document.getElementById(
+          'newOrderAlertDetail'
+        );
+
+      if (!alert) {
+        return;
+      }
+
+      const orderId =
+        order.orderId ||
+        order.Order_ID ||
+        '-';
+
+      const customer =
+        order.customerName ||
+        order.Customer_Name ||
+        'ลูกค้า';
+
+      const total =
+        Number(
+          order.total ||
+          order.Total ||
+          0
+        );
+
+      title.textContent =
+        '🔔 มีออเดอร์ใหม่! ' +
+        orderId;
+
+      detail.textContent =
+        customer +
+        ' • ' +
+        total.toLocaleString('th-TH') +
+        ' บาท • กรุณามาดูที่หน้าร้าน';
+
+      alert.classList.add(
+        'show'
+      );
+
+      clearTimeout(
+        newOrderAlertTimer
+      );
+
+      newOrderAlertTimer =
+        setTimeout(
+          function() {
+            dismissNewOrderAlert();
+          },
+          15000
+        );
+
+    }
+
+
+    function dismissNewOrderAlert() {
+
+      const alert =
+        document.getElementById(
+          'newOrderAlert'
+        );
+
+      if (alert) {
+        alert.classList.remove(
+          'show'
+        );
+      }
+
+      clearTimeout(
+        newOrderAlertTimer
+      );
+
+    }
+
+
+    function testNewOrderSound(
+      event
+    ) {
+
+      if (event) {
+        event.stopPropagation();
+      }
+
+      ensureNewOrderAudio_();
+
+      playNewOrderSound_();
+
+      showNewOrderAlert_({
+        orderId: 'TEST',
+        customerName: 'ทดสอบระบบ',
+        total: 50
+      });
+
+    }
+
+
+    function detectNewOrders_(
+      orders
+    ) {
+
+      const currentIds =
+        new Set();
+
+      const newOrders =
+        [];
+
+      (orders || []).forEach(
+        function(order) {
+
+          const id =
+            String(
+              order.orderId ||
+              order.Order_ID ||
+              ''
+            ).trim();
+
+          if (!id) {
+            return;
+          }
+
+          currentIds.add(id);
+
+          if (
+            notificationInitialized &&
+            !knownOrderIds.has(id)
+          ) {
+
+            newOrders.push(
+              order
+            );
+
+          }
+
+        }
+      );
+
+      if (
+        notificationInitialized &&
+        newOrders.length > 0
+      ) {
+
+        playNewOrderSound_();
+
+        showNewOrderAlert_(
+          newOrders[
+            newOrders.length - 1
+          ]
+        );
+
+      }
+
+      knownOrderIds =
+        currentIds;
+
+      notificationInitialized =
+        true;
+
+    }
+
+
+async function loadOrders() {
+
+  if (isLoadingOrders) {
+    return;
+  }
+
+  isLoadingOrders = true;
+
+  try {
+
+    const controller =
+      new AbortController();
+
+    const timeout =
+      setTimeout(
+        function() {
+          controller.abort();
+        },
+        10000
+      );
+
+
+    let response;
+
+    try {
+
+      response =
+        await fetch(
+          API_URL +
+          '?action=getOrders',
+          {
+            method: 'GET',
+            cache: 'no-store',
+            signal: controller.signal
+          }
+        );
+
+    } finally {
+
+      clearTimeout(timeout);
+
+    }
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'Backend HTTP Error: ' +
+        response.status
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      'ORDERS:',
+      data
+    );
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        'ไม่สามารถโหลดออเดอร์ได้'
+      );
+
+    }
+
+
+    orders =
+      data.orders || [];
+
+    detectNewOrders_(
+      orders
+    );
+
+
+    document
+      .getElementById('today')
+      .textContent =
+        'วันที่ ' +
+        data.date;
+
+
+    renderSummary();
+
+    renderOrders();
+
+
+    document
+      .getElementById('lastUpdated')
+      .textContent =
+        'อัปเดตล่าสุด ' +
+        new Date()
+          .toLocaleTimeString(
+            'th-TH',
+            {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            }
+          );
+
+
+  } catch (error) {
+
+    console.error(
+      'LOAD ORDERS ERROR:',
+      error
+    );
+
+
+    document
+      .getElementById('app')
+      .innerHTML = `
+
+        <div class="error">
+
+          ❌ โหลดออเดอร์ไม่สำเร็จ
+
+          <br><br>
+
+          ${escapeHtml(
+            error.message ||
+            String(error)
+          )}
+
+        </div>
+
+      `;
+
+
+  } finally {
+
+    isLoadingOrders = false;
+
+  }
+
+}
+
+
+// โหลดครั้งแรก
+loadOrders();
+
+
+// Auto refresh ทุก 10 วินาที
+setInterval(
+  loadOrders,
+  10000
+);
+
+  </script>
+
+</body>
+
+</html>
