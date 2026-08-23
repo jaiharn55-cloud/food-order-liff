@@ -1448,12 +1448,172 @@
       .daily-item-card .menu-item-actions, .special-item-card .menu-item-actions { grid-column:1/-1; justify-content:stretch; }
       .daily-item-card button, .special-item-card button { flex:1; }
     }
-  </style>
+  
+    /* =========================================
+     * ADMIN PIN GATE
+     * ========================================= */
+    .admin-lock {
+      position: fixed;
+      inset: 0;
+      z-index: 50000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(
+          circle at top,
+          rgba(6,199,85,.13),
+          transparent 42%
+        ),
+        #f4f5f7;
+      padding: 18px;
+    }
+
+    .admin-lock.hidden {
+      display: none;
+    }
+
+    .admin-lock-card {
+      width: min(420px, 100%);
+      background: #fff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 14px 45px rgba(0,0,0,.14);
+      text-align: center;
+    }
+
+    .admin-lock-logo {
+      width: 74px;
+      height: 74px;
+      margin: 0 auto 12px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #e9f8ef;
+      font-size: 38px;
+    }
+
+    .admin-lock-title {
+      font-size: 21px;
+      font-weight: 1000;
+      color: #145a38;
+    }
+
+    .admin-lock-sub {
+      margin-top: 5px;
+      color: #777;
+      font-size: 13px;
+    }
+
+    .admin-pin-input {
+      width: 100%;
+      margin-top: 18px;
+      padding: 13px 14px;
+      border: 1px solid #d9dfe2;
+      border-radius: 11px;
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 8px;
+      outline: none;
+    }
+
+    .admin-pin-input:focus {
+      border-color: #06c755;
+      box-shadow: 0 0 0 3px rgba(6,199,85,.12);
+    }
+
+    .admin-pin-btn {
+      width: 100%;
+      margin-top: 11px;
+      border: 0;
+      border-radius: 11px;
+      padding: 13px;
+      background: #06c755;
+      color: #fff;
+      font-weight: 1000;
+      font-size: 16px;
+    }
+
+    .admin-pin-error {
+      min-height: 20px;
+      margin-top: 9px;
+      color: #b00020;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .admin-pin-note {
+      margin-top: 9px;
+      color: #888;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .admin-logout-btn {
+      margin-left: 6px;
+    }
+</style>
 
 </head>
 
 
 <body>
+  <div id="adminLock" class="admin-lock">
+
+    <div class="admin-lock-card">
+
+      <div class="admin-lock-logo">
+        🔐
+      </div>
+
+      <div class="admin-lock-title">
+        ร้านข้าวแกง ตามสั่ง
+      </div>
+
+      <div class="admin-lock-sub">
+        เข้าสู่หน้าจัดการร้าน
+      </div>
+
+      <form
+        onsubmit="unlockAdmin(event)"
+      >
+
+        <input
+          id="adminPinInput"
+          class="admin-pin-input"
+          type="password"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="6"
+          autocomplete="off"
+          placeholder="PIN"
+          aria-label="รหัสเข้าหน้า Admin"
+        >
+
+        <button
+          type="submit"
+          class="admin-pin-btn"
+        >
+          🔓 เข้าสู่ระบบ
+        </button>
+
+      </form>
+
+      <div
+        id="adminPinError"
+        class="admin-pin-error"
+      ></div>
+
+      <div class="admin-pin-note">
+        ใช้สำหรับเครื่องหน้าร้านเท่านั้น
+      </div>
+
+    </div>
+
+  </div>
+
+
   <div
     id="silentRefreshStatus"
     class="silent-refresh-status"
@@ -1527,6 +1687,14 @@
           ⚙️ ตั้งค่า
 
         </button>
+        <button
+          class="settings-btn admin-logout-btn"
+          onclick="lockAdmin()"
+          title="ออกจากหน้า Admin"
+        >
+          🔒
+        </button>
+
 
       </div>
 
@@ -2063,6 +2231,416 @@
      *
      * ใช้ URL /exec ตัวเดียวกับระบบ LIFF
      */
+
+
+    /* =========================================
+     * ADMIN PIN GATE
+     * ========================================= */
+
+    const ADMIN_PIN_ = "8899";
+    const ADMIN_SESSION_KEY_ =
+      "restaurantAdminUnlockedUntil";
+
+    const ADMIN_SESSION_MS_ =
+      8 * 60 * 60 * 1000;
+
+
+    function adminIsUnlocked_() {
+
+      const raw =
+        localStorage.getItem(
+          ADMIN_SESSION_KEY_
+        );
+
+      if (!raw) {
+        return false;
+      }
+
+      const until =
+        Number(raw);
+
+      return (
+        Number.isFinite(until) &&
+        until > Date.now()
+      );
+
+    }
+
+
+    function showAdminApp_() {
+
+      const lock =
+        document.getElementById(
+          "adminLock"
+        );
+
+      if (lock) {
+        lock.classList.add(
+          "hidden"
+        );
+      }
+
+    }
+
+
+    function showAdminLock_() {
+
+      const lock =
+        document.getElementById(
+          "adminLock"
+        );
+
+      if (lock) {
+        lock.classList.remove(
+          "hidden"
+        );
+      }
+
+    }
+
+
+    async function unlockAdmin(
+      event
+    ) {
+
+      event.preventDefault();
+
+      const input =
+        document.getElementById(
+          "adminPinInput"
+        );
+
+      const error =
+        document.getElementById(
+          "adminPinError"
+        );
+
+      const value =
+        String(
+          input?.value || ""
+        ).trim();
+
+
+      if (
+        !/^\d{4,6}$/.test(
+          value
+        )
+      ) {
+
+        if (error) {
+          error.textContent =
+            "กรุณาใส่ PIN 4-6 หลัก";
+        }
+
+        return false;
+
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type":
+                  "text/plain;charset=utf-8"
+              },
+              body:
+                JSON.stringify({
+                  action:
+                    "loginAdmin",
+                  pin:
+                    value
+                })
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (
+          !result ||
+          !result.success ||
+          !result.token
+        ) {
+
+          throw new Error(
+            result &&
+            result.error
+              ? result.error
+              : "เข้าสู่ระบบ Admin ไม่สำเร็จ"
+          );
+
+        }
+
+
+        sessionStorage.setItem(
+          "adminAuthToken",
+          result.token
+        );
+
+
+        localStorage.setItem(
+          ADMIN_SESSION_KEY_,
+          String(
+            result.expiresAt
+          )
+        );
+
+
+        if (error) {
+          error.textContent = "";
+        }
+
+        if (input) {
+          input.value = "";
+        }
+
+
+        showAdminApp_();
+
+
+        // Load Admin data only after backend auth succeeds.
+        if (
+          typeof loadAdminOrders ===
+          "function"
+        ) {
+          await loadAdminOrders();
+        }
+
+
+      } catch (loginError) {
+
+        if (error) {
+
+          error.textContent =
+            loginError.message ||
+            String(loginError);
+
+        }
+
+        if (input) {
+
+          input.value = "";
+
+          input.focus();
+
+        }
+
+      }
+
+
+      return false;
+
+    }
+
+
+    function lockAdmin() {
+
+      const token =
+        sessionStorage.getItem(
+          "adminAuthToken"
+        );
+
+
+      if (token) {
+
+        fetch(
+          API_URL,
+          {
+            method:
+              "POST",
+            headers: {
+              "Content-Type":
+                "text/plain;charset=utf-8"
+            },
+            body:
+              JSON.stringify({
+                action:
+                  "logoutAdmin",
+                token:
+                  token
+              })
+          }
+        ).catch(
+          function(error) {
+            console.warn(
+              "Logout backend error:",
+              error
+            );
+          }
+        );
+
+      }
+
+
+      sessionStorage.removeItem(
+        "adminAuthToken"
+      );
+
+      localStorage.removeItem(
+        ADMIN_SESSION_KEY_
+      );
+
+      showAdminLock_();
+
+
+      const input =
+        document.getElementById(
+          "adminPinInput"
+        );
+
+      if (input) {
+
+        input.value = "";
+
+        setTimeout(
+          function(){
+            input.focus();
+          },
+          50
+        );
+
+      }
+
+    }
+
+
+function initializeAdminLock_() {
+
+      const token =
+        sessionStorage.getItem(
+          "adminAuthToken"
+        );
+
+
+      if (
+        !token
+      ) {
+
+        localStorage.removeItem(
+          ADMIN_SESSION_KEY_
+        );
+
+        showAdminLock_();
+
+        setTimeout(
+          function(){
+
+            const input =
+              document.getElementById(
+                "adminPinInput"
+              );
+
+            if (input) {
+              input.focus();
+            }
+
+          },
+          50
+        );
+
+        return;
+
+      }
+
+
+      if (
+        adminIsUnlocked_()
+      ) {
+
+        showAdminApp_();
+
+      } else {
+
+        showAdminLock_();
+
+        setTimeout(
+          function(){
+
+            const input =
+              document.getElementById(
+                "adminPinInput"
+              );
+
+            if (input) {
+              input.focus();
+            }
+
+          },
+          50
+        );
+
+      }
+
+    }
+
+
+
+    function adminAuthToken_() {
+
+      return sessionStorage.getItem(
+        "adminAuthToken"
+      ) || "";
+
+    }
+
+
+    function adminAuthHeaders_() {
+
+      return {
+        "Content-Type":
+          "text/plain;charset=utf-8"
+      };
+
+    }
+
+
+    async function adminFetchJson_(
+      url,
+      options
+    ) {
+
+      const opts =
+        Object.assign(
+          {
+            headers:
+              adminAuthHeaders_()
+          },
+          options || {}
+        );
+
+
+      const response =
+        await fetch(
+          url,
+          opts
+        );
+
+
+      if (
+        response.status ===
+        401
+      ) {
+
+        lockAdmin();
+
+        throw new Error(
+          "Admin Session หมดอายุ กรุณาเข้าสู่ระบบใหม่"
+        );
+
+      }
+
+
+      return response.json();
+
+    }
+
 
     const API_URL =
       'https://script.google.com/macros/s/AKfycbxawZU8dYjnixWed3eVoUPqA88PAtZmCwTgyJghOtcP9e4iqJQDghzrrQslK2X2CO3S/exec';
@@ -3153,6 +3731,8 @@
 
                   action:
                     'updateOrderStatus',
+                    adminToken:
+                      adminAuthToken_(),
 
                   orderId:
                     orderId,
@@ -3261,8 +3841,8 @@
 
                   action:
                     'updatePaymentStatus',
-
-                  orderId:
+                          adminToken:
+                            adminAuthToken_(),orderId:
                     orderId,
 
                   orderDate:
@@ -3551,7 +4131,9 @@
       const ok=confirm('ระบบจะสำรอง Menu และ Menu_Options เดิม แล้วติดตั้งชุดเมนูแนะนำใหม่\n\nต้องการทำต่อหรือไม่?');
       if(!ok) return;
       try{
-        const response=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'installRecommendedMenuSystem',confirm:'YES'})});
+        const response=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'installRecommendedMenuSystem',
+                          adminToken:
+                            adminAuthToken_(),confirm:'YES'})});
         const result=await response.json();
         if(!result.success) throw new Error(result.error||'ติดตั้งเมนูไม่สำเร็จ');
         alert('ติดตั้งเมนูแนะนำสำเร็จ\nเมนู '+result.mainMenus+' รายการ\nตัวเลือก '+result.options+' รายการ');
@@ -3601,7 +4183,9 @@
 
     async function uploadAdminImageFromFile_(file){
       const dataUrl=await readFileAsDataUrl_(file);
-      const result=await postAdminAction_({action:'uploadAdminImage',image:{dataUrl:dataUrl,fileName:file.name}});
+      const result=await postAdminAction_({action:'uploadAdminImage',
+                          adminToken:
+                            adminAuthToken_(),image:{dataUrl:dataUrl,fileName:file.name}});
       if(!result.success)throw new Error(result.error||'อัปโหลดรูปไม่สำเร็จ');
       return result.url||'';
     }
@@ -3617,7 +4201,9 @@
     async function toggleMenuAvailability(menuId,available){
       const menu=findAdminMenu_(menuId);if(!menu)return;
       if(!confirm((available?'เปิดขาย ':'ปิดขาย ')+menu.name+' ใช่หรือไม่?'))return;
-      try{const result=await postAdminAction_({action:'toggleMenuAvailable',menuId:menuId,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');menu.available=available;renderMenuManager();}catch(error){alert(error.message||String(error));}
+      try{const result=await postAdminAction_({action:'toggleMenuAvailable',
+                          adminToken:
+                            adminAuthToken_(),menuId:menuId,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');menu.available=available;renderMenuManager();}catch(error){alert(error.message||String(error));}
     }
 
 
@@ -3667,7 +4253,9 @@
         closeDailyDishForm();await loadMenuSystemData_();document.getElementById('dailyDateInput').value=dish.date;renderDailyDishList();
       }catch(error){alert(error.message||String(error));}
     }
-    async function toggleDailyDishUI(id,available){try{const result=await postAdminAction_({action:'toggleDailyDish',dishId:id,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');await loadMenuSystemData_();renderDailyDishList();}catch(error){alert(error.message||String(error));}}
+    async function toggleDailyDishUI(id,available){try{const result=await postAdminAction_({action:'toggleDailyDish',
+                          adminToken:
+                            adminAuthToken_(),dishId:id,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');await loadMenuSystemData_();renderDailyDishList();}catch(error){alert(error.message||String(error));}}
 
 
     function renderSpecialMenuList(){
@@ -3711,7 +4299,9 @@
         closeSpecialMenuForm();await loadMenuSystemData_();renderSpecialMenuList();
       }catch(error){alert(error.message||String(error));}
     }
-    async function toggleSpecialMenuUI(id,available){try{const result=await postAdminAction_({action:'toggleSpecialMenu',menuId:id,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');await loadMenuSystemData_();renderSpecialMenuList();}catch(error){alert(error.message||String(error));}}
+    async function toggleSpecialMenuUI(id,available){try{const result=await postAdminAction_({action:'toggleSpecialMenu',
+                          adminToken:
+                            adminAuthToken_(),menuId:id,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');await loadMenuSystemData_();renderSpecialMenuList();}catch(error){alert(error.message||String(error));}}
 
     /* =====================================
      * SETTINGS / SOUND / WAKE LOCK
@@ -4320,6 +4910,8 @@
         await apiPost_({
           action:
             'uploadAdminImage',
+                    adminToken:
+                      adminAuthToken_(),
 
           image: {
             dataUrl:
@@ -4415,8 +5007,8 @@
           await apiPost_({
             action:
               'saveMenu',
-
-            menu: {
+                          adminToken:
+                            adminAuthToken_(),menu: {
 
               id: id,
               name: name,
@@ -4443,8 +5035,8 @@
           await apiPost_({
             action:
               'createMenu',
-
-            menu: {
+                          adminToken:
+                            adminAuthToken_(),menu: {
 
               name: name,
               price: price,
@@ -4522,6 +5114,8 @@
         await apiPost_({
           action:
             'toggleMenuAvailable',
+                    adminToken:
+                      adminAuthToken_(),
 
           menuId:
             menuId,
@@ -4778,8 +5372,8 @@
 
           action:
             'savePaymentSettings',
-
-          settings:
+                          adminToken:
+                            adminAuthToken_(),settings:
             settings
 
         });
@@ -5439,7 +6033,10 @@ async function loadOrders() {
       response =
         await fetch(
           API_URL +
-          '?action=getOrders',
+          '?action=getOrders&adminToken=' +
+          encodeURIComponent(
+            adminAuthToken_()
+          ),
           {
             method: 'GET',
             cache: 'no-store',
@@ -5637,6 +6234,20 @@ setInterval(
 
   </script>
 
+
+<script>
+  window.addEventListener(
+    "load",
+    function() {
+      if (
+        typeof initializeAdminLock_ ===
+        "function"
+      ) {
+        initializeAdminLock_();
+      }
+    }
+  );
+</script>
 </body>
 
 </html>
