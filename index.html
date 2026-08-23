@@ -45,6 +45,158 @@ textarea.field,input.field{width:100%;border:1px solid #ddd;border-radius:10px;p
 .success-order{text-align:center;padding:22px 12px}.order-id{font-size:50px;font-weight:1000;color:#006b38;margin:12px 0}
 .empty{text-align:center;color:#888;padding:25px 10px}.loading,.error-page{text-align:center;padding:40px 20px}.error-page h2{color:#b00020}
 .mini-help{color:#777;font-size:12px;line-height:1.5}
+
+/* ===== CUSTOMER CONFIRM / CART FIX ===== */
+
+.section-title{
+  font-size:17px;
+  font-weight:900;
+  margin:0 0 9px;
+  color:#333;
+}
+
+.cart-item{
+  border-bottom:1px solid #ececec;
+  padding:12px 0;
+}
+
+.cart-item:last-child{
+  border-bottom:0;
+}
+
+.cart-item-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.cart-item-name{
+  font-size:16px;
+  font-weight:900;
+  line-height:1.35;
+  flex:1;
+  min-width:0;
+}
+
+.cart-item-price{
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.cart-item-meta{
+  color:#666;
+  font-size:12px;
+  line-height:1.5;
+  margin-top:5px;
+}
+
+.cart-item-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:8px;
+}
+
+.cart-remove-btn{
+  border:1px solid #d64b4b;
+  background:#fff5f5;
+  color:#b00020;
+  padding:7px 12px;
+  border-radius:8px;
+  font-weight:900;
+  min-width:70px;
+}
+
+.cart-remove-btn:active{
+  transform:scale(.98);
+}
+
+.payment-choice{
+  display:block;
+  width:100%;
+  margin-top:8px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:12px;
+  background:#fff;
+  color:#222;
+  cursor:pointer;
+}
+
+.payment-choice:first-of-type{
+  margin-top:0;
+}
+
+.payment-choice input{
+  margin:0 8px 0 0;
+  vertical-align:middle;
+}
+
+.payment-choice.active{
+  border-color:#06c755;
+  background:#f1fff6;
+  box-shadow:0 0 0 1px rgba(6,199,85,.08);
+}
+
+.payment-choice b{
+  vertical-align:middle;
+}
+
+.payment-choice .mini-help{
+  margin-left:25px !important;
+  margin-top:3px;
+}
+
+.slot-row{
+  width:100%;
+  background:#fff;
+}
+
+.slot-row input{
+  flex:0 0 auto;
+}
+
+.pickup-note{
+  margin-top:7px;
+  color:#777;
+  font-size:12px;
+}
+
+.confirm-card{
+  margin-bottom:10px;
+}
+
+.confirm-actions{
+  display:grid;
+  gap:8px;
+  margin-top:10px;
+}
+
+.confirm-primary{
+  width:100%;
+  padding:13px;
+  font-size:16px;
+}
+
+.confirm-secondary{
+  width:100%;
+  margin-top:0;
+}
+
+@media (max-width: 420px){
+  .cart-item-head{
+    gap:8px;
+  }
+
+  .cart-item-name{
+    font-size:15px;
+  }
+
+  .payment-choice{
+    padding:11px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -255,105 +407,451 @@ function addToCart(){
 }
 
 function openCart(){
-  if(!cart.length){showToast("🛒 ยังไม่มีอาหารในตะกร้า");return;}
+
+  if(!cart.length){
+
+    showToast(
+      "🛒 ยังไม่มีอาหารในตะกร้า"
+    );
+
+    return;
+
+  }
+
 
   let html = `
+
     <div class="header">
-      <h1>🛒 ตะกร้าและยืนยันออเดอร์</h1>
-      <p>ตรวจสอบรายการ แล้วเลือกเวลารับและวิธีชำระเงิน</p>
+      <h1>🛒 ตรวจสอบออเดอร์</h1>
+      <p>ตรวจสอบรายการก่อนยืนยัน</p>
     </div>
+
     <div class="container">
 
-      <div class="card">
-        <div class="section" style="margin-top:0">
-          <h2>🍱 รายการอาหาร</h2>
-          <small>${cartCount()} รายการ</small>
+      <div class="card confirm-card">
+
+        <div class="section-title">
+          🍱 รายการอาหาร
         </div>
+
   `;
 
-  cart.forEach((item,index)=>{
-    const optTotal=(item.options||[]).reduce((s,o)=>s+Number(o.price||0),0);
-    const itemTotal=(Number(item.price)+optTotal)*Number(item.qty);
 
-    html += `
-      <div style="border-bottom:1px solid #eee;padding:11px 0">
-        <div style="display:flex;justify-content:space-between;gap:10px">
-          <b>${escapeHtml(item.name)}</b>
-          <b>${itemTotal.toLocaleString("th-TH")} บาท</b>
+  cart.forEach(
+    function(item,index){
+
+      const optTotal =
+        (item.options || [])
+          .reduce(
+            function(sum,option){
+              return sum +
+                Number(
+                  option.price || 0
+                );
+            },
+            0
+          );
+
+
+      const itemTotal =
+        (
+          Number(
+            item.price || 0
+          ) +
+          optTotal
+        ) *
+        Number(
+          item.qty || 1
+        );
+
+
+      html += `
+
+        <div class="cart-item">
+
+          <div class="cart-item-head">
+
+            <div class="cart-item-name">
+              ${escapeHtml(item.name)}
+            </div>
+
+            <div class="cart-item-price">
+              ${itemTotal.toLocaleString("th-TH")} บาท
+            </div>
+
+          </div>
+
+          <div class="cart-item-meta">
+            จำนวน ${Number(item.qty || 1)}
+            ${
+              item.options &&
+              item.options.length
+                ? " • " +
+                  item.options
+                    .map(
+                      function(option){
+                        return escapeHtml(
+                          option.name
+                        );
+                      }
+                    )
+                    .join(", ")
+                : ""
+            }
+          </div>
+
+          ${
+            item.remark
+              ? `
+                <div class="cart-item-meta">
+                  📝 ${escapeHtml(item.remark)}
+                </div>
+              `
+              : ""
+          }
+
+          <div class="cart-item-actions">
+
+            <button
+              type="button"
+              class="cart-remove-btn"
+              onclick="
+                removeCartItem(${index});
+                return false;
+              "
+            >
+              🗑️ ลบ
+            </button>
+
+          </div>
+
         </div>
-        <div class="mini-help">
-          จำนวน ${item.qty}
-          ${item.options?.length ? " • "+item.options.map(o=>escapeHtml(o.name)).join(", ") : ""}
-        </div>
-        ${item.remark ? `<div class="mini-help">📝 ${escapeHtml(item.remark)}</div>` : ""}
-        <button class="btn-outline" style="margin-top:7px" onclick="removeCartItem(${index})">ลบ</button>
-      </div>`;
-  });
+
+      `;
+
+    }
+  );
+
 
   html += `
-      <div class="summary-total" style="display:flex;justify-content:space-between">
-        <span>รวม</span>
-        <span>${cartTotal().toLocaleString("th-TH")} บาท</span>
-      </div>
+
+        <div
+          class="summary-total"
+          style="
+            display:flex;
+            justify-content:space-between;
+            gap:10px;
+          "
+        >
+          <span>รวม</span>
+          <span>
+            ${cartTotal().toLocaleString("th-TH")} บาท
+          </span>
+        </div>
+
       </div>
 
-      <div class="card">
-        <div class="section-title">🕐 เวลารับอาหาร</div>
+
+      <div class="card confirm-card">
+
+        <div class="section-title">
+          🕐 เวลารับอาหาร
+        </div>
 
         <label class="slot-row">
-          <input type="radio" name="pickupType" value="NOW" checked onchange="togglePickupMode()">
-          <span><b>รับเร็วที่สุด</b><br><small>รับตอนนี้</small></span>
+
+          <input
+            type="radio"
+            name="pickupType"
+            value="NOW"
+            checked
+            onchange="togglePickupMode()"
+          >
+
+          <span>
+            <b>รับเร็วที่สุด</b><br>
+            <small>รับตอนนี้</small>
+          </span>
+
         </label>
+
 
         <label class="slot-row">
-          <input type="radio" name="pickupType" value="SCHEDULED" onchange="togglePickupMode()">
-          <span><b>เลือกช่วงเวลา</b><br><small>จองเวลาไว้ล่วงหน้า</small></span>
+
+          <input
+            type="radio"
+            name="pickupType"
+            value="SCHEDULED"
+            onchange="togglePickupMode()"
+          >
+
+          <span>
+            <b>เลือกช่วงเวลา</b><br>
+            <small>จองเวลาไว้ล่วงหน้า</small>
+          </span>
+
         </label>
 
-        <div id="slotBox" style="display:none">
+
+        <div
+          id="slotBox"
+          style="display:none"
+        >
           ${renderSlots()}
         </div>
+
+        <div class="pickup-note">
+          📌 คิวที่รอ = ออเดอร์ใหม่ + กำลังทำ
+        </div>
+
       </div>
 
-      <div class="card">
-        <div class="section-title">👤 ข้อมูลผู้สั่ง</div>
-        <input id="customerName" class="field" placeholder="ชื่อผู้สั่ง">
-        <textarea id="customerRemark" class="field" rows="3" placeholder="หมายเหตุถึงร้าน เช่น มารับแทน / ขอช้อน"></textarea>
+
+      <div class="card confirm-card">
+
+        <div class="section-title">
+          👤 ข้อมูลผู้สั่ง
+        </div>
+
+
+        <input
+          id="customerName"
+          class="field"
+          placeholder="ชื่อผู้สั่ง"
+        >
+
+
+        <textarea
+          id="customerRemark"
+          class="field"
+          rows="3"
+          placeholder="หมายเหตุถึงร้าน เช่น มารับแทน / ขอช้อน"
+        ></textarea>
+
       </div>
 
-      <div class="card">
-        <div class="section-title">💳 วิธีชำระเงิน</div>
+
+      <div class="card confirm-card">
+
+        <div class="section-title">
+          💳 วิธีชำระเงิน
+        </div>
+
         ${renderPayments()}
+
         <div id="qrBox"></div>
+
       </div>
 
-      <button class="btn-green" style="width:100%;padding:13px" onclick="submitOrderV3()">✅ ยืนยันออเดอร์</button>
-      <button class="btn-outline" style="width:100%;margin-top:8px" onclick="renderMenu()">← กลับไปเลือกเมนู</button>
+
+      <div class="confirm-actions">
+
+        <button
+          type="button"
+          class="btn-green confirm-primary"
+          onclick="submitOrderV3()"
+        >
+          ✅ ยืนยันออเดอร์
+        </button>
+
+        <button
+          type="button"
+          class="btn-outline confirm-secondary"
+          onclick="renderMenu()"
+        >
+          ← กลับไปเลือกเมนู
+        </button>
+
+      </div>
 
     </div>
+
   `;
 
-  document.getElementById("app").innerHTML=html;
+
+  document.getElementById(
+    "app"
+  ).innerHTML = html;
+
+
   togglePaymentQR();
+
 }
 
+
 function renderSlots(){
-  if(!Array.isArray(DATA.slots)||!DATA.slots.length)return '<div class="mini-help" style="margin-top:8px">ไม่มีช่วงเวลาที่เปิดรับ</div>';
+  if(!Array.isArray(DATA.slots)||!DATA.slots.length){
+    return '<div class="mini-help" style="margin-top:8px">ไม่มีช่วงเวลาที่เปิดรับ</div>';
+  }
+
   return '<div class="slot-list">'+DATA.slots.map(s=>{
     const full=Number(s.remaining||0)<=0;
-    return '<label class="slot-row '+(full?'full':'')+'"><input type="radio" name="pickupSlot" value="'+escapeHtml(s.id)+'" '+(full?'disabled':'')+'><span><b>'+escapeHtml(s.start)+' - '+escapeHtml(s.end)+'</b><br><small>'+(full?'เต็มแล้ว':'เหลือ '+Number(s.remaining)+' คิว')+'</small></span></label>';
-  }).join("")+'</div>';
+    const waiting=Number(
+      s.waitingCount ??
+      s.waiting ??
+      0
+    );
+
+    return '<label class="slot-row '+(full?'full':'')+'">'+
+      '<input type="radio" name="pickupSlot" value="'+escapeHtml(s.id)+'" '+(full?'disabled':'')+'>'+
+      '<span><b>'+escapeHtml(s.start)+' - '+escapeHtml(s.end)+'</b><br>'+
+      '<small>'+(full?'ช่วงนี้เต็มแล้ว':'กำลังรอ '+waiting+' คิว')+'</small></span>'+
+      '</label>';
+  }).join('')+'</div>';
 }
+
 function togglePickupMode(){const type=document.querySelector('input[name=pickupType]:checked')?.value;const box=document.getElementById("slotBox");if(box)box.style.display=type==="SCHEDULED"?"block":"none";}
 
 function renderPayments(){
-  const p=DATA.payment||{},methods=[];
-  if(p.cashActive)methods.push({value:"CASH",title:"💵 เงินสด",note:"จ่ายเงินตอนรับอาหาร"});
-  if(p.promptPayActive)methods.push({value:"QR",title:"📱 PromptPay",note:p.promptPayName||"ชำระด้วย QR พร้อมเพย์"});
-  if(p.governmentActive)methods.push({value:"GOVERNMENT",title:"🏛️ "+(p.governmentName||"โครงการรัฐ / ถุงเงิน"),note:p.governmentNote||"ชำระผ่านร้าน"});
-  if(!methods.length)return '<div class="mini-help">ยังไม่มีช่องทางชำระเงินที่เปิดใช้งาน</div>';
-  return methods.map((m,i)=>'<label class="payment-choice '+(i===0?"active":"")+'" onclick="selectPaymentVisual(this)"><input type="radio" name="payment" value="'+m.value+'" '+(i===0?"checked":"")+' onchange="togglePaymentQR()"><b>'+escapeHtml(m.title)+'</b><div class="mini-help" style="margin-left:24px">'+escapeHtml(m.note)+'</div></label>').join("");
+
+  const payment =
+    DATA.payment || {};
+
+  const methods = [];
+
+
+  if(
+    payment.cashActive
+  ){
+
+    methods.push({
+
+      value:
+        "CASH",
+
+      title:
+        "💵 เงินสด",
+
+      note:
+        "จ่ายเงินตอนรับอาหาร"
+
+    });
+
+  }
+
+
+  if(
+    payment.promptPayActive
+  ){
+
+    methods.push({
+
+      value:
+        "QR",
+
+      title:
+        "📱 PromptPay",
+
+      note:
+        payment.promptPayName ||
+        "ชำระด้วย QR พร้อมเพย์"
+
+    });
+
+  }
+
+
+  if(
+    payment.governmentActive
+  ){
+
+    methods.push({
+
+      value:
+        "GOVERNMENT",
+
+      title:
+        "🏛️ " +
+        (
+          payment.governmentName ||
+          "โครงการรัฐ / ถุงเงิน"
+        ),
+
+      note:
+        payment.governmentNote ||
+        "ชำระผ่านร้าน"
+
+    });
+
+  }
+
+
+  if(
+    !methods.length
+  ){
+
+    return `
+      <div class="mini-help">
+        ยังไม่มีช่องทางชำระเงินที่เปิดใช้งาน
+      </div>
+    `;
+
+  }
+
+
+  return methods
+    .map(
+      function(method,index){
+
+        const checked =
+          index === 0;
+
+
+        return `
+
+          <label
+            class="payment-choice ${
+              checked
+                ? "active"
+                : ""
+            }"
+            onclick="
+              selectPaymentVisual(this)
+            "
+          >
+
+            <div>
+
+              <input
+                type="radio"
+                name="payment"
+                value="${method.value}"
+                ${
+                  checked
+                    ? "checked"
+                    : ""
+                }
+                onchange="
+                  togglePaymentQR()
+                "
+              >
+
+              <b>
+                ${escapeHtml(
+                  method.title
+                )}
+              </b>
+
+            </div>
+
+
+            <div class="mini-help">
+              ${escapeHtml(
+                method.note
+              )}
+            </div>
+
+          </label>
+
+        `;
+
+      }
+    )
+    .join("");
+
 }
+
+
 function selectPaymentVisual(el){document.querySelectorAll(".payment-choice").forEach(x=>x.classList.remove("active"));el.classList.add("active");togglePaymentQR();}
 function togglePaymentQR(){
   const box=document.getElementById("qrBox"),pay=document.querySelector('input[name=payment]:checked');
@@ -372,7 +870,53 @@ function openQr(){
   if(!win){showToast("Browser ไม่อนุญาตให้เปิด QR");return;}
   win.document.write('<html><head><title>QR พร้อมเพย์</title></head><body style="margin:0;padding:20px;text-align:center;background:#f5f5f5;font-family:Arial,sans-serif"><p>กดค้างที่ QR แล้วเลือกบันทึกรูปภาพ</p><img src="'+data+'" style="width:100%;max-width:500px;height:auto"></body></html>');win.document.close();
 }
-function removeCartItem(index){cart.splice(index,1);openCart();}
+function removeCartItem(index){
+
+  const target =
+    Number(index);
+
+
+  if(
+    !Number.isInteger(target) ||
+    target < 0 ||
+    target >= cart.length
+  ){
+
+    return;
+
+  }
+
+
+  cart.splice(
+    target,
+    1
+  );
+
+
+  if(
+    cart.length === 0
+  ){
+
+    renderMenu();
+
+    showToast(
+      "🛒 ลบรายการแล้ว"
+    );
+
+    return;
+
+  }
+
+
+  openCart();
+
+
+  showToast(
+    "🗑️ ลบรายการแล้ว"
+  );
+
+}
+
 
 async function submitOrderV3(){
   try{
