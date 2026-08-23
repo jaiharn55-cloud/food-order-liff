@@ -68,8 +68,56 @@ window.addEventListener("load",startApp);
 async function startApp(){
   try{
     await liff.init({liffId:LIFF_ID});
+
+    /*
+     * LIFF Login
+     * - ถ้าเปิดจาก LINE และได้ Session แล้ว ใช้ต่อได้ทันที
+     * - ถ้ายังไม่มี LIFF login ให้เริ่ม login อัตโนมัติ
+     *   แทนการปล่อยให้ไปเจอ error ตอนกดยืนยันออเดอร์
+     */
+    if (!liff.isLoggedIn()) {
+
+      if (liff.isInClient()) {
+        /*
+         * ใน LINE App ให้ลอง getProfile ก่อน
+         * บางกรณี isLoggedIn() ยังไม่อัปเดตทันที
+         */
+        try {
+          await liff.getProfile();
+        } catch (profileError) {
+          throw new Error(
+            'ไม่สามารถอ่านข้อมูล LINE ได้ กรุณาปิดหน้านี้แล้วเปิดร้านจาก LINE ใหม่'
+          );
+        }
+
+      } else {
+
+        const redirectUri =
+          window.location.href;
+
+        liff.login({
+          redirectUri: redirectUri
+        });
+
+        return;
+      }
+    }
+
+    /*
+     * ตรวจ profile ตั้งแต่ตอนเปิดหน้า
+     * เพื่อไม่ให้รอจนกด "ยืนยันออเดอร์"
+     */
+    if (liff.isLoggedIn()) {
+      await liff.getProfile();
+    }
+
     await loadData();
-  }catch(error){showError(error.message||String(error));}
+
+  }catch(error){
+    showError(
+      error.message || String(error)
+    );
+  }
 }
 
 async function loadData(){
@@ -342,11 +390,61 @@ async function submitOrderV3(){
     if(!customerName)throw new Error("กรุณาใส่ชื่อผู้สั่ง");
 
     let userId="";
-    if(typeof liff!=="undefined"&&liff.isLoggedIn()){
-      const profile=await liff.getProfile();
-      userId=profile.userId||"";
+
+    if (
+      typeof liff !== "undefined"
+    ) {
+
+      /*
+       * ใช้ profile ที่มาจาก LIFF
+       * ไม่พึ่งแค่ isLoggedIn() อย่างเดียว
+       */
+      try {
+
+        const profile =
+          await liff.getProfile();
+
+        userId =
+          profile &&
+          profile.userId
+            ? profile.userId
+            : "";
+
+      } catch (profileError) {
+
+        /*
+         * กรณี LIFF ยังไม่ login และอยู่นอก LINE
+         * ให้เริ่ม login ใหม่
+         */
+        if (
+          !liff.isLoggedIn() &&
+          !liff.isInClient()
+        ) {
+
+          liff.login({
+            redirectUri:
+              window.location.href
+          });
+
+          return;
+
+        }
+
+        throw new Error(
+          "ไม่พบข้อมูล LINE User กรุณาเปิดหน้านี้จาก LINE ใหม่"
+        );
+
+      }
+
     }
-    if(!userId)throw new Error("กรุณาเปิดหน้านี้ผ่าน LINE ใหม่");
+
+    if (!userId) {
+
+      throw new Error(
+        "ไม่พบข้อมูล LINE User กรุณาเปิดหน้านี้จาก LINE ใหม่"
+      );
+
+    }
 
     showLoading("กำลังส่งออเดอร์...");
 
