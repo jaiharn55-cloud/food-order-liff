@@ -205,6 +205,32 @@
       margin-top:6px;
       font-weight:700;
     }
+
+    .cart-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 92px;
+      transform: translateX(-50%) translateY(16px);
+      z-index: 9999;
+      max-width: calc(100vw - 32px);
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: rgba(20,20,20,.94);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 8px 26px rgba(0,0,0,.25);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+
+    .cart-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
   </style>
 
 </head>
@@ -1169,8 +1195,8 @@
     });
 
 
-    alert(
-      'เพิ่ม ' +
+    showCartToast_(
+      '✅ เพิ่ม ' +
       menu.name +
       ' ลงตะกร้าแล้ว'
     );
@@ -2803,6 +2829,61 @@ showOrderSuccess(
 
 }
   
+
+  let cartToastTimer_ = null;
+
+  function showCartToast_(message) {
+
+    let toast =
+      document.getElementById(
+        'cartToast'
+      );
+
+    if (!toast) {
+
+      toast =
+        document.createElement(
+          'div'
+        );
+
+      toast.id =
+        'cartToast';
+
+      toast.className =
+        'cart-toast';
+
+      document.body.appendChild(
+        toast
+      );
+
+    }
+
+    toast.textContent =
+      String(message || '');
+
+    toast.classList.add(
+      'show'
+    );
+
+    if (cartToastTimer_) {
+      clearTimeout(
+        cartToastTimer_
+      );
+    }
+
+    cartToastTimer_ =
+      setTimeout(
+        function() {
+          toast.classList.remove(
+            'show'
+          );
+        },
+        1800
+      );
+
+  }
+
+
   function removeItem(index) {
 
     cart.splice(
