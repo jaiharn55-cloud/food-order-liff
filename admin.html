@@ -964,6 +964,106 @@
       }
     }
 
+
+    .admin-menu-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .admin-menu-item {
+      display: grid;
+      grid-template-columns: 58px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 9px;
+      border: 1px solid #e6e6e6;
+      border-radius: 11px;
+      background: #fafafa;
+    }
+
+    .admin-menu-thumb {
+      width: 58px;
+      height: 58px;
+      object-fit: cover;
+      border-radius: 9px;
+      background: #eee;
+    }
+
+    .admin-menu-name {
+      font-weight: 800;
+    }
+
+    .admin-menu-meta {
+      color: #777;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+
+    .admin-menu-status {
+      font-size: 12px;
+      font-weight: 800;
+      margin-top: 3px;
+    }
+
+    .admin-menu-status.available {
+      color: #087a37;
+    }
+
+    .admin-menu-status.soldout {
+      color: #b00020;
+    }
+
+    .admin-menu-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: flex-end;
+    }
+
+    .menu-editor {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #f7f7f7;
+      border: 1px dashed #ddd;
+    }
+
+    .menu-image-preview {
+      width: 140px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .settings-qr-preview {
+      width: 190px;
+      height: 190px;
+      object-fit: contain;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background: white;
+      padding: 5px;
+    }
+
+    @media (max-width: 650px) {
+      .admin-menu-item {
+        grid-template-columns: 54px 1fr;
+      }
+
+      .admin-menu-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+
+      .admin-menu-thumb {
+        width: 54px;
+        height: 54px;
+      }
+    }
+
   </style>
 
 </head>
@@ -1045,6 +1145,7 @@
 
 
 
+
   <div
     id="settingsBackdrop"
     class="settings-backdrop"
@@ -1054,18 +1155,8 @@
     <div class="settings-panel">
 
       <div class="settings-head">
-
-        <div class="settings-head-title">
-          ⚙️ ตั้งค่าร้าน
-        </div>
-
-        <button
-          class="settings-close"
-          onclick="closeSettings()"
-        >
-          ×
-        </button>
-
+        <div class="settings-head-title">⚙️ ตั้งค่าร้าน</div>
+        <button class="settings-close" onclick="closeSettings()">×</button>
       </div>
 
       <div class="settings-body">
@@ -1077,23 +1168,101 @@
           </div>
 
           <div class="settings-note">
-            เพิ่ม/แก้ไขเมนู ราคา รูปอาหาร และเปิด/ปิดขาย
+            เพิ่ม แก้ไขรูป/ราคา และปิดขายชั่วคราวได้ทันที
+          </div>
+
+          <div id="adminMenuList" class="admin-menu-list">
+            <div class="settings-note">
+              กำลังโหลดเมนู...
+            </div>
           </div>
 
           <div class="settings-actions">
             <button
               class="settings-action blue"
-              onclick="addMenuPlaceholder()"
+              onclick="openAddMenuForm()"
             >
               ➕ เพิ่มเมนู
             </button>
           </div>
 
-          <div class="settings-note">
-            🔴 ปิดขาย = ของหมดชั่วคราว โดยไม่ลบเมนูและไม่กระทบออเดอร์เก่า
+          <div
+            id="menuEditor"
+            class="menu-editor"
+            style="display:none"
+          >
+
+            <div class="settings-section-title">
+              ✏️ <span id="menuEditorTitle">เพิ่มเมนู</span>
+            </div>
+
+            <input id="menuEditorId" type="hidden">
+
+            <div class="settings-field">
+              <label>ชื่อเมนู</label>
+              <input id="menuEditorName" placeholder="เช่น กะเพราไก่">
+            </div>
+
+            <div class="settings-field">
+              <label>ราคา</label>
+              <input
+                id="menuEditorPrice"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="50"
+              >
+            </div>
+
+            <div class="settings-field">
+              <label>หมวดหมู่</label>
+              <input id="menuEditorCategory" placeholder="เช่น อาหารจานเดียว">
+            </div>
+
+            <div class="settings-field">
+              <label>รายละเอียด</label>
+              <input id="menuEditorDescription" placeholder="รายละเอียดเมนู">
+            </div>
+
+            <div class="settings-field">
+              <label>รูปอาหาร</label>
+              <input
+                id="menuEditorImageFile"
+                type="file"
+                accept="image/*"
+                onchange="previewMenuImage(event)"
+              >
+              <div class="settings-note">
+                เลือกรูปจากมือถือ/แท็บเล็ตได้ ระบบจะย่อรูปก่อนส่ง
+              </div>
+              <img
+                id="menuEditorImagePreview"
+                class="menu-image-preview"
+                style="display:none"
+                alt="รูปอาหาร"
+              >
+            </div>
+
+            <div class="settings-actions">
+              <button
+                class="settings-action blue"
+                onclick="saveMenuFromEditor()"
+              >
+                💾 บันทึกเมนู
+              </button>
+
+              <button
+                class="settings-action"
+                onclick="closeMenuEditor()"
+              >
+                ยกเลิก
+              </button>
+            </div>
+
           </div>
 
         </div>
+
 
         <div class="settings-section">
 
@@ -1106,10 +1275,11 @@
               <div class="settings-row-title">💵 เงินสด</div>
               <div class="settings-row-note">รับเงินสดที่หน้าร้าน</div>
             </div>
+
             <button
               id="cashSettingBtn"
               class="settings-toggle on"
-              onclick="toggleSettingPlaceholder('cash')"
+              onclick="togglePaymentSettingLocal('cashActive')"
             >
               🟢 เปิด
             </button>
@@ -1120,10 +1290,11 @@
               <div class="settings-row-title">📱 PromptPay</div>
               <div class="settings-row-note">QR PromptPay</div>
             </div>
+
             <button
               id="promptpaySettingBtn"
               class="settings-toggle on"
-              onclick="toggleSettingPlaceholder('promptpay')"
+              onclick="togglePaymentSettingLocal('promptPayActive')"
             >
               🟢 เปิด
             </button>
@@ -1134,10 +1305,11 @@
               <div class="settings-row-title">🏛️ โครงการรัฐ / ถุงเงิน</div>
               <div class="settings-row-note">เปิดเมื่อร้านรับชำระผ่านถุงเงิน</div>
             </div>
+
             <button
               id="governmentSettingBtn"
               class="settings-toggle off"
-              onclick="toggleSettingPlaceholder('government')"
+              onclick="togglePaymentSettingLocal('governmentActive')"
             >
               🔴 ปิด
             </button>
@@ -1145,28 +1317,59 @@
 
           <div class="settings-field">
             <label>ชื่อบัญชี PromptPay</label>
+            <input id="promptpayNameSetting">
+          </div>
+
+          <div class="settings-field">
+            <label>เบอร์ / เลข PromptPay</label>
+            <input id="promptpayNumberSetting" inputmode="numeric">
+          </div>
+
+          <div class="settings-field">
+            <label>QR ปัจจุบัน</label>
+            <img
+              id="settingsQrPreview"
+              class="settings-qr-preview"
+              style="display:none"
+              alt="QR PromptPay"
+            >
+          </div>
+
+          <div class="settings-field">
+            <label>เปลี่ยน QR</label>
             <input
-              id="promptpayNameSetting"
-              value="ร้านข้าวแกง ตามสั่ง"
-              readonly
+              id="qrImageFile"
+              type="file"
+              accept="image/*"
+            >
+            <div class="settings-note">
+              เลือกรูป QR ใหม่จากเครื่อง ระบบจะอัปโหลดเข้า Google Drive
+            </div>
+          </div>
+
+          <div class="settings-field">
+            <label>หรือใส่ลิงก์ QR จาก Google Drive</label>
+            <input
+              id="promptpayQrUrlSetting"
+              placeholder="https://drive.google.com/..."
             >
           </div>
 
           <div class="settings-actions">
             <button
               class="settings-action blue"
-              onclick="changeQrPlaceholder()"
+              onclick="savePaymentSettingsFromUI()"
             >
-              📷 เปลี่ยน QR
+              💾 บันทึกการชำระเงิน
             </button>
           </div>
 
           <div class="settings-note">
-            รอบนี้ยังไม่เขียนทับ Script Properties จนกว่าจะตรวจชื่อ Setting จริง
-            เพื่อป้องกัน QR/Payment เดิมเสีย
+            การเปลี่ยน QR จะใช้กับหน้าชำระเงินหลังบันทึกสำเร็จ
           </div>
 
         </div>
+
 
         <div class="settings-section">
 
@@ -1178,7 +1381,7 @@
             <div>
               <div class="settings-row-title">🗣️ เสียงแจ้งเตือน</div>
               <div class="settings-row-note">
-                มีออเดอร์ใหม่ → พูดเลขที่ออเดอร์
+                ใช้เสียงคนพูดตามระบบเดิม
               </div>
             </div>
 
@@ -1220,7 +1423,7 @@
         </div>
 
         <div class="version-note">
-          ระบบแนบสลิปและตรวจสอบสลิป จะทำใน Version ถัดไป
+          ระบบแนบสลิป/ตรวจสลิป ค่อยทำใน Version ถัดไป
         </div>
 
       </div>
@@ -2638,6 +2841,13 @@
      * SETTINGS / SOUND / WAKE LOCK
      * ===================================== */
 
+
+    /* =====================================
+     * SETTINGS / MENU / PAYMENT / WAKE
+     * ===================================== */
+
+    let adminSettingsData_ = null;
+    let menuEditorImageDataUrl_ = '';
     let soundNotificationsEnabled =
       localStorage.getItem(
         'adminSoundNotifications'
@@ -2651,7 +2861,7 @@
     let wakeLockSentinel = null;
 
 
-    function openSettings() {
+    async function openSettings() {
 
       const modal =
         document.getElementById(
@@ -2662,7 +2872,7 @@
         modal.classList.add('show');
       }
 
-      updateSettingsButtons_();
+      await loadAdminSettings_();
 
     }
 
@@ -2694,6 +2904,1129 @@
     }
 
 
+    async function apiPost_(payload) {
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'text/plain;charset=utf-8'
+            },
+            body:
+              JSON.stringify(
+                payload
+              )
+          }
+        );
+
+      const result =
+        await response.json();
+
+      if (
+        !result.success
+      ) {
+
+        throw new Error(
+          result.error ||
+          'บันทึกไม่สำเร็จ'
+        );
+
+      }
+
+      return result;
+
+    }
+
+
+    async function loadAdminSettings_() {
+
+      const list =
+        document.getElementById(
+          'adminMenuList'
+        );
+
+      if (list) {
+
+        list.innerHTML =
+          '<div class="settings-note">กำลังโหลดเมนู...</div>';
+
+      }
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL +
+            '?action=getAdminSettings'
+          );
+
+        const result =
+          await response.json();
+
+        if (
+          !result.success
+        ) {
+
+          throw new Error(
+            result.error ||
+            'โหลดการตั้งค่าไม่สำเร็จ'
+          );
+
+        }
+
+        adminSettingsData_ =
+          result;
+
+        renderAdminMenus_();
+
+        fillPaymentSettings_();
+
+      } catch (error) {
+
+        console.error(
+          'ADMIN SETTINGS ERROR:',
+          error
+        );
+
+        if (list) {
+
+          list.innerHTML =
+            '<div class="settings-note" style="color:#b00020">' +
+            escapeHtml(
+              error.message ||
+              String(error)
+            ) +
+            '</div>';
+
+        }
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    function renderAdminMenus_() {
+
+      const list =
+        document.getElementById(
+          'adminMenuList'
+        );
+
+      if (!list) return;
+
+      const menus =
+        adminSettingsData_ &&
+        Array.isArray(
+          adminSettingsData_.menus
+        )
+          ? adminSettingsData_.menus
+          : [];
+
+      if (!menus.length) {
+
+        list.innerHTML =
+          '<div class="settings-note">ยังไม่มีเมนู</div>';
+
+        return;
+
+      }
+
+      list.innerHTML =
+        menus.map(
+          function(menu) {
+
+            const image =
+              menu.image ||
+              '';
+
+            const thumb =
+              image
+                ? '<img class="admin-menu-thumb" src="' +
+                  escapeHtml(
+                    image
+                  ) +
+                  '" alt="">'
+                : '<div class="admin-menu-thumb"></div>';
+
+            return `
+              <div class="admin-menu-item">
+
+                ${thumb}
+
+                <div>
+
+                  <div class="admin-menu-name">
+                    ${escapeHtml(
+                      menu.name
+                    )}
+                  </div>
+
+                  <div class="admin-menu-meta">
+                    ${Number(
+                      menu.price || 0
+                    )} บาท
+                    ${menu.category
+                      ? ' · ' +
+                        escapeHtml(
+                          menu.category
+                        )
+                      : ''}
+                  </div>
+
+                  <div class="admin-menu-status ${
+                    menu.available
+                      ? 'available'
+                      : 'soldout'
+                  }">
+                    ${
+                      menu.available
+                        ? '🟢 กำลังขาย'
+                        : '🔴 ปิดขาย / ของหมด'
+                    }
+                  </div>
+
+                </div>
+
+                <div class="admin-menu-actions">
+
+                  <button
+                    class="settings-action"
+                    onclick="editMenu('${escapeJs(menu.id)}')"
+                  >
+                    ✏️ แก้ไข
+                  </button>
+
+                  <button
+                    class="settings-action ${
+                      menu.available
+                        ? ''
+                        : 'blue'
+                    }"
+                    onclick="toggleMenuAvailable_(
+                      '${escapeJs(menu.id)}',
+                      ${menu.available ? 'false' : 'true'}
+                    )"
+                  >
+                    ${
+                      menu.available
+                        ? '🔴 ปิดขาย'
+                        : '🟢 เปิดขาย'
+                    }
+                  </button>
+
+                </div>
+
+              </div>
+            `;
+
+          }
+        )
+        .join('');
+
+    }
+
+
+    function openAddMenuForm() {
+
+      const editor =
+        document.getElementById(
+          'menuEditor'
+        );
+
+      document.getElementById(
+        'menuEditorTitle'
+      ).textContent =
+        'เพิ่มเมนู';
+
+      document.getElementById(
+        'menuEditorId'
+      ).value = '';
+
+      document.getElementById(
+        'menuEditorName'
+      ).value = '';
+
+      document.getElementById(
+        'menuEditorPrice'
+      ).value = '';
+
+      document.getElementById(
+        'menuEditorCategory'
+      ).value = '';
+
+      document.getElementById(
+        'menuEditorDescription'
+      ).value = '';
+
+      document.getElementById(
+        'menuEditorImageFile'
+      ).value = '';
+
+      document.getElementById(
+        'menuEditorImagePreview'
+      ).style.display =
+        'none';
+
+      menuEditorImageDataUrl_ =
+        '';
+
+      editor.style.display =
+        'block';
+
+      editor.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
+
+    }
+
+
+    function editMenu(
+      menuId
+    ) {
+
+      const menus =
+        adminSettingsData_ &&
+        adminSettingsData_.menus
+          ? adminSettingsData_.menus
+          : [];
+
+      const menu =
+        menus.find(
+          function(item) {
+            return String(
+              item.id
+            ) ===
+            String(
+              menuId
+            );
+          }
+        );
+
+      if (!menu) {
+        alert('ไม่พบเมนู');
+        return;
+      }
+
+      document.getElementById(
+        'menuEditorTitle'
+      ).textContent =
+        'แก้ไข ' +
+        menu.name;
+
+      document.getElementById(
+        'menuEditorId'
+      ).value =
+        menu.id;
+
+      document.getElementById(
+        'menuEditorName'
+      ).value =
+        menu.name || '';
+
+      document.getElementById(
+        'menuEditorPrice'
+      ).value =
+        menu.price || 0;
+
+      document.getElementById(
+        'menuEditorCategory'
+      ).value =
+        menu.category || '';
+
+      document.getElementById(
+        'menuEditorDescription'
+      ).value =
+        menu.description || '';
+
+      document.getElementById(
+        'menuEditorImageFile'
+      ).value =
+        '';
+
+      menuEditorImageDataUrl_ =
+        '';
+
+      const preview =
+        document.getElementById(
+          'menuEditorImagePreview'
+        );
+
+      if (menu.image) {
+
+        preview.src =
+          menu.image;
+
+        preview.style.display =
+          'block';
+
+      } else {
+
+        preview.style.display =
+          'none';
+
+      }
+
+      document.getElementById(
+        'menuEditor'
+      ).style.display =
+        'block';
+
+    }
+
+
+    function closeMenuEditor() {
+
+      document.getElementById(
+        'menuEditor'
+      ).style.display =
+        'none';
+
+      menuEditorImageDataUrl_ =
+        '';
+
+    }
+
+
+    function resizeImageFile_(
+      file
+    ) {
+
+      return new Promise(
+        function(resolve, reject) {
+
+          const reader =
+            new FileReader();
+
+          reader.onload =
+            function() {
+
+              const img =
+                new Image();
+
+              img.onload =
+                function() {
+
+                  const max =
+                    1000;
+
+                  const scale =
+                    Math.min(
+                      1,
+                      max /
+                      Math.max(
+                        img.width,
+                        img.height
+                      )
+                    );
+
+                  const canvas =
+                    document.createElement(
+                      'canvas'
+                    );
+
+                  canvas.width =
+                    Math.max(
+                      1,
+                      Math.round(
+                        img.width *
+                        scale
+                      )
+                    );
+
+                  canvas.height =
+                    Math.max(
+                      1,
+                      Math.round(
+                        img.height *
+                        scale
+                      )
+                    );
+
+                  const ctx =
+                    canvas.getContext(
+                      '2d'
+                    );
+
+                  ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                  );
+
+                  resolve(
+                    canvas.toDataURL(
+                      'image/jpeg',
+                      0.82
+                    )
+                  );
+
+                };
+
+              img.onerror =
+                reject;
+
+              img.src =
+                reader.result;
+
+            };
+
+          reader.onerror =
+            reject;
+
+          reader.readAsDataURL(
+            file
+          );
+
+        }
+      );
+
+    }
+
+
+    async function previewMenuImage(
+      event
+    ) {
+
+      const file =
+        event.target.files &&
+        event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      try {
+
+        menuEditorImageDataUrl_ =
+          await resizeImageFile_(
+            file
+          );
+
+        const preview =
+          document.getElementById(
+            'menuEditorImagePreview'
+          );
+
+        preview.src =
+          menuEditorImageDataUrl_;
+
+        preview.style.display =
+          'block';
+
+      } catch (error) {
+
+        alert(
+          'อ่านรูปไม่สำเร็จ'
+        );
+
+      }
+
+    }
+
+
+    async function uploadAdminImage_(
+      dataUrl,
+      fileName
+    ) {
+
+      const result =
+        await apiPost_({
+          action:
+            'uploadAdminImage',
+
+          image: {
+            dataUrl:
+              dataUrl,
+
+            fileName:
+              fileName
+          }
+
+        });
+
+      return result.url;
+
+    }
+
+
+    async function saveMenuFromEditor() {
+
+      const id =
+        document.getElementById(
+          'menuEditorId'
+        ).value.trim();
+
+      const name =
+        document.getElementById(
+          'menuEditorName'
+        ).value.trim();
+
+      const price =
+        Number(
+          document.getElementById(
+            'menuEditorPrice'
+          ).value
+        );
+
+      const category =
+        document.getElementById(
+          'menuEditorCategory'
+        ).value.trim();
+
+      const description =
+        document.getElementById(
+          'menuEditorDescription'
+        ).value.trim();
+
+      if (!name) {
+        alert('กรุณาใส่ชื่อเมนู');
+        return;
+      }
+
+      if (
+        !isFinite(price) ||
+        price < 0
+      ) {
+        alert('กรุณาใส่ราคาให้ถูกต้อง');
+        return;
+      }
+
+      try {
+
+        let imageUrl = '';
+
+        if (id) {
+
+          const old =
+            adminSettingsData_.menus.find(
+              function(menu) {
+                return String(menu.id) ===
+                  String(id);
+              }
+            );
+
+          imageUrl =
+            old &&
+            old.image
+              ? old.image
+              : '';
+
+        }
+
+        if (menuEditorImageDataUrl_) {
+
+          imageUrl =
+            await uploadAdminImage_(
+              menuEditorImageDataUrl_,
+              name + '.jpg'
+            );
+
+        }
+
+        if (id) {
+
+          await apiPost_({
+            action:
+              'saveMenu',
+
+            menu: {
+
+              id: id,
+              name: name,
+              price: price,
+              category: category,
+              description:
+                description,
+              image: imageUrl,
+              available:
+                (
+                  adminSettingsData_.menus.find(
+                    function(menu) {
+                      return String(menu.id) ===
+                        String(id);
+                    }
+                  ) || {}
+                ).available !== false
+            }
+
+          });
+
+        } else {
+
+          await apiPost_({
+            action:
+              'createMenu',
+
+            menu: {
+
+              name: name,
+              price: price,
+              category: category,
+              description:
+                description,
+              image: imageUrl
+
+            }
+
+          });
+
+        }
+
+        closeMenuEditor();
+
+        await loadAdminSettings_();
+
+        alert(
+          'บันทึกเมนูสำเร็จ'
+        );
+
+      } catch (error) {
+
+        console.error(
+          'SAVE MENU ERROR:',
+          error
+        );
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    async function toggleMenuAvailable_(
+      menuId,
+      available
+    ) {
+
+      const menu =
+        adminSettingsData_.menus.find(
+          function(item) {
+            return String(item.id) ===
+              String(menuId);
+          }
+        );
+
+      if (!menu) {
+        return;
+      }
+
+      const actionText =
+        available
+          ? 'เปิดขาย'
+          : 'ปิดขาย / ของหมด';
+
+      if (
+        !confirm(
+          actionText +
+          ' "' +
+          menu.name +
+          '" ?'
+        )
+      ) {
+        return;
+      }
+
+      try {
+
+        await apiPost_({
+          action:
+            'toggleMenuAvailable',
+
+          menuId:
+            menuId,
+
+          available:
+            available
+
+        });
+
+        await loadAdminSettings_();
+
+      } catch (error) {
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    function fillPaymentSettings_() {
+
+      const p =
+        adminSettingsData_ &&
+        adminSettingsData_.payment
+          ? adminSettingsData_.payment
+          : {};
+
+      setPaymentButton_(
+        'cashSettingBtn',
+        !!p.cashActive
+      );
+
+      setPaymentButton_(
+        'promptpaySettingBtn',
+        !!p.promptPayActive
+      );
+
+      setPaymentButton_(
+        'governmentSettingBtn',
+        !!p.governmentActive
+      );
+
+      document.getElementById(
+        'promptpayNameSetting'
+      ).value =
+        p.promptPayName || '';
+
+      document.getElementById(
+        'promptpayNumberSetting'
+      ).value =
+        p.promptPayNumber || '';
+
+      document.getElementById(
+        'promptpayQrUrlSetting'
+      ).value =
+        p.promptPayQrUrl || '';
+
+      const qr =
+        document.getElementById(
+          'settingsQrPreview'
+        );
+
+      if (
+        p.promptPayQrData
+      ) {
+
+        qr.src =
+          p.promptPayQrData;
+
+        qr.style.display =
+          'block';
+
+      } else {
+
+        qr.style.display =
+          'none';
+
+      }
+
+      document.getElementById(
+        'qrImageFile'
+      ).value =
+        '';
+
+    }
+
+
+    function setPaymentButton_(
+      id,
+      on
+    ) {
+
+      const btn =
+        document.getElementById(
+          id
+        );
+
+      if (!btn) return;
+
+      btn.className =
+        'settings-toggle ' +
+        (
+          on
+            ? 'on'
+            : 'off'
+        );
+
+      btn.textContent =
+        on
+          ? '🟢 เปิด'
+          : '🔴 ปิด';
+
+      btn.dataset.on =
+        on
+          ? 'true'
+          : 'false';
+
+    }
+
+
+    function togglePaymentSettingLocal(
+      key
+    ) {
+
+      if (
+        !adminSettingsData_
+      ) {
+        return;
+      }
+
+      const map = {
+
+        cashActive:
+          'cashSettingBtn',
+
+        promptPayActive:
+          'promptpaySettingBtn',
+
+        governmentActive:
+          'governmentSettingBtn'
+
+      };
+
+      const btn =
+        document.getElementById(
+          map[key]
+        );
+
+      const current =
+        btn &&
+        btn.dataset.on ===
+        'true';
+
+      adminSettingsData_.payment[key] =
+        !current;
+
+      setPaymentButton_(
+        map[key],
+        !current
+      );
+
+    }
+
+
+    async function savePaymentSettingsFromUI() {
+
+      if (
+        !adminSettingsData_
+      ) {
+        return;
+      }
+
+      try {
+
+        let qrUrl =
+          document.getElementById(
+            'promptpayQrUrlSetting'
+          ).value.trim();
+
+        const qrFile =
+          document.getElementById(
+            'qrImageFile'
+          ).files &&
+          document.getElementById(
+            'qrImageFile'
+          ).files[0];
+
+        if (qrFile) {
+
+          const dataUrl =
+            await resizeImageFile_(
+              qrFile
+            );
+
+          qrUrl =
+            await uploadAdminImage_(
+              dataUrl,
+              'PromptPay_QR.jpg'
+            );
+
+        }
+
+        const settings = {
+
+          cashActive:
+            document.getElementById(
+              'cashSettingBtn'
+            ).dataset.on ===
+            'true',
+
+          promptPayActive:
+            document.getElementById(
+              'promptpaySettingBtn'
+            ).dataset.on ===
+            'true',
+
+          promptPayName:
+            document.getElementById(
+              'promptpayNameSetting'
+            ).value.trim(),
+
+          promptPayNumber:
+            document.getElementById(
+              'promptpayNumberSetting'
+            ).value.trim(),
+
+          promptPayQrUrl:
+            qrUrl,
+
+          governmentActive:
+            document.getElementById(
+              'governmentSettingBtn'
+            ).dataset.on ===
+            'true',
+
+          governmentName:
+            adminSettingsData_.payment
+              .governmentName ||
+            '',
+
+          governmentNote:
+            adminSettingsData_.payment
+              .governmentNote ||
+            ''
+
+        };
+
+
+        await apiPost_({
+
+          action:
+            'savePaymentSettings',
+
+          settings:
+            settings
+
+        });
+
+
+        await loadAdminSettings_();
+
+        alert(
+          'บันทึกการชำระเงินสำเร็จ'
+        );
+
+      } catch (error) {
+
+        console.error(
+          'SAVE PAYMENT SETTINGS ERROR:',
+          error
+        );
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+
+    function speakNewOrder_(orderId) {
+
+      if (!soundNotificationsEnabled) {
+        return;
+      }
+
+      if (
+        !('speechSynthesis' in window)
+      ) {
+
+        console.warn(
+          'Browser นี้ไม่รองรับ SpeechSynthesis'
+        );
+
+        return;
+
+      }
+
+      try {
+
+        const synth =
+          window.speechSynthesis;
+
+        synth.cancel();
+
+        const utterance =
+          new SpeechSynthesisUtterance(
+            'มีออเดอร์ใหม่ครับ เลขที่ ' +
+            String(
+              orderId || 'ใหม่'
+            )
+          );
+
+        utterance.lang = 'th-TH';
+        utterance.rate = 0.92;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        const voices =
+          synth.getVoices();
+
+        const thaiVoice =
+          voices.find(
+            function(voice) {
+
+              return String(
+                voice.lang || ''
+              )
+              .toLowerCase()
+              .startsWith('th');
+
+            }
+          );
+
+        if (thaiVoice) {
+          utterance.voice =
+            thaiVoice;
+        }
+
+        synth.speak(
+          utterance
+        );
+
+      } catch (error) {
+
+        console.warn(
+          'Speech notification error:',
+          error
+        );
+
+      }
+
+    }
+
+
+    function testConfiguredSound() {
+
+      soundNotificationsEnabled =
+        true;
+
+      localStorage.setItem(
+        'adminSoundNotifications',
+        'true'
+      );
+
+      updateSettingsButtons_();
+
+      speakNewOrder_(
+        'A001'
+      );
+
+    }
+
+
     function updateSettingsButtons_() {
 
       const soundBtn =
@@ -2717,7 +4050,6 @@
             : '🔇 ปิด';
 
       }
-
 
       const wakeBtn =
         document.getElementById(
@@ -2758,113 +4090,17 @@
 
       updateSettingsButtons_();
 
-      /*
-       * การกดปุ่มนี้เป็น User Gesture
-       * ใช้เปิด/ปลุกระบบเสียงของ Browser
-       */
-      if (soundNotificationsEnabled) {
-
-        ensureNewOrderAudio_();
+      if (
+        soundNotificationsEnabled &&
+        typeof speakNewOrder_ ===
+        'function'
+      ) {
 
         speakNewOrder_(
           'ทดสอบระบบ'
         );
 
       }
-
-    }
-
-
-    function speakNewOrder_(orderId) {
-
-      if (!soundNotificationsEnabled) {
-        return;
-      }
-
-      if (
-        !('speechSynthesis' in window)
-      ) {
-
-        alert(
-          'Browser นี้ไม่รองรับเสียงพูด'
-        );
-
-        return;
-
-      }
-
-      try {
-
-        const synth =
-          window.speechSynthesis;
-
-        synth.cancel();
-
-        const utterance =
-          new SpeechSynthesisUtterance(
-            'มีออเดอร์ใหม่ครับ เลขที่ ' +
-            String(
-              orderId || 'ใหม่'
-            )
-          );
-
-        utterance.lang = 'th-TH';
-        utterance.rate = 0.92;
-        utterance.pitch = 1;
-        utterance.volume = 1;
-
-        const voices =
-          synth.getVoices();
-
-        const thaiVoice =
-          voices.find(
-            function(voice) {
-
-              return String(
-                voice.lang || ''
-              )
-                .toLowerCase()
-                .startsWith('th');
-
-            }
-          );
-
-        if (thaiVoice) {
-          utterance.voice = thaiVoice;
-        }
-
-        synth.speak(
-          utterance
-        );
-
-      } catch (error) {
-
-        console.warn(
-          'Speech notification error:',
-          error
-        );
-
-      }
-
-    }
-
-
-    function testConfiguredSound() {
-
-      soundNotificationsEnabled = true;
-
-      localStorage.setItem(
-        'adminSoundNotifications',
-        'true'
-      );
-
-      updateSettingsButtons_();
-
-      ensureNewOrderAudio_();
-
-      speakNewOrder_(
-        'A001'
-      );
 
     }
 
@@ -2894,19 +4130,17 @@
           'release',
           function() {
 
-            wakeLockSentinel = null;
+            wakeLockSentinel =
+              null;
+
             updateSettingsButtons_();
 
           }
         );
 
-        updateSettingsButtons_();
-
         return true;
 
       } catch (error) {
-
-        wakeLockSentinel = null;
 
         console.warn(
           'Wake Lock ไม่สำเร็จ:',
@@ -2920,55 +4154,45 @@
     }
 
 
-    async function releaseWakeLock_() {
-
-      if (wakeLockSentinel) {
-
-        try {
-          await wakeLockSentinel.release();
-        } catch (error) {
-          console.warn(
-            'Wake Lock release error:',
-            error
-          );
-        }
-
-      }
-
-      wakeLockSentinel = null;
-      updateSettingsButtons_();
-
-    }
-
-
     async function toggleWakeSetting() {
 
       if (wakeSettingEnabled) {
 
-        wakeSettingEnabled = false;
+        wakeSettingEnabled =
+          false;
 
         localStorage.setItem(
           'adminKeepScreenAwake',
           'false'
         );
 
-        await releaseWakeLock_();
+        if (wakeLockSentinel) {
+
+          try {
+            await wakeLockSentinel.release();
+          } catch (error) {}
+
+        }
+
+        wakeLockSentinel =
+          null;
 
       } else {
 
         const success =
           await requestWakeLock_();
 
-        if (success) {
-
-          wakeSettingEnabled = true;
-
-          localStorage.setItem(
-            'adminKeepScreenAwake',
-            'true'
-          );
-
+        if (!success) {
+          return;
         }
+
+        wakeSettingEnabled =
+          true;
+
+        localStorage.setItem(
+          'adminKeepScreenAwake',
+          'true'
+        );
 
       }
 
@@ -2979,7 +4203,7 @@
 
     document.addEventListener(
       'visibilitychange',
-      async function() {
+      function() {
 
         if (
           document.visibilityState ===
@@ -2988,64 +4212,12 @@
           !wakeLockSentinel
         ) {
 
-          await requestWakeLock_();
+          requestWakeLock_();
 
         }
 
       }
     );
-
-
-    function toggleSettingPlaceholder(key) {
-
-      const map = {
-        cash: 'cashSettingBtn',
-        promptpay: 'promptpaySettingBtn',
-        government: 'governmentSettingBtn'
-      };
-
-      const btn =
-        document.getElementById(
-          map[key]
-        );
-
-      if (!btn) return;
-
-      const isOn =
-        btn.classList.contains('on');
-
-      btn.className =
-        'settings-toggle ' +
-        (
-          isOn ? 'off' : 'on'
-        );
-
-      btn.textContent =
-        isOn ? '🔴 ปิด' : '🟢 เปิด';
-
-      /*
-       * ยังไม่ส่ง Backend ใน V7
-       * จนกว่าจะตรวจ Setting จริง
-       */
-    }
-
-
-    function addMenuPlaceholder() {
-
-      alert(
-        'ส่วนเพิ่ม/แก้ไขเมนูจะเชื่อมกับ MENU จริงในขั้นถัดไป เพื่อไม่กระทบออเดอร์เก่า'
-      );
-
-    }
-
-
-    function changeQrPlaceholder() {
-
-      alert(
-        'ส่วนเปลี่ยน QR จะเชื่อมกับ PromptPay_QR_URL จริงในขั้นถัดไป เพื่อป้องกัน QR เดิมเสีย'
-      );
-
-    }
 
 
     function initSettings_() {
@@ -3056,24 +4228,8 @@
         requestWakeLock_();
       }
 
-      if (
-        'speechSynthesis' in window
-      ) {
-
-        window.speechSynthesis.getVoices();
-
-        window.speechSynthesis.addEventListener(
-          'voiceschanged',
-          function() {
-
-            window.speechSynthesis.getVoices();
-
-          }
-        );
-
-      }
-
     }
+
 
 
     let isLoadingOrders = false;
