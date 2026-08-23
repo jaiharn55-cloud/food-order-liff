@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <title>ร้านข้าวแกง ตามสั่ง</title>
+
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #f5f5f5;
+      color: #222;
+      font-family:
+        Arial,
+        "Noto Sans Thai",
+        sans-serif;
+    }
+
+    .header {
+      background: #06c755;
+      color: white;
+      padding: 22px 16px;
+      text-align: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    .header p {
+      margin: 7px 0 0;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      padding: 14px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+      margin-bottom: 12px;
+      box-shadow:
+        0 2px 8px rgba(0,0,0,.06);
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .menu-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .menu-info {
+      flex: 1;
+    }
+
+    .menu-name {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .menu-desc {
+      margin-top: 5px;
+      font-size: 13px;
+      color: #777;
+    }
+
+    .price {
+      margin-top: 7px;
+      font-weight: bold;
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .btn-green {
+      background: #06c755;
+      color: white;
+    }
+
+    .btn-gray {
+      background: #eee;
+      color: #333;
+    }
+
+    .full {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .category-bar {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+
+    .category-btn {
+      white-space: nowrap;
+      background: white;
+      border: 1px solid #ddd;
+    }
+
+    .category-btn.active {
+      background: #06c755;
+      color: white;
+      border-color: #06c755;
+    }
+
+    .cart-bar {
+      position: sticky;
+      bottom: 10px;
+      z-index: 20;
+    }
+
+    .cart-summary {
+      font-size: 15px;
+    }
+
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px 20px;
+    }
+
+    .error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #b00020;
+    }
+
+    .version {
+      font-size: 10px;
+      opacity: .7;
+      margin-top: 5px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+<div id="app">
+
+  <div class="loading">
+
+    <h2>
+      กำลังโหลดร้านอาหาร...
+    </h2>
+
+  </div>
+
+</div>
+
+
+<script>
+
+  /*
+   * ===============================
+   * CONFIG
+   * ===============================
+   */
+
+  const LIFF_ID =
+    '2011202604-C2aNSUPF';
+
+
+  const API_URL =
+    'https://script.google.com/macros/s/AKfycbxawZU8dYjnixWed3eVoUPqA88PAtZmCwTgyJghOtcP9e4iqJQDghzrrQslK2X2CO3S/exec';
+
+
+  const FRONTEND_VERSION =
+    'FRONT-V1-1301';
+
+
+  let DATA = {
+
+    menus: [],
+  
+    options: [],
+  
+    slots: [],
+  
+    payment: {
+  
+      cashActive: true,
+  
+      promptPayActive: false,
+  
+      promptPayName: '',
+  
+      promptPayNumber: '',
+  
+      promptPayQrUrl: '',
+
+      promptPayQrData: '',
+  
+      governmentActive: false,
+  
+      governmentName: '',
+  
+      governmentNote: ''
+  
+    }
+  
+  };
+
+
+  let cart = [];
+
+  let currentCategory = 'ทั้งหมด';
+
+
+  /*
+   * ===============================
+   * START
+   * ===============================
+   */
+
+  window.onload = async function() {
+
+  try {
+
+    console.log('STEP 1: PAGE LOADED');
+
+    await startLIFF();
+
+    console.log('STEP 3: LIFF SUCCESS');
+
+    showLoading(
+      'STEP 4: กำลังโหลดข้อมูลจาก Google Sheets...'
+    );
+
+    await loadData();
+
+    console.log('STEP 5: DATA LOADED');
+
+  } catch (error) {
+
+    console.error(
+      'START ERROR:',
+      error
+    );
+
+    showError(
+      error.message ||
+      String(error)
+    );
+
+  }
+
+};
+
+
+  /*
+   * ===============================
+   * LIFF
+   * ===============================
+   */
+
+  async function startLIFF() {
+
+  showLoading(
+    'STEP 2: กำลังเริ่ม LIFF...'
+  );
+
+
+  await liff.init({
+
+    liffId: LIFF_ID
+
+  });
+
+
+  console.log(
+    'LIFF initialized successfully'
+  );
+
+}
+
+
+  /*
+   * ===============================
+   * LOAD DATA
+   * ===============================
+   */
+
+  async function loadData() {
+
+  showLoading(
+    'STEP 4: กำลังเชื่อมต่อ Google Sheets...'
+  );
+
+  const url =
+    API_URL +
+    '?action=getInitialData';
+
+
+  console.log(
+    'API URL:',
+    url
+  );
+
+
+  const response =
+    await fetch(url);
+
+
+  console.log(
+    'API RESPONSE:',
+    response.status
+  );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      'API ตอบกลับผิดพลาด: HTTP ' +
+      response.status
+    );
+
+  }
+
+
+  const data =
+    await response.json();
+
+
+  console.log(
+    'API DATA:',
+    data
+  );
+
+
+  if (
+    !data ||
+    !Array.isArray(data.menus)
+  ) {
+
+    throw new Error(
+      'ข้อมูลเมนูจาก API ไม่ถูกต้อง'
+    );
+
+  }
+
+
+  DATA = data;
+
+
+  showLoading(
+    'STEP 5: โหลดข้อมูลสำเร็จ กำลังสร้างเมนู...'
+  );
+
+
+  setTimeout(function() {
+
+    renderMenu();
+
+  }, 100);
+
+}
+
+
+  /*
+   * ===============================
+   * MENU
+   * ===============================
+   */
+
+  function renderMenu() {
+
+    const categories = [
+      'ทั้งหมด',
+      ...new Set(
+        DATA.menus
+          .map(function(menu) {
+            return menu.category;
+          })
+          .filter(Boolean)
+      )
+    ];
+
+
+    let html = `
+
+      <div class="header">
+
+        <h1>
+          🍱 ร้านข้าวแกง ตามสั่ง
+        </h1>
+
+        <p>
+          สั่งอาหารล่วงหน้า
+          ไม่ต้องรอหน้าร้าน
+        </p>
+
+        <div class="version">
+          ${FRONTEND_VERSION}
+        </div>
+
+      </div>
+
+
+      <div class="container">
+
+        <div class="category-bar">
+
+    `;
+
+
+    categories.forEach(
+      function(category) {
+
+        html += `
+
+          <button
+            class="category-btn
+              ${
+                currentCategory === category
+                  ? 'active'
+                  : ''
+              }"
+            onclick="selectCategory(
+              '${escapeHtml(category)}'
+            )">
+
+            ${escapeHtml(category)}
+
+          </button>
+
+        `;
+
+      }
+    );
+
+
+    html += `
+
+        </div>
+
+        <div id="menuList"></div>
+
+
+        <div class="card cart-bar">
+
+          <div
+            id="cartSummary"
+            class="cart-summary">
+
+            🛒 ตะกร้าว่าง
+
+          </div>
+
+          <button
+            class="btn-green full"
+            onclick="showCart()">
+
+            🛒 ดูตะกร้า
+
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.getElementById(
+      'app'
+    ).innerHTML = html;
+
+
+    renderMenuList();
+
+    updateCartSummary();
+
+  }
+
+
+  function selectCategory(category) {
+
+    currentCategory =
+      category;
+
+    renderMenu();
+
+  }
+
+
+  function renderMenuList() {
+
+    const list =
+      document.getElementById(
+        'menuList'
+      );
+
+
+    if (!list) return;
+
+
+    let menus =
+      DATA.menus;
+
+
+    if (
+      currentCategory !==
+      'ทั้งหมด'
+    ) {
+
+      menus =
+        menus.filter(
+          function(menu) {
+
+            return (
+              menu.category ===
+              currentCategory
+            );
+
+          }
+        );
+
+    }
+
+
+    if (menus.length === 0) {
+
+      list.innerHTML = `
+
+        <div class="card">
+
+          ไม่พบเมนู
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    list.innerHTML = '';
+
+
+    menus.forEach(
+      function(menu) {
+
+        const card =
+          document.createElement(
+            'div'
+          );
+
+
+        card.className =
+          'card menu-card';
+
+
+        card.innerHTML = `
+
+          <div class="menu-info">
+
+            <div class="menu-name">
+
+              ${escapeHtml(
+                menu.name
+              )}
+
+            </div>
+
+
+            ${
+              menu.description
+                ? `
+                  <div class="menu-desc">
+
+                    ${escapeHtml(
+                      menu.description
+                    )}
+
+                  </div>
+                `
+                : ''
+            }
+
+
+            <div class="price">
+
+              ${Number(
+                menu.price
+              ).toLocaleString()}
+
+              บาท
+
+            </div>
+
+          </div>
+
+
+          <button
+            class="btn-green"
+            onclick="
+              openMenu(
+                '${escapeHtml(menu.id)}'
+              )
+            ">
+
+            เลือก
+
+          </button>
+
+        `;
+
+
+        list.appendChild(
+          card
+        );
+
+      }
+    );
+
+  }
+
+
+  /*
+   * ===============================
+   * MENU DETAIL
+   * ===============================
+   */
+
+  let tempQty = 1;
+
+
+  function openMenu(menuId) {
+
+    const menu =
+      DATA.menus.find(
+        function(m) {
+
+          return m.id === menuId;
+
+        }
+      );
+
+
+    if (!menu) return;
+
+
+    tempQty = 1;
+
+
+    const options =
+      DATA.options.filter(
+        function(option) {
+
+          return (
+            option.menuId ===
+            menuId
+          );
+
+        }
+      );
+
+
+    const groups = {};
+
+
+    options.forEach(
+      function(option) {
+
+        if (
+          !groups[option.group]
+        ) {
+
+          groups[option.group] =
+            [];
+
+        }
+
+
+        groups[
+          option.group
+        ].push(option);
+
+      }
+    );
+
+
+    let html = `
+
+      <div class="header">
+
+        <h1>
+          ${escapeHtml(menu.name)}
+        </h1>
+
+        <p>
+          ${Number(
+            menu.price
+          ).toLocaleString()}
+          บาท
+        </p>
+
+      </div>
+
+
+      <div class="container">
+
+        <div class="card">
+
+    `;
+
+
+    Object.keys(groups)
+      .forEach(
+        function(group) {
+
+          html += `
+
+            <div
+              style="margin-top:15px;">
+
+              <div
+                style="
+                  font-weight:bold;
+                  margin-bottom:8px;
+                ">
+
+                ${escapeHtml(group)}
+
+              </div>
+
+          `;
+
+
+          groups[group]
+            .forEach(
+              function(option) {
+
+                const inputType =
+                  group ===
+                  'ระดับความเผ็ด'
+                    ? 'radio'
+                    : 'checkbox';
+
+
+                html += `
+
+                  <label
+                    style="
+                      display:block;
+                      padding:7px 0;
+                    ">
+
+                    <input
+                      type="${inputType}"
+                      name="
+                        option_${escapeHtml(group)}
+                      "
+                      value="${escapeHtml(
+                        option.name
+                      )}"
+                      data-price="${
+                        option.price
+                      }">
+
+                    ${escapeHtml(
+                      option.name
+                    )}
+
+                    ${
+                      Number(
+                        option.price
+                      ) > 0
+                        ? ' +' +
+                          Number(
+                            option.price
+                          ).toLocaleString() +
+                          ' บาท'
+                        : ''
+                    }
+
+                  </label>
+
+                `;
+
+              }
+            );
+
+
+          html += `
+
+            </div>
+
+          `;
+
+        }
+      );
+
+
+    html += `
+
+          <div
+            style="margin-top:18px;">
+
+            <b>จำนวน</b>
+
+            <div
+              style="
+                display:flex;
+                align-items:center;
+                gap:15px;
+                margin-top:8px;
+              ">
+
+              <button
+                class="btn-gray"
+                onclick="changeQty(-1)">
+
+                −
+
+              </button>
+
+              <b id="tempQty">
+                1
+              </b>
+
+              <button
+                class="btn-gray"
+                onclick="changeQty(1)">
+
+                +
+
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="margin-top:18px;">
+
+            <b>
+              📝 รายละเอียดเพิ่มเติม
+            </b>
+
+            <textarea
+              id="itemRemark"
+              rows="3"
+              style="
+                width:100%;
+                margin-top:8px;
+                padding:10px;
+                border:1px solid #ddd;
+                border-radius:10px;
+                font-size:15px;
+              "
+              placeholder="
+                เช่น ไม่ใส่พริก
+                ขอข้าวเยอะๆ
+              "></textarea>
+
+          </div>
+
+
+          <button
+            class="btn-green full"
+            onclick="
+              addToCart(
+                '${escapeHtml(menu.id)}'
+              )
+            ">
+
+            🛒 เพิ่มลงตะกร้า
+
+          </button>
+
+
+          <button
+            class="btn-gray full"
+            onclick="renderMenu()">
+
+            ← กลับไปเลือกเมนู
+
+          </button>
+
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document.getElementById(
+      'app'
+    ).innerHTML = html;
+
+  }
+
+
+  function changeQty(amount) {
+
+    tempQty =
+      Math.max(
+        1,
+        tempQty + amount
+      );
+
+
+    document.getElementById(
+      'tempQty'
+    ).innerText =
+      tempQty;
+
+  }
+
+
+  /*
+   * ===============================
+   * CART
+   * ===============================
+   */
+
+  function addToCart(menuId) {
+
+    const menu =
+      DATA.menus.find(
+        function(m) {
+
+          return m.id === menuId;
+
+        }
+      );
+
+
+    if (!menu) return;
+
+
+    const selectedOptions = [];
+
+
+    document
+      .querySelectorAll(
+        'input[type="radio"]:checked,' +
+        'input[type="checkbox"]:checked'
+      )
+      .forEach(
+        function(input) {
+
+          selectedOptions.push({
+
+            name:
+              input.value,
+
+            price:
+              Number(
+                input.dataset.price ||
+                0
+              )
+
+          });
+
+        }
+      );
+
+
+    const remark =
+      document.getElementById(
+        'itemRemark'
+      ).value.trim();
+
+
+    cart.push({
+
+      menuId:
+        menu.id,
+
+      name:
+        menu.name,
+
+      price:
+        Number(menu.price),
+
+      qty:
+        tempQty,
+
+      options:
+        selectedOptions,
+
+      remark:
+        remark
+
+    });
+
+
+    showNotice(
+      'เพิ่ม ' +
+      menu.name +
+      ' ลงตะกร้าแล้ว'
+    );
+
+
+    renderMenu();
+
+  }
+
+
+  function calculateTotal() {
+
+    let total = 0;
+
+
+    cart.forEach(
+      function(item) {
+
+        let optionTotal = 0;
+
+
+        item.options.forEach(
+          function(option) {
+
+            optionTotal +=
+              Number(
+                option.price || 0
+              );
+
+          }
+        );
+
+
+        total +=
+          (
+            Number(item.price) +
+            optionTotal
+          ) *
+          Number(item.qty);
+
+      }
+    );
+
+
+    return total;
+
+  }
+
+
+  function updateCartSummary() {
+
+    const el =
+      document.getElementById(
+        'cartSummary'
+      );
+
+
+    if (!el) return;
+
+
+    let count = 0;
+
+
+    cart.forEach(
+      function(item) {
+
+        count +=
+          Number(item.qty);
+
+      }
+    );
+
+
+    if (count === 0) {
+
+      el.innerHTML =
+        '🛒 ตะกร้าว่าง';
+
+      return;
+
+    }
+
+
+    el.innerHTML = `
+
+      🛒 ${count} รายการ
+
+      <br>
+
+      <span class="total">
+
+        ${calculateTotal()
+          .toLocaleString()}
+
+        บาท
+
+      </span>
+
+    `;
+
+  }
+
+  function showNotice(message) {
+
+  const old =
+    document.getElementById(
+      'noticeModal'
+    );
+
+  if (old) {
+    old.remove();
+  }
+
+
+  const modal =
+    document.createElement(
+      'div'
+    );
+
+
+  modal.id =
+    'noticeModal';
+
+
+  modal.innerHTML = `
+
+    <div
+      style="
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.35);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:99999;
+        padding:20px;
+      "
+      onclick="closeNotice()"
+    >
+
+      <div
+        style="
+          width:min(320px,90vw);
+          background:white;
+          border-radius:18px;
+          padding:25px 20px 18px;
+          text-align:center;
+          box-shadow:0 10px 35px rgba(0,0,0,.25);
+        "
+        onclick="event.stopPropagation()"
+      >
+
+        <div
+          style="
+            font-size:20px;
+            font-weight:bold;
+            margin-bottom:12px;
+          "
+        >
+          ✅ สำเร็จ
+        </div>
+
+
+        <div
+          style="
+            font-size:15px;
+            color:#666;
+            line-height:1.6;
+          "
+        >
+          ${escapeHtml(message)}
+        </div>
+
+
+        <button
+          type="button"
+          onclick="closeNotice()"
+          style="
+            margin-top:18px;
+            width:100%;
+            border:0;
+            border-radius:10px;
+            padding:11px;
+            background:#06c755;
+            color:white;
+            font-size:15px;
+            font-weight:bold;
+          "
+        >
+          ตกลง
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+}
+
+
+function closeNotice() {
+
+  const modal =
+    document.getElementById(
+      'noticeModal'
+    );
+
+  if (modal) {
+    modal.remove();
+  }
+
+}
+
+  function showCart() {
+
+  if (cart.length === 0) {
+
+    showNotice('กรุณาเลือกอาหารก่อน');
+
+    return;
+
+  }
+
+
+  let html = `
+
+    <div class="header">
+
+      <h1>
+        🛒 ยืนยันออเดอร์
+      </h1>
+
+      <p>
+        ตรวจสอบรายการก่อนสั่งอาหาร
+      </p>
+
+    </div>
+
+
+    <div class="container">
+
+      <div class="card">
+
+        <div class="section-title">
+          🍱 รายการอาหาร
+        </div>
+
+  `;
+
+
+  cart.forEach(
+    function(item, index) {
+
+      let optionTotal = 0;
+
+
+      item.options.forEach(
+        function(option) {
+
+          optionTotal +=
+            Number(
+              option.price || 0
+            );
+
+        }
+      );
+
+
+      const itemTotal =
+        (
+          Number(item.price) +
+          optionTotal
+        ) *
+        Number(item.qty);
+
+
+      html += `
+
+        <div
+          style="
+            padding:12px 0;
+            border-bottom:1px solid #eee;
+          ">
+
+          <b>
+            ${escapeHtml(item.name)}
+          </b>
+
+          <div style="margin-top:5px;">
+
+            จำนวน:
+            ${item.qty}
+
+          </div>
+
+
+          ${
+            item.options.length
+              ? `
+                <div class="menu-desc">
+
+                  ตัวเลือก:
+                  ${
+                    item.options
+                      .map(
+                        function(option) {
+
+                          return escapeHtml(
+                            option.name
+                          );
+
+                        }
+                      )
+                      .join(', ')
+                  }
+
+                </div>
+              `
+              : ''
+          }
+
+
+          ${
+            item.remark
+              ? `
+                <div class="menu-desc">
+
+                  📝
+                  ${escapeHtml(
+                    item.remark
+                  )}
+
+                </div>
+              `
+              : ''
+          }
+
+
+          <div class="price">
+
+            ${itemTotal.toLocaleString()}
+            บาท
+
+          </div>
+
+
+          <button
+            class="btn-gray"
+            style="margin-top:8px;"
+            onclick="removeItem(${index})">
+
+            ลบรายการ
+
+          </button>
+
+        </div>
+
+      `;
+
+    }
+  );
+
+
+  html += `
+
+      </div>
+
+
+      <!-- ================= -->
+      <!-- PICKUP TIME -->
+      <!-- ================= -->
+
+      <div class="card">
+
+        <div class="section-title">
+          🕐 เวลารับอาหาร
+        </div>
+
+
+        <label
+          style="
+            display:block;
+            padding:10px 0;
+          ">
+
+          <input
+            type="radio"
+            name="pickupType"
+            value="NOW"
+            checked
+            onchange="togglePickupSlot()">
+
+          รับตอนนี้
+
+        </label>
+
+
+        <label
+          style="
+            display:block;
+            padding:10px 0;
+          ">
+
+          <input
+            type="radio"
+            name="pickupType"
+            value="SCHEDULED"
+            onchange="togglePickupSlot()">
+
+          เลือกช่วงเวลา
+
+        </label>
+
+
+        <div
+          id="pickupSlots"
+          style="display:none;">
+
+          ${renderPickupSlots()}
+
+        </div>
+
+      </div>
+
+
+      <!-- ================= -->
+      <!-- CUSTOMER -->
+      <!-- ================= -->
+
+      <div class="card">
+
+        <div class="section-title">
+          👤 ข้อมูลผู้สั่ง
+        </div>
+
+
+        <input
+          id="customerName"
+          type="text"
+          placeholder="ชื่อผู้สั่ง"
+          style="
+            width:100%;
+            padding:12px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            font-size:15px;
+          ">
+
+
+        <textarea
+          id="customerRemark"
+          rows="3"
+          placeholder="หมายเหตุเพิ่มเติม เช่น มารับแทน / ขอช้อน"
+          style="
+            width:100%;
+            margin-top:10px;
+            padding:12px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            font-size:15px;
+          "></textarea>
+
+      </div>
+
+
+      <!-- ================= -->
+      <!-- PAYMENT -->
+      <!-- ================= -->
+      
+      <div class="card">
+      
+        <div class="section-title">
+          💳 วิธีชำระเงิน
+        </div>
+      
+      
+        ${
+          DATA.payment &&
+          DATA.payment.cashActive
+            ? `
+      
+              <label
+                style="
+                  display:block;
+                  padding:12px;
+                  margin-top:8px;
+                  border:1px solid #ddd;
+                  border-radius:10px;
+                ">
+      
+                <input
+                  type="radio"
+                  name="payment"
+                  value="CASH"
+                  checked
+                  onchange="togglePaymentQR()">
+      
+                💵 เงินสด
+      
+                <div
+                  style="
+                    font-size:13px;
+                    color:#777;
+                    margin-top:4px;
+                    margin-left:24px;
+                  ">
+      
+                  จ่ายเงินตอนรับอาหาร
+      
+                </div>
+      
+              </label>
+      
+            `
+            : ''
+        }
+      
+      
+        ${
+          DATA.payment &&
+          DATA.payment.promptPayActive
+            ? `
+      
+              <label
+                style="
+                  display:block;
+                  padding:12px;
+                  margin-top:8px;
+                  border:1px solid #ddd;
+                  border-radius:10px;
+                ">
+      
+                <input
+                  type="radio"
+                  name="payment"
+                  value="QR"
+                  onchange="togglePaymentQR()">
+      
+                📱 โอนผ่าน QR พร้อมเพย์
+      
+                <div
+                  style="
+                    font-size:13px;
+                    color:#777;
+                    margin-top:4px;
+                    margin-left:24px;
+                  ">
+      
+                  ${
+                    escapeHtml(
+                      DATA.payment.promptPayName || ''
+                    )
+                  }
+      
+                </div>
+      
+              </label>
+      
+            `
+            : ''
+        }
+      
+      
+        ${
+          DATA.payment &&
+          DATA.payment.governmentActive
+            ? `
+      
+              <label
+                style="
+                  display:block;
+                  padding:12px;
+                  margin-top:8px;
+                  border:1px solid #ddd;
+                  border-radius:10px;
+                ">
+      
+                <input
+                  type="radio"
+                  name="payment"
+                  value="GOVERNMENT"
+                  onchange="togglePaymentQR()">
+      
+                🟠 ${
+                  escapeHtml(
+                    DATA.payment.governmentName ||
+                    'โครงการรัฐ / เป๋าตัง'
+                  )
+                }
+      
+                <div
+                  style="
+                    font-size:13px;
+                    color:#777;
+                    margin-top:4px;
+                    margin-left:24px;
+                  ">
+      
+                  ${
+                    escapeHtml(
+                      DATA.payment.governmentNote || ''
+                    )
+                  }
+      
+                </div>
+      
+              </label>
+      
+            `
+            : ''
+        }
+      
+      </div>
+
+      <!-- ================= -->
+<!-- QR PAYMENT -->
+<!-- ================= -->
+
+<div
+  id="qrPaymentBox"
+  class="card"
+  style="display:none; text-align:center;">
+
+  <div class="section-title">
+    📱 ชำระเงินผ่าน QR พร้อมเพย์
+  </div>
+
+  <div
+    style="
+      font-size:14px;
+      color:#666;
+      margin-bottom:10px;
+    ">
+
+    ${escapeHtml(
+      DATA.payment?.promptPayName || ''
+    )}
+
+  </div>
+
+
+  ${
+    DATA.payment?.promptPayQrData
+      ? `
+
+        <img
+          src="${escapeHtml(
+            DATA.payment.promptPayQrData || ''
+          )}"
+          alt="QR พร้อมเพย์"
+          style="
+            width:min(100%,320px);
+            display:block;
+            margin:10px auto;
+            border-radius:10px;
+          "
+        >
+
+        <div
+          style="
+            font-size:18px;
+            font-weight:bold;
+            margin-top:10px;
+          ">
+
+          ยอดที่ต้องโอน
+          <br>
+
+          <span
+            style="
+              font-size:28px;
+              color:#06c755;
+            ">
+
+            ${calculateTotal().toLocaleString()}
+            บาท
+
+          </span>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn-gray full"
+          style="margin-top:12px;"
+          onclick="savePaymentQR()">
+
+          📱 เปิด QR สำหรับบันทึก
+
+        </button>
+
+
+        <div
+          style="
+            font-size:12px;
+            color:#777;
+            margin-top:8px;
+          ">
+
+          หากปุ่มบันทึกไม่ทำงาน
+          สามารถกดค้างที่รูป QR
+          แล้วเลือกบันทึกรูปได้
+
+        </div>
+
+      `
+      : `
+
+        <div
+          style="
+            padding:15px;
+            color:#b00020;
+            background:#fff5f5;
+            border-radius:10px;
+          ">
+
+          ⚠️ ร้านยังไม่ได้ตั้งค่า QR พร้อมเพย์
+
+        </div>
+
+      `
+  }
+
+</div>
+
+      <!-- ================= -->
+      <!-- TOTAL -->
+      <!-- ================= -->
+
+      <div class="card">
+
+        <div
+          style="
+            display:flex;
+            justify-content:space-between;
+            font-size:20px;
+            font-weight:bold;
+          ">
+
+          <span>
+            รวมทั้งหมด
+          </span>
+
+          <span>
+            ${calculateTotal().toLocaleString()}
+            บาท
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        class="btn-green full"
+        onclick="submitOrder()">
+
+        ✅ ยืนยันสั่งอาหาร
+
+      </button>
+
+
+      <button
+        class="btn-gray full"
+        onclick="renderMenu()">
+
+        ← กลับไปเลือกเมนู
+
+      </button>
+
+
+    </div>
+
+  `;
+
+
+  document.getElementById(
+    'app'
+  ).innerHTML = html;
+
+}
+
+  function renderPickupSlots() {
+
+  if (
+    !DATA.slots ||
+    DATA.slots.length === 0
+  ) {
+
+    return `
+      <div class="menu-desc">
+        ไม่มีช่วงเวลาที่เปิดรับ
+      </div>
+    `;
+
+  }
+
+
+  let html = '';
+
+
+  DATA.slots.forEach(
+    function(slot) {
+
+      const disabled =
+        Number(slot.remaining) <= 0;
+
+
+      html += `
+
+        <label
+          style="
+            display:block;
+            padding:12px;
+            margin-top:8px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            ${
+              disabled
+                ? 'opacity:.5;'
+                : ''
+            }
+          ">
+
+          <input
+            type="radio"
+            name="pickupSlot"
+            value="${escapeHtml(slot.id)}"
+            ${disabled ? 'disabled' : ''}>
+
+          <b>
+            ${escapeHtml(slot.start)}
+            -
+            ${escapeHtml(slot.end)}
+          </b>
+
+          <br>
+
+          <span
+            style="
+              font-size:13px;
+              color:${
+                disabled
+                  ? '#b00020'
+                  : '#666'
+              };
+            ">
+
+            ${
+              disabled
+                ? 'มีคิวรอ ' +
+                  Number(slot.waiting ?? 0) +
+                  ' คิว • เต็มแล้ว'
+                : 'มีคิวรอ ' +
+                  Number(slot.waiting ?? 0) +
+                  ' คิว'
+            }
+
+          </span>
+
+        </label>
+
+      `;
+
+    }
+  );
+
+
+  return html;
+
+}
+
+  function togglePickupSlot() {
+
+  const type =
+    document.querySelector(
+      'input[name="pickupType"]:checked'
+    );
+
+
+  const slotBox =
+    document.getElementById(
+      'pickupSlots'
+    );
+
+
+  if (!type || !slotBox) {
+    return;
+  }
+
+
+  if (
+    type.value ===
+    'SCHEDULED'
+  ) {
+
+    slotBox.style.display =
+      'block';
+
+  } else {
+
+    slotBox.style.display =
+      'none';
+
+  }
+
+}
+
+  async function submitOrder() {
+
+  try {
+
+    if (cart.length === 0) {
+
+      throw new Error(
+        'ยังไม่มีอาหารในตะกร้า'
+      );
+
+    }
+
+
+    const pickupType =
+      document.querySelector(
+        'input[name="pickupType"]:checked'
+      );
+
+
+    if (!pickupType) {
+
+      throw new Error(
+        'กรุณาเลือกเวลารับอาหาร'
+      );
+
+    }
+
+
+    let pickupSlot = '';
+
+
+    if (
+      pickupType.value ===
+      'SCHEDULED'
+    ) {
+
+      const slot =
+        document.querySelector(
+          'input[name="pickupSlot"]:checked'
+        );
+
+
+      if (!slot) {
+
+        throw new Error(
+          'กรุณาเลือกช่วงเวลารับอาหาร'
+        );
+
+      }
+
+
+      pickupSlot =
+        slot.value;
+
+    }
+
+
+    const payment =
+      document.querySelector(
+        'input[name="payment"]:checked'
+      );
+
+
+    if (!payment) {
+
+      throw new Error(
+        'กรุณาเลือกวิธีชำระเงิน'
+      );
+
+    }
+
+
+    const customerName =
+      document.getElementById(
+        'customerName'
+      ).value.trim();
+
+
+    if (!customerName) {
+
+      throw new Error(
+        'กรุณาใส่ชื่อผู้สั่ง'
+      );
+
+    }
+
+
+    const customerRemark =
+      document.getElementById(
+        'customerRemark'
+      ).value.trim();
+
+
+    /*
+     * ==========================
+     * LINE USER
+     * ==========================
+     */
+
+    let userId = '';
+
+
+    if (
+      typeof liff !== 'undefined' &&
+      liff.isLoggedIn()
+    ) {
+
+      const profile =
+        await liff.getProfile();
+
+
+      userId =
+        profile.userId;
+
+    }
+
+
+    if (!userId) {
+
+      throw new Error(
+        'ไม่พบข้อมูล LINE User กรุณาเปิดจาก LINE ใหม่'
+      );
+
+    }
+
+
+    /*
+     * ==========================
+     * ORDER DATA
+     * ==========================
+     */
+
+    const orderData = {
+
+      userId:
+        userId,
+
+      customerName:
+        customerName,
+
+      customerRemark:
+        customerRemark,
+
+      pickupType:
+        pickupType.value,
+
+      pickupSlot:
+        pickupSlot,
+
+      payment:
+        payment.value,
+
+      items:
+        cart.map(
+          function(item) {
+
+            return {
+
+              menuId:
+                item.menuId,
+
+              qty:
+                item.qty,
+
+              options:
+                item.options.map(
+                  function(option) {
+
+                    return {
+
+                      name:
+                        option.name
+
+                    };
+
+                  }
+                ),
+
+              remark:
+                item.remark || ''
+
+            };
+
+          }
+        )
+
+    };
+
+
+    showLoading(
+      'กำลังส่งออเดอร์...'
+    );
+
+
+    /*
+     * ==========================
+     * SEND TO GAS
+     * ==========================
+     */
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+
+          method: 'POST',
+
+          headers: {
+
+            'Content-Type':
+              'text/plain;charset=utf-8'
+
+          },
+
+          body:
+            JSON.stringify({
+
+              action:
+                'createOrder',
+
+              orderData:
+                orderData
+
+            })
+
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'ระบบร้านไม่ตอบสนอง'
+      );
+
+    }
+
+
+    const result =
+      await response.json();
+
+
+    console.log(
+      'CREATE ORDER RESULT:',
+      result
+    );
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.error ||
+        'ไม่สามารถสร้างออเดอร์ได้'
+      );
+
+    }
+
+
+    /*
+     * ==========================
+     * SUCCESS
+     * ==========================
+     */
+
+
+    cart = [];
+
+
+// ==========================================
+// โหลดข้อมูลร้านใหม่หลังสร้าง Order สำเร็จ
+// เพื่ออัปเดตจำนวนคิว
+// ==========================================
+
+try {
+
+  const refreshResponse =
+    await fetch(
+      API_URL +
+      '?action=getInitialData'
+    );
+
+
+  if (refreshResponse.ok) {
+
+    const refreshedData =
+      await refreshResponse.json();
+
+
+    if (
+      refreshedData &&
+      Array.isArray(
+        refreshedData.slots
+      )
+    ) {
+
+      DATA =
+        refreshedData;
+
+    }
+
+  }
+
+} catch (refreshError) {
+
+  console.error(
+    'ไม่สามารถรีเฟรชจำนวนคิว:',
+    refreshError
+  );
+
+}
+
+
+showOrderSuccess(
+  result
+);
+
+
+  } catch (error) {
+
+    console.error(
+      'ORDER ERROR:',
+      error
+    );
+
+
+    showError(
+      error.message ||
+      String(error)
+    );
+
+  }
+
+}
+
+  function showOrderSuccess(result) {
+
+  let pickupText =
+    'รับตอนนี้';
+
+
+  if (
+    result.pickupType ===
+    'SCHEDULED'
+  ) {
+
+    const slot =
+      DATA.slots.find(
+        function(s) {
+
+          return (
+            s.id ===
+            result.pickupSlot
+          );
+
+        }
+      );
+
+
+    if (slot) {
+
+      pickupText =
+        slot.start +
+        ' - ' +
+        slot.end;
+
+    }
+
+  }
+
+
+  document.getElementById(
+    'app'
+  ).innerHTML = `
+
+    <div class="header">
+
+      <h1>
+        ✅ สั่งอาหารสำเร็จ
+      </h1>
+
+    </div>
+
+
+    <div class="container">
+
+      <div class="card"
+        style="text-align:center;">
+
+        <div
+          style="
+            color:#666;
+            margin-bottom:8px;
+          ">
+
+          หมายเลขออเดอร์
+
+        </div>
+
+
+        <div
+          style="
+            font-size:48px;
+            font-weight:bold;
+            margin:15px 0;
+          ">
+
+          ${escapeHtml(
+            result.orderId
+          )}
+
+        </div>
+
+
+        <div
+          style="
+            font-size:20px;
+            font-weight:bold;
+          ">
+
+          ${Number(
+            result.total
+          ).toLocaleString()}
+
+          บาท
+
+        </div>
+
+
+        <div
+          style="
+            margin-top:15px;
+            padding:12px;
+            background:#f5f5f5;
+            border-radius:10px;
+          ">
+
+          🕐 รับอาหาร:
+          <b>
+            ${escapeHtml(
+              pickupText
+            )}
+          </b>
+
+        </div>
+
+
+        <p
+          style="
+            color:#666;
+            margin-top:20px;
+          ">
+
+          กรุณาจำหมายเลขออเดอร์
+          แล้วแจ้งที่ร้านเมื่อมารับอาหาร
+
+        </p>
+
+      </div>
+
+
+      <button
+        class="btn-green full"
+        onclick="reloadStoreData()">
+
+        🍱 สั่งอาหารเพิ่ม
+
+      </button>
+
+    </div>
+
+  `;
+
+}
+
+  function togglePaymentQR() {
+
+  const box =
+    document.getElementById(
+      'qrPaymentBox'
+    );
+
+  if (!box) {
+    return;
+  }
+
+
+  const payment =
+    document.querySelector(
+      'input[name="payment"]:checked'
+    );
+
+
+  if (
+    payment &&
+    payment.value === 'QR'
+  ) {
+
+    box.style.display =
+      'block';
+
+  } else {
+
+    box.style.display =
+      'none';
+
+  }
+
+}
+
+  function savePaymentQR() {
+
+    const dataUrl =
+      DATA.payment &&
+      DATA.payment.promptPayQrData;
+  
+    if (!dataUrl) {
+  
+      showNotice(
+        'ไม่พบรูป QR พร้อมเพย์'
+      );
+  
+      return;
+  
+    }
+  
+    const win =
+      window.open(
+        '',
+        '_blank'
+      );
+  
+    if (!win) {
+  
+      showNotice(
+        'เบราว์เซอร์ไม่อนุญาตให้เปิด QR กรุณากดค้างที่รูป QR แล้วเลือกบันทึกรูปภาพ'
+      );
+  
+      return;
+  
+    }
+  
+    win.document.write(`
+      <!DOCTYPE html>
+  
+      <html lang="th">
+  
+      <head>
+  
+        <meta
+          charset="UTF-8"
+        >
+  
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1"
+        >
+  
+        <title>
+          QR พร้อมเพย์
+        </title>
+  
+      </head>
+  
+      <body
+        style="
+          margin:0;
+          padding:20px;
+          text-align:center;
+          background:#f5f5f5;
+          font-family:Arial,sans-serif;
+        "
+      >
+  
+        <div
+          style="
+            margin-bottom:15px;
+            font-size:16px;
+            color:#555;
+          "
+        >
+          📱 กดค้างที่ QR
+          <br>
+          แล้วเลือก
+          <b>บันทึกรูปภาพ</b>
+        </div>
+  
+        <img
+          src="${dataUrl}"
+          alt="QR พร้อมเพย์"
+          style="
+            width:100%;
+            max-width:500px;
+            height:auto;
+            display:block;
+            margin:auto;
+            background:white;
+          "
+        >
+  
+      </body>
+  
+      </html>
+    `);
+  
+    win.document.close();
+  
+  }
+  
+  function removeItem(index) {
+
+    cart.splice(
+      index,
+      1
+    );
+
+    showCart();
+
+  }
+
+
+  /*
+   * ===============================
+   * HELPERS
+   * ===============================
+   */
+
+  function showLoading(message) {
+
+    document.getElementById(
+      'app'
+    ).innerHTML = `
+
+      <div class="loading">
+
+        <h2>
+          🍱 ร้านข้าวแกง ตามสั่ง
+        </h2>
+
+        <p>
+          ${escapeHtml(message)}
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+
+  function showError(message) {
+
+    document.getElementById(
+      'app'
+    ).innerHTML = `
+
+      <div class="error">
+
+        <h2>
+          ⚠️ เกิดข้อผิดพลาด
+        </h2>
+
+        <p>
+          ${escapeHtml(message)}
+        </p>
+
+      </div>
+
+    `;
+
+  }
+
+
+  function escapeHtml(text) {
+
+    return String(text || '')
+      .replace(
+        /&/g,
+        '&amp;'
+      )
+      .replace(
+        /</g,
+        '&lt;'
+      )
+      .replace(
+        />/g,
+        '&gt;'
+      )
+      .replace(
+        /"/g,
+        '&quot;'
+      )
+      .replace(
+        /'/g,
+        '&#039;'
+      );
+
+  }
+
+  async function reloadStoreData() {
+
+  try {
+
+    showLoading(
+      'กำลังอัปเดตเมนูและจำนวนคิว...'
+    );
+
+
+    const response =
+      await fetch(
+        API_URL +
+        '?action=getInitialData'
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'ไม่สามารถโหลดข้อมูลร้านได้'
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    DATA =
+      data;
+
+
+    currentCategory =
+      'ทั้งหมด';
+
+
+    renderMenu();
+
+
+  } catch (error) {
+
+    console.error(
+      'RELOAD ERROR:',
+      error
+    );
+
+
+    showError(
+      error.message ||
+      String(error)
+    );
+
+  }
+
+}
+
+</script>
+
+</body>
+
+</html>
