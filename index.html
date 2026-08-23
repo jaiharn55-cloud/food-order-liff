@@ -212,11 +212,31 @@
   let DATA = {
 
     menus: [],
-
+  
     options: [],
-
-    slots: []
-
+  
+    slots: [],
+  
+    payment: {
+  
+      cashActive: true,
+  
+      promptPayActive: false,
+  
+      promptPayName: '',
+  
+      promptPayNumber: '',
+  
+      promptPayQrUrl: '',
+  
+      governmentActive: false,
+  
+      governmentName: '',
+  
+      governmentNote: ''
+  
+    }
+  
   };
 
 
@@ -1369,46 +1389,147 @@
       <!-- ================= -->
       <!-- PAYMENT -->
       <!-- ================= -->
-
+      
       <div class="card">
-
+      
         <div class="section-title">
           💳 วิธีชำระเงิน
         </div>
-
-
-        <label
-          style="
-            display:block;
-            padding:10px 0;
-          ">
-
-          <input
-            type="radio"
-            name="payment"
-            value="CASH"
-            checked>
-
-          💵 เงินสด
-
-        </label>
-
-
-        <label
-          style="
-            display:block;
-            padding:10px 0;
-          ">
-
-          <input
-            type="radio"
-            name="payment"
-            value="QR">
-
-          📱 QR Payment
-
-        </label>
-
+      
+      
+        ${
+          DATA.payment &&
+          DATA.payment.cashActive
+            ? `
+      
+              <label
+                style="
+                  display:block;
+                  padding:12px;
+                  margin-top:8px;
+                  border:1px solid #ddd;
+                  border-radius:10px;
+                ">
+      
+                <input
+                  type="radio"
+                  name="payment"
+                  value="CASH"
+                  checked>
+      
+                💵 เงินสด
+      
+                <div
+                  style="
+                    font-size:13px;
+                    color:#777;
+                    margin-top:4px;
+                    margin-left:24px;
+                  ">
+      
+                  จ่ายเงินตอนรับอาหาร
+      
+                </div>
+      
+              </label>
+      
+            `
+            : ''
+        }
+      
+      
+        ${
+          DATA.payment &&
+          DATA.payment.promptPayActive
+            ? `
+      
+              <label
+                style="
+                  display:block;
+                  padding:12px;
+                  margin-top:8px;
+                  border:1px solid #ddd;
+                  border-radius:10px;
+                ">
+      
+                <input
+                  type="radio"
+                  name="payment"
+                  value="QR">
+      
+                📱 โอนผ่าน QR พร้อมเพย์
+      
+                <div
+                  style="
+                    font-size:13px;
+                    color:#777;
+                    margin-top:4px;
+                    margin-left:24px;
+                  ">
+      
+                  ${
+                    escapeHtml(
+                      DATA.payment.promptPayName || ''
+                    )
+                  }
+      
+                </div>
+      
+              </label>
+      
+            `
+            : ''
+        }
+      
+      
+        ${
+          DATA.payment &&
+          DATA.payment.governmentActive
+            ? `
+      
+              <label
+                style="
+                  display:block;
+                  padding:12px;
+                  margin-top:8px;
+                  border:1px solid #ddd;
+                  border-radius:10px;
+                ">
+      
+                <input
+                  type="radio"
+                  name="payment"
+                  value="GOVERNMENT">
+      
+                🟠 ${
+                  escapeHtml(
+                    DATA.payment.governmentName ||
+                    'โครงการรัฐ / เป๋าตัง'
+                  )
+                }
+      
+                <div
+                  style="
+                    font-size:13px;
+                    color:#777;
+                    margin-top:4px;
+                    margin-left:24px;
+                  ">
+      
+                  ${
+                    escapeHtml(
+                      DATA.payment.governmentNote || ''
+                    )
+                  }
+      
+                </div>
+      
+              </label>
+      
+            `
+            : ''
+        }
+      
       </div>
 
 
