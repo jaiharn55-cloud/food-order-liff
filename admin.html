@@ -223,7 +223,65 @@
     }
 
 
-    .order-card {
+    
+    /* =====================================
+     * LOCAL NEW ORDER NOTIFICATION
+     * ===================================== */
+
+    .new-order-alert {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      width: min(92vw, 420px);
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: #06c755;
+      color: white;
+      box-shadow: 0 8px 30px rgba(0,0,0,.22);
+      cursor: pointer;
+      animation: newOrderPulse 1s ease-in-out infinite;
+    }
+
+    .new-order-alert.show {
+      display: block;
+    }
+
+    .new-order-alert-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .new-order-alert-detail {
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    @keyframes newOrderPulse {
+      0%, 100% {
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        transform: translateX(-50%) scale(1.025);
+      }
+    }
+
+    .notification-test-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 7px 10px;
+      background: #06c755;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 6px;
+    }
+
+.order-card {
 
       background: white;
 
@@ -686,6 +744,24 @@
 
 
 <body>
+
+  <div
+    id="newOrderAlert"
+    class="new-order-alert"
+    onclick="dismissNewOrderAlert()"
+  >
+    <div
+      class="new-order-alert-title"
+      id="newOrderAlertTitle"
+    >🔔 มีออเดอร์ใหม่!</div>
+
+    <div
+      class="new-order-alert-detail"
+      id="newOrderAlertDetail"
+    >กรุณามาดูที่หน้าร้าน</div>
+  </div>
+
+
 
 
   <div class="header">
@@ -2133,7 +2209,321 @@
     let isLoadingOrders = false;
 
 
-async function loadOrders() {
+async 
+    /* =====================================
+     * LOCAL NEW ORDER NOTIFICATION
+     * ตรวจทุกครั้งที่ Admin refresh ออเดอร์
+     * ===================================== */
+
+    let knownOrderIds =
+      new Set();
+
+    let notificationInitialized =
+      false;
+
+    let newOrderAudioContext =
+      null;
+
+    let newOrderAlertTimer =
+      null;
+
+
+    function ensureNewOrderAudio_() {
+
+      try {
+
+        if (!newOrderAudioContext) {
+
+          const AudioContextClass =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+          if (!AudioContextClass) {
+            return null;
+          }
+
+          newOrderAudioContext =
+            new AudioContextClass();
+
+        }
+
+        if (
+          newOrderAudioContext.state ===
+          'suspended'
+        ) {
+
+          newOrderAudioContext
+            .resume()
+            .catch(function() {});
+
+        }
+
+        return newOrderAudioContext;
+
+      } catch (error) {
+
+        console.warn(
+          'Audio not available:',
+          error
+        );
+
+        return null;
+
+      }
+
+    }
+
+
+    function playNewOrderSound_() {
+
+      const ctx =
+        ensureNewOrderAudio_();
+
+      if (!ctx) {
+        return;
+      }
+
+      try {
+
+        const now =
+          ctx.currentTime;
+
+        [0, 0.20, 0.40].forEach(
+          function(offset, index) {
+
+            const oscillator =
+              ctx.createOscillator();
+
+            const gain =
+              ctx.createGain();
+
+            oscillator.type =
+              'sine';
+
+            oscillator.frequency.value =
+              index === 2
+                ? 1046
+                : 880;
+
+            gain.gain.setValueAtTime(
+              0,
+              now + offset
+            );
+
+            gain.gain.linearRampToValueAtTime(
+              0.18,
+              now + offset + 0.02
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+              0.001,
+              now + offset + 0.16
+            );
+
+            oscillator.connect(gain);
+
+            gain.connect(
+              ctx.destination
+            );
+
+            oscillator.start(
+              now + offset
+            );
+
+            oscillator.stop(
+              now + offset + 0.18
+            );
+
+          }
+        );
+
+      } catch (error) {
+
+        console.warn(
+          'Cannot play notification sound:',
+          error
+        );
+
+      }
+
+    }
+
+
+    function showNewOrderAlert_(
+      order
+    ) {
+
+      const alert =
+        document.getElementById(
+          'newOrderAlert'
+        );
+
+      const title =
+        document.getElementById(
+          'newOrderAlertTitle'
+        );
+
+      const detail =
+        document.getElementById(
+          'newOrderAlertDetail'
+        );
+
+      if (!alert) {
+        return;
+      }
+
+      const orderId =
+        order.orderId ||
+        order.Order_ID ||
+        '-';
+
+      const customer =
+        order.customerName ||
+        order.Customer_Name ||
+        'ลูกค้า';
+
+      const total =
+        Number(
+          order.total ||
+          order.Total ||
+          0
+        );
+
+      title.textContent =
+        '🔔 มีออเดอร์ใหม่! ' +
+        orderId;
+
+      detail.textContent =
+        customer +
+        ' • ' +
+        total.toLocaleString('th-TH') +
+        ' บาท • กรุณามาดูที่หน้าร้าน';
+
+      alert.classList.add(
+        'show'
+      );
+
+      clearTimeout(
+        newOrderAlertTimer
+      );
+
+      newOrderAlertTimer =
+        setTimeout(
+          function() {
+            dismissNewOrderAlert();
+          },
+          15000
+        );
+
+    }
+
+
+    function dismissNewOrderAlert() {
+
+      const alert =
+        document.getElementById(
+          'newOrderAlert'
+        );
+
+      if (alert) {
+        alert.classList.remove(
+          'show'
+        );
+      }
+
+      clearTimeout(
+        newOrderAlertTimer
+      );
+
+    }
+
+
+    function testNewOrderSound(
+      event
+    ) {
+
+      if (event) {
+        event.stopPropagation();
+      }
+
+      ensureNewOrderAudio_();
+
+      playNewOrderSound_();
+
+      showNewOrderAlert_({
+        orderId: 'TEST',
+        customerName: 'ทดสอบระบบ',
+        total: 50
+      });
+
+    }
+
+
+    function detectNewOrders_(
+      orders
+    ) {
+
+      const currentIds =
+        new Set();
+
+      const newOrders =
+        [];
+
+      (orders || []).forEach(
+        function(order) {
+
+          const id =
+            String(
+              order.orderId ||
+              order.Order_ID ||
+              ''
+            ).trim();
+
+          if (!id) {
+            return;
+          }
+
+          currentIds.add(id);
+
+          if (
+            notificationInitialized &&
+            !knownOrderIds.has(id)
+          ) {
+
+            newOrders.push(
+              order
+            );
+
+          }
+
+        }
+      );
+
+      if (
+        notificationInitialized &&
+        newOrders.length > 0
+      ) {
+
+        playNewOrderSound_();
+
+        showNewOrderAlert_(
+          newOrders[
+            newOrders.length - 1
+          ]
+        );
+
+      }
+
+      knownOrderIds =
+        currentIds;
+
+      notificationInitialized =
+        true;
+
+    }
+
+
+function loadOrders() {
 
   if (isLoadingOrders) {
     return;
@@ -2210,6 +2600,10 @@ async function loadOrders() {
     orders =
       data.orders || [];
 
+    detectNewOrders_(
+      orders
+    );
+
 
     document
       .getElementById('today')
@@ -2279,10 +2673,10 @@ async function loadOrders() {
 loadOrders();
 
 
-// Auto refresh ทุก 60 วินาที
+// Auto refresh ทุก 10 วินาที
 setInterval(
   loadOrders,
-  60000
+  10000
 );
 
   </script>
