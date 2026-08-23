@@ -303,7 +303,9 @@
 
   await liff.init({
 
-    liffId: LIFF_ID
+    liffId: LIFF_ID,
+
+    withLoginOnExternalBrowser: true
 
   });
 
@@ -312,7 +314,91 @@
     'LIFF initialized successfully'
   );
 
+
+  /*
+   * ถ้าเปิดจาก Browser ภายนอก LINE
+   * และยังไม่ได้ Login ให้ LIFF พาไป Login
+   * แล้วกลับมาหน้านี้อัตโนมัติ
+   */
+  if (!liff.isLoggedIn()) {
+
+    console.log(
+      'LIFF user is not logged in - redirecting to LINE login'
+    );
+
+    liff.login({
+
+      redirectUri:
+        window.location.href
+
+    });
+
+    return;
+
+  }
+
+
+  console.log(
+    'LIFF user is logged in'
+  );
+
 }
+
+
+  /*
+   * ===============================
+   * LINE USER
+   * ===============================
+   */
+
+  async function getLineUserId() {
+
+    if (
+      typeof liff === 'undefined'
+    ) {
+
+      throw new Error(
+        'ไม่สามารถโหลด LINE LIFF ได้'
+      );
+
+    }
+
+
+    if (!liff.isLoggedIn()) {
+
+      liff.login({
+
+        redirectUri:
+          window.location.href
+
+      });
+
+      throw new Error(
+        'กำลังเปิด LINE Login...'
+      );
+
+    }
+
+
+    const profile =
+      await liff.getProfile();
+
+
+    if (
+      !profile ||
+      !profile.userId
+    ) {
+
+      throw new Error(
+        'ไม่สามารถอ่าน LINE User ได้ กรุณาเปิดหน้านี้จาก LINE อีกครั้ง'
+      );
+
+    }
+
+
+    return profile.userId;
+
+  }
 
 
   /*
@@ -2047,31 +2133,8 @@ async function submitOrder() {
      * ==========================
      */
 
-    let userId = '';
-
-
-    if (
-      typeof liff !== 'undefined' &&
-      liff.isLoggedIn()
-    ) {
-
-      const profile =
-        await liff.getProfile();
-
-
-      userId =
-        profile.userId;
-
-    }
-
-
-    if (!userId) {
-
-      throw new Error(
-        'ไม่พบข้อมูล LINE User กรุณาเปิดจาก LINE ใหม่'
-      );
-
-    }
+    const userId =
+      await getLineUserId();
 
 
     /*
@@ -2336,31 +2399,8 @@ async function submitOrder() {
      * ==========================
      */
 
-    let userId = '';
-
-
-    if (
-      typeof liff !== 'undefined' &&
-      liff.isLoggedIn()
-    ) {
-
-      const profile =
-        await liff.getProfile();
-
-
-      userId =
-        profile.userId;
-
-    }
-
-
-    if (!userId) {
-
-      throw new Error(
-        'ไม่พบข้อมูล LINE User กรุณาเปิดจาก LINE ใหม่'
-      );
-
-    }
+    const userId =
+      await getLineUserId();
 
 
     /*
