@@ -228,7 +228,27 @@
      * LOCAL NEW ORDER NOTIFICATION
      * ===================================== */
 
-    .new-order-alert {
+    
+    .silent-refresh-status {
+      position: fixed;
+      right: 10px;
+      bottom: 10px;
+      z-index: 9998;
+      padding: 5px 8px;
+      border-radius: 8px;
+      background: rgba(0,0,0,.55);
+      color: white;
+      font-size: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s ease;
+    }
+
+    .silent-refresh-status.show {
+      opacity: 1;
+    }
+
+.new-order-alert {
       display: none;
       position: fixed;
       top: 16px;
@@ -744,6 +764,12 @@
 
 
 <body>
+  <div
+    id="silentRefreshStatus"
+    class="silent-refresh-status"
+  >กำลังอัปเดต...</div>
+
+
 
   <div
     id="newOrderAlert"
@@ -2226,6 +2252,9 @@
     let newOrderAlertTimer =
       null;
 
+    let lastRenderedOrdersSnapshot =
+      '';
+
 
     function ensureNewOrderAudio_() {
 
@@ -2530,16 +2559,17 @@ async function loadOrders() {
 
   isLoadingOrders = true;
 
-  const appEl = document.getElementById('app');
-  if (appEl) {
-    appEl.innerHTML = `
-      <div class="loading">
-        🔄 กำลังเชื่อมต่อระบบออเดอร์...
-      </div>
-    `;
-  }
-
   try {
+
+    const refreshStatus =
+      document.getElementById(
+        'silentRefreshStatus'
+      );
+
+    if (refreshStatus) {
+      refreshStatus.classList.add('show');
+    }
+
 
     const controller =
       new AbortController();
@@ -2585,23 +2615,9 @@ async function loadOrders() {
     }
 
 
-    let data;
+    const data =
+      await response.json();
 
-    try {
-      data = await Promise.race([
-        response.json(),
-        new Promise(function(_, reject) {
-          setTimeout(function() {
-            reject(new Error('Backend ตอบกลับข้อมูลช้าเกิน 10 วินาที'));
-          }, 10000);
-        })
-      ]);
-    } catch (jsonError) {
-      throw new Error(
-        'อ่านข้อมูลจาก Backend ไม่สำเร็จ: ' +
-        (jsonError.message || String(jsonError))
-      );
-    }
 
     console.log(
       'ORDERS:',
@@ -2634,9 +2650,66 @@ async function loadOrders() {
         data.date;
 
 
-    renderSummary();
+    /*
+     * รีเฟรชแบบเงียบ:
+     * ถ้าข้อมูลออเดอร์ไม่เปลี่ยน จะไม่ render ใหม่
+     * เพื่อไม่ให้หน้าจอกระพริบหรือเลื่อนกลับด้านบน
+     */
+    const snapshot =
+      JSON.stringify(
+        orders.map(
+          function(order) {
+            return {
+              orderId:
+                order.orderId,
+              status:
+                order.status,
+              paymentStatus:
+                order.paymentStatus,
+              total:
+                order.total,
+              items:
+                order.items,
+              customerName:
+                order.customerName,
+              pickupTime:
+                order.pickupTime,
+              pickupSlot:
+                order.pickupSlot
+            };
+          }
+        )
+      );
 
-    renderOrders();
+    if (
+      snapshot !==
+      lastRenderedOrdersSnapshot
+    ) {
+
+      const currentScrollY =
+        window.scrollY;
+
+      renderSummary();
+
+      renderOrders();
+
+      lastRenderedOrdersSnapshot =
+        snapshot;
+
+      /*
+       * ให้ Browser คงตำแหน่งที่พนักงานกำลังดูอยู่
+       * โดยเฉพาะระหว่าง auto refresh
+       */
+      requestAnimationFrame(
+        function() {
+          window.scrollTo(
+            0,
+            currentScrollY
+          );
+        }
+      );
+
+    }
 
 
     document
@@ -2654,7 +2727,17 @@ async function loadOrders() {
           );
 
 
-  } catch (error) {
+  
+    const refreshStatusDone =
+      document.getElementById(
+        'silentRefreshStatus'
+      );
+
+    if (refreshStatusDone) {
+      refreshStatusDone.classList.remove('show');
+    }
+
+} catch (error) {
 
     console.error(
       'LOAD ORDERS ERROR:',
@@ -2662,24 +2745,24 @@ async function loadOrders() {
     );
 
 
-    document
-      .getElementById('app')
-      .innerHTML = `
+    const refreshStatusError =
+      document.getElementById(
+        'silentRefreshStatus'
+      );
 
-        <div class="error">
+    if (refreshStatusError) {
+      refreshStatusError.classList.remove('show');
+    }
 
-          ❌ โหลดออเดอร์ไม่สำเร็จ
-
-          <br><br>
-
-          ${escapeHtml(
-            error.message ||
-            String(error)
-          )}
-
-        </div>
-
-      `;
+    /*
+     * Auto-refresh ห้ามล้างรายการออเดอร์เดิม
+     * ถ้า Backend สะดุดชั่วคราว ให้คงหน้าจอเดิมไว้
+     * และรอบถัดไปจะลองโหลดใหม่เอง
+     */
+    console.warn(
+      'Auto refresh failed; keeping current orders visible:',
+      error
+    );
 
 
   } finally {
