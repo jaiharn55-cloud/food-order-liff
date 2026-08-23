@@ -776,6 +776,194 @@
 
     }
     
+
+    .settings-btn {
+      border: none;
+      background: white;
+      color: #222;
+      padding: 9px 11px;
+      border-radius: 9px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .settings-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: rgba(0,0,0,.45);
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .settings-backdrop.show {
+      display: block;
+    }
+
+    .settings-panel {
+      width: min(760px, 100%);
+      margin: 20px auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 12px 45px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+
+    .settings-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 17px;
+      background: #06c755;
+      color: white;
+    }
+
+    .settings-head-title {
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .settings-close {
+      border: none;
+      background: rgba(255,255,255,.2);
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .settings-body {
+      padding: 16px;
+    }
+
+    .settings-section {
+      border: 1px solid #e5e7eb;
+      border-radius: 13px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .settings-section-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px dashed #eee;
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-row-title {
+      font-weight: 700;
+    }
+
+    .settings-row-note,
+    .settings-note {
+      color: #777;
+      font-size: 12px;
+      line-height: 1.5;
+      margin-top: 3px;
+    }
+
+    .settings-toggle {
+      min-width: 78px;
+      border: none;
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .settings-toggle.on {
+      background: #e5f8ec;
+      color: #087a37;
+    }
+
+    .settings-toggle.off {
+      background: #eeeeee;
+      color: #666;
+    }
+
+    .settings-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .settings-action {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #e9e9e9;
+      color: #333;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .settings-action.blue {
+      background: #e7f0ff;
+      color: #1757a6;
+    }
+
+    .settings-field {
+      margin-top: 10px;
+    }
+
+    .settings-field label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: 700;
+    }
+
+    .settings-field input {
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 14px;
+    }
+
+    .version-note {
+      color: #888;
+      font-size: 11px;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    @media (max-width: 650px) {
+      .header-actions {
+        width: 100%;
+      }
+
+      .header-actions button {
+        flex: 1;
+      }
+    }
+
   </style>
 
 </head>
@@ -831,18 +1019,213 @@
       </div>
 
 
-      <button
-        class="refresh"
-        onclick="loadOrders()">
+      <div class="header-actions">
 
-        🔄 รีเฟรช
+        <button
+          class="refresh"
+          onclick="loadOrders()">
 
-      </button>
+          🔄 รีเฟรช
+
+        </button>
+
+        <button
+          class="settings-btn"
+          onclick="openSettings()">
+
+          ⚙️ ตั้งค่า
+
+        </button>
+
+      </div>
 
     </div>
 
   </div>
 
+
+
+  <div
+    id="settingsBackdrop"
+    class="settings-backdrop"
+    onclick="settingsBackdropClick(event)"
+  >
+
+    <div class="settings-panel">
+
+      <div class="settings-head">
+
+        <div class="settings-head-title">
+          ⚙️ ตั้งค่าร้าน
+        </div>
+
+        <button
+          class="settings-close"
+          onclick="closeSettings()"
+        >
+          ×
+        </button>
+
+      </div>
+
+      <div class="settings-body">
+
+        <div class="settings-section">
+
+          <div class="settings-section-title">
+            🍛 จัดการเมนู
+          </div>
+
+          <div class="settings-note">
+            เพิ่ม/แก้ไขเมนู ราคา รูปอาหาร และเปิด/ปิดขาย
+          </div>
+
+          <div class="settings-actions">
+            <button
+              class="settings-action blue"
+              onclick="addMenuPlaceholder()"
+            >
+              ➕ เพิ่มเมนู
+            </button>
+          </div>
+
+          <div class="settings-note">
+            🔴 ปิดขาย = ของหมดชั่วคราว โดยไม่ลบเมนูและไม่กระทบออเดอร์เก่า
+          </div>
+
+        </div>
+
+        <div class="settings-section">
+
+          <div class="settings-section-title">
+            💳 การชำระเงิน
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">💵 เงินสด</div>
+              <div class="settings-row-note">รับเงินสดที่หน้าร้าน</div>
+            </div>
+            <button
+              id="cashSettingBtn"
+              class="settings-toggle on"
+              onclick="toggleSettingPlaceholder('cash')"
+            >
+              🟢 เปิด
+            </button>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">📱 PromptPay</div>
+              <div class="settings-row-note">QR PromptPay</div>
+            </div>
+            <button
+              id="promptpaySettingBtn"
+              class="settings-toggle on"
+              onclick="toggleSettingPlaceholder('promptpay')"
+            >
+              🟢 เปิด
+            </button>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">🏛️ โครงการรัฐ / ถุงเงิน</div>
+              <div class="settings-row-note">เปิดเมื่อร้านรับชำระผ่านถุงเงิน</div>
+            </div>
+            <button
+              id="governmentSettingBtn"
+              class="settings-toggle off"
+              onclick="toggleSettingPlaceholder('government')"
+            >
+              🔴 ปิด
+            </button>
+          </div>
+
+          <div class="settings-field">
+            <label>ชื่อบัญชี PromptPay</label>
+            <input
+              id="promptpayNameSetting"
+              value="ร้านข้าวแกง ตามสั่ง"
+              readonly
+            >
+          </div>
+
+          <div class="settings-actions">
+            <button
+              class="settings-action blue"
+              onclick="changeQrPlaceholder()"
+            >
+              📷 เปลี่ยน QR
+            </button>
+          </div>
+
+          <div class="settings-note">
+            รอบนี้ยังไม่เขียนทับ Script Properties จนกว่าจะตรวจชื่อ Setting จริง
+            เพื่อป้องกัน QR/Payment เดิมเสีย
+          </div>
+
+        </div>
+
+        <div class="settings-section">
+
+          <div class="settings-section-title">
+            🔊 การแจ้งเตือน
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">🗣️ เสียงแจ้งเตือน</div>
+              <div class="settings-row-note">
+                มีออเดอร์ใหม่ → พูดเลขที่ออเดอร์
+              </div>
+            </div>
+
+            <button
+              id="soundSettingBtn"
+              class="settings-toggle on"
+              onclick="toggleSoundSetting()"
+            >
+              🔊 เปิด
+            </button>
+          </div>
+
+          <div class="settings-actions">
+            <button
+              class="settings-action blue"
+              onclick="testConfiguredSound()"
+            >
+              🗣️ ทดสอบเสียง
+            </button>
+          </div>
+
+          <div class="settings-row">
+            <div>
+              <div class="settings-row-title">🔆 หน้าจอเปิดตลอด</div>
+              <div class="settings-row-note">
+                ป้องกันหน้าจอ Admin ดับระหว่างเปิดร้าน
+              </div>
+            </div>
+
+            <button
+              id="wakeSettingBtn"
+              class="settings-toggle off"
+              onclick="toggleWakeSetting()"
+            >
+              🌙 ปิด
+            </button>
+          </div>
+
+        </div>
+
+        <div class="version-note">
+          ระบบแนบสลิปและตรวจสอบสลิป จะทำใน Version ถัดไป
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <div class="container">
 
@@ -2250,6 +2633,449 @@
      * เริ่มต้น
      * =====================================
      */
+
+    /* =====================================
+     * SETTINGS / SOUND / WAKE LOCK
+     * ===================================== */
+
+    let soundNotificationsEnabled =
+      localStorage.getItem(
+        'adminSoundNotifications'
+      ) !== 'false';
+
+    let wakeSettingEnabled =
+      localStorage.getItem(
+        'adminKeepScreenAwake'
+      ) === 'true';
+
+    let wakeLockSentinel = null;
+
+
+    function openSettings() {
+
+      const modal =
+        document.getElementById(
+          'settingsBackdrop'
+        );
+
+      if (modal) {
+        modal.classList.add('show');
+      }
+
+      updateSettingsButtons_();
+
+    }
+
+
+    function closeSettings() {
+
+      const modal =
+        document.getElementById(
+          'settingsBackdrop'
+        );
+
+      if (modal) {
+        modal.classList.remove('show');
+      }
+
+    }
+
+
+    function settingsBackdropClick(event) {
+
+      if (
+        event.target &&
+        event.target.id ===
+        'settingsBackdrop'
+      ) {
+        closeSettings();
+      }
+
+    }
+
+
+    function updateSettingsButtons_() {
+
+      const soundBtn =
+        document.getElementById(
+          'soundSettingBtn'
+        );
+
+      if (soundBtn) {
+
+        soundBtn.className =
+          'settings-toggle ' +
+          (
+            soundNotificationsEnabled
+              ? 'on'
+              : 'off'
+          );
+
+        soundBtn.textContent =
+          soundNotificationsEnabled
+            ? '🔊 เปิด'
+            : '🔇 ปิด';
+
+      }
+
+
+      const wakeBtn =
+        document.getElementById(
+          'wakeSettingBtn'
+        );
+
+      if (wakeBtn) {
+
+        wakeBtn.className =
+          'settings-toggle ' +
+          (
+            wakeSettingEnabled
+              ? 'on'
+              : 'off'
+          );
+
+        wakeBtn.textContent =
+          wakeSettingEnabled
+            ? '🔆 เปิด'
+            : '🌙 ปิด';
+
+      }
+
+    }
+
+
+    function toggleSoundSetting() {
+
+      soundNotificationsEnabled =
+        !soundNotificationsEnabled;
+
+      localStorage.setItem(
+        'adminSoundNotifications',
+        String(
+          soundNotificationsEnabled
+        )
+      );
+
+      updateSettingsButtons_();
+
+      /*
+       * การกดปุ่มนี้เป็น User Gesture
+       * ใช้เปิด/ปลุกระบบเสียงของ Browser
+       */
+      if (soundNotificationsEnabled) {
+
+        ensureNewOrderAudio_();
+
+        speakNewOrder_(
+          'ทดสอบระบบ'
+        );
+
+      }
+
+    }
+
+
+    function speakNewOrder_(orderId) {
+
+      if (!soundNotificationsEnabled) {
+        return;
+      }
+
+      if (
+        !('speechSynthesis' in window)
+      ) {
+
+        alert(
+          'Browser นี้ไม่รองรับเสียงพูด'
+        );
+
+        return;
+
+      }
+
+      try {
+
+        const synth =
+          window.speechSynthesis;
+
+        synth.cancel();
+
+        const utterance =
+          new SpeechSynthesisUtterance(
+            'มีออเดอร์ใหม่ครับ เลขที่ ' +
+            String(
+              orderId || 'ใหม่'
+            )
+          );
+
+        utterance.lang = 'th-TH';
+        utterance.rate = 0.92;
+        utterance.pitch = 1;
+        utterance.volume = 1;
+
+        const voices =
+          synth.getVoices();
+
+        const thaiVoice =
+          voices.find(
+            function(voice) {
+
+              return String(
+                voice.lang || ''
+              )
+                .toLowerCase()
+                .startsWith('th');
+
+            }
+          );
+
+        if (thaiVoice) {
+          utterance.voice = thaiVoice;
+        }
+
+        synth.speak(
+          utterance
+        );
+
+      } catch (error) {
+
+        console.warn(
+          'Speech notification error:',
+          error
+        );
+
+      }
+
+    }
+
+
+    function testConfiguredSound() {
+
+      soundNotificationsEnabled = true;
+
+      localStorage.setItem(
+        'adminSoundNotifications',
+        'true'
+      );
+
+      updateSettingsButtons_();
+
+      ensureNewOrderAudio_();
+
+      speakNewOrder_(
+        'A001'
+      );
+
+    }
+
+
+    async function requestWakeLock_() {
+
+      if (
+        !('wakeLock' in navigator)
+      ) {
+
+        alert(
+          'อุปกรณ์หรือ Browser นี้ไม่รองรับการเปิดหน้าจอตลอด'
+        );
+
+        return false;
+
+      }
+
+      try {
+
+        wakeLockSentinel =
+          await navigator.wakeLock.request(
+            'screen'
+          );
+
+        wakeLockSentinel.addEventListener(
+          'release',
+          function() {
+
+            wakeLockSentinel = null;
+            updateSettingsButtons_();
+
+          }
+        );
+
+        updateSettingsButtons_();
+
+        return true;
+
+      } catch (error) {
+
+        wakeLockSentinel = null;
+
+        console.warn(
+          'Wake Lock ไม่สำเร็จ:',
+          error
+        );
+
+        return false;
+
+      }
+
+    }
+
+
+    async function releaseWakeLock_() {
+
+      if (wakeLockSentinel) {
+
+        try {
+          await wakeLockSentinel.release();
+        } catch (error) {
+          console.warn(
+            'Wake Lock release error:',
+            error
+          );
+        }
+
+      }
+
+      wakeLockSentinel = null;
+      updateSettingsButtons_();
+
+    }
+
+
+    async function toggleWakeSetting() {
+
+      if (wakeSettingEnabled) {
+
+        wakeSettingEnabled = false;
+
+        localStorage.setItem(
+          'adminKeepScreenAwake',
+          'false'
+        );
+
+        await releaseWakeLock_();
+
+      } else {
+
+        const success =
+          await requestWakeLock_();
+
+        if (success) {
+
+          wakeSettingEnabled = true;
+
+          localStorage.setItem(
+            'adminKeepScreenAwake',
+            'true'
+          );
+
+        }
+
+      }
+
+      updateSettingsButtons_();
+
+    }
+
+
+    document.addEventListener(
+      'visibilitychange',
+      async function() {
+
+        if (
+          document.visibilityState ===
+          'visible' &&
+          wakeSettingEnabled &&
+          !wakeLockSentinel
+        ) {
+
+          await requestWakeLock_();
+
+        }
+
+      }
+    );
+
+
+    function toggleSettingPlaceholder(key) {
+
+      const map = {
+        cash: 'cashSettingBtn',
+        promptpay: 'promptpaySettingBtn',
+        government: 'governmentSettingBtn'
+      };
+
+      const btn =
+        document.getElementById(
+          map[key]
+        );
+
+      if (!btn) return;
+
+      const isOn =
+        btn.classList.contains('on');
+
+      btn.className =
+        'settings-toggle ' +
+        (
+          isOn ? 'off' : 'on'
+        );
+
+      btn.textContent =
+        isOn ? '🔴 ปิด' : '🟢 เปิด';
+
+      /*
+       * ยังไม่ส่ง Backend ใน V7
+       * จนกว่าจะตรวจ Setting จริง
+       */
+    }
+
+
+    function addMenuPlaceholder() {
+
+      alert(
+        'ส่วนเพิ่ม/แก้ไขเมนูจะเชื่อมกับ MENU จริงในขั้นถัดไป เพื่อไม่กระทบออเดอร์เก่า'
+      );
+
+    }
+
+
+    function changeQrPlaceholder() {
+
+      alert(
+        'ส่วนเปลี่ยน QR จะเชื่อมกับ PromptPay_QR_URL จริงในขั้นถัดไป เพื่อป้องกัน QR เดิมเสีย'
+      );
+
+    }
+
+
+    function initSettings_() {
+
+      updateSettingsButtons_();
+
+      if (wakeSettingEnabled) {
+        requestWakeLock_();
+      }
+
+      if (
+        'speechSynthesis' in window
+      ) {
+
+        window.speechSynthesis.getVoices();
+
+        window.speechSynthesis.addEventListener(
+          'voiceschanged',
+          function() {
+
+            window.speechSynthesis.getVoices();
+
+          }
+        );
+
+      }
+
+    }
+
+
     let isLoadingOrders = false;
 
 
@@ -2324,86 +3150,25 @@
       order
     ) {
 
-      try {
-
-        if (
-          !('speechSynthesis' in window)
-        ) {
-
-          console.warn(
-            'Browser ไม่รองรับเสียงพูด'
-          );
-
-          return;
-
-        }
-
-        const orderId =
-          order &&
-          (
-            order.orderId ||
-            order.Order_ID
-          )
-            ? String(
-                order.orderId ||
-                order.Order_ID
-              )
-            : 'ใหม่';
-
-        window.speechSynthesis.cancel();
-
-        const utterance =
-          new SpeechSynthesisUtterance(
-            'มีออเดอร์ใหม่ครับ เลขที่ ' +
-            orderId
-          );
-
-        utterance.lang =
-          'th-TH';
-
-        utterance.rate =
-          0.92;
-
-        utterance.pitch =
-          1.0;
-
-        utterance.volume =
-          1.0;
-
-        const voices =
-          window.speechSynthesis
-            .getVoices();
-
-        const thaiVoice =
-          voices.find(
-            function(voice) {
-
-              return String(
-                voice.lang || ''
-              )
-              .toLowerCase()
-              .startsWith('th');
-
-            }
-          );
-
-        if (thaiVoice) {
-          utterance.voice =
-            thaiVoice;
-        }
-
-        window.speechSynthesis.speak(
-          utterance
-        );
-
-      } catch (error) {
-
-        console.warn(
-          'Cannot speak new-order notification:',
-          error
-        );
-
+      if (!soundNotificationsEnabled) {
+        return;
       }
+
+      const orderId =
+        order &&
+        (
+          order.orderId ||
+          order.Order_ID
+        )
+          ? String(
+              order.orderId ||
+              order.Order_ID
+            )
+          : 'ใหม่';
+
+      speakNewOrder_(
+        orderId
+      );
 
     }
 
@@ -2510,21 +3275,26 @@
         event.stopPropagation();
       }
 
+      soundNotificationsEnabled = true;
+
+      localStorage.setItem(
+        'adminSoundNotifications',
+        'true'
+      );
+
+      updateSettingsButtons_();
+
       ensureNewOrderAudio_();
 
-      const testOrder = {
+      speakNewOrder_(
+        'A001'
+      );
+
+      showNewOrderAlert_({
         orderId: 'A001',
         customerName: 'ทดสอบระบบ',
         total: 50
-      };
-
-      playNewOrderSound_(
-        testOrder
-      );
-
-      showNewOrderAlert_(
-        testOrder
-      );
+      });
 
     }
 
@@ -2822,6 +3592,8 @@ async function loadOrders() {
 
 
 // โหลดครั้งแรก
+    initSettings_();
+
 loadOrders();
 
 
