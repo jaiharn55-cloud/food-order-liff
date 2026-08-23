@@ -258,7 +258,7 @@
       width: min(92vw, 420px);
       padding: 14px 16px;
       border-radius: 14px;
-      background: #06c755;
+      background: #dc2626;
       color: white;
       box-shadow: 0 8px 30px rgba(0,0,0,.22);
       cursor: pointer;
@@ -267,6 +267,24 @@
 
     .new-order-alert.show {
       display: block;
+    }
+
+    .new-order-alert.urgent {
+      background: #dc2626;
+      border: 3px solid #ffffff;
+      box-shadow:
+        0 0 0 4px rgba(220,38,38,.25),
+        0 10px 35px rgba(0,0,0,.35);
+      animation: newOrderUrgentPulse .75s ease-in-out infinite;
+    }
+
+    @keyframes newOrderUrgentPulse {
+      0%, 100% {
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        transform: translateX(-50%) scale(1.045);
+      }
     }
 
     .new-order-alert-title {
@@ -293,7 +311,7 @@
       border: none;
       border-radius: 8px;
       padding: 7px 10px;
-      background: #06c755;
+      background: #dc2626;
       color: white;
       font-size: 12px;
       font-weight: bold;
@@ -2302,79 +2320,93 @@
     }
 
 
-    function playNewOrderSound_() {
-
-      const ctx =
-        ensureNewOrderAudio_();
-
-      if (!ctx) {
-        return;
-      }
+    function playNewOrderSound_(
+      order
+    ) {
 
       try {
 
-        const now =
-          ctx.currentTime;
+        if (
+          !('speechSynthesis' in window)
+        ) {
 
-        [0, 0.20, 0.40].forEach(
-          function(offset, index) {
+          console.warn(
+            'Browser ไม่รองรับเสียงพูด'
+          );
 
-            const oscillator =
-              ctx.createOscillator();
+          return;
 
-            const gain =
-              ctx.createGain();
+        }
 
-            oscillator.type =
-              'sine';
+        const orderId =
+          order &&
+          (
+            order.orderId ||
+            order.Order_ID
+          )
+            ? String(
+                order.orderId ||
+                order.Order_ID
+              )
+            : 'ใหม่';
 
-            oscillator.frequency.value =
-              index === 2
-                ? 1046
-                : 880;
+        window.speechSynthesis.cancel();
 
-            gain.gain.setValueAtTime(
-              0,
-              now + offset
-            );
+        const utterance =
+          new SpeechSynthesisUtterance(
+            'มีออเดอร์ใหม่ครับ เลขที่ ' +
+            orderId
+          );
 
-            gain.gain.linearRampToValueAtTime(
-              0.18,
-              now + offset + 0.02
-            );
+        utterance.lang =
+          'th-TH';
 
-            gain.gain.exponentialRampToValueAtTime(
-              0.001,
-              now + offset + 0.16
-            );
+        utterance.rate =
+          0.92;
 
-            oscillator.connect(gain);
+        utterance.pitch =
+          1.0;
 
-            gain.connect(
-              ctx.destination
-            );
+        utterance.volume =
+          1.0;
 
-            oscillator.start(
-              now + offset
-            );
+        const voices =
+          window.speechSynthesis
+            .getVoices();
 
-            oscillator.stop(
-              now + offset + 0.18
-            );
+        const thaiVoice =
+          voices.find(
+            function(voice) {
 
-          }
+              return String(
+                voice.lang || ''
+              )
+              .toLowerCase()
+              .startsWith('th');
+
+            }
+          );
+
+        if (thaiVoice) {
+          utterance.voice =
+            thaiVoice;
+        }
+
+        window.speechSynthesis.speak(
+          utterance
         );
 
       } catch (error) {
 
         console.warn(
-          'Cannot play notification sound:',
+          'Cannot speak new-order notification:',
           error
         );
 
       }
 
     }
+
 
 
     function showNewOrderAlert_(
@@ -2418,17 +2450,20 @@
         );
 
       title.textContent =
-        '🔔 มีออเดอร์ใหม่! ' +
-        orderId;
+        '🚨 มีออเดอร์ใหม่!';
 
       detail.textContent =
+        'เลขที่ ' +
+        orderId +
+        ' • ' +
         customer +
         ' • ' +
         total.toLocaleString('th-TH') +
         ' บาท • กรุณามาดูที่หน้าร้าน';
 
       alert.classList.add(
-        'show'
+        'show',
+        'urgent'
       );
 
       clearTimeout(
@@ -2455,7 +2490,8 @@
 
       if (alert) {
         alert.classList.remove(
-          'show'
+          'show',
+          'urgent'
         );
       }
 
@@ -2476,13 +2512,19 @@
 
       ensureNewOrderAudio_();
 
-      playNewOrderSound_();
-
-      showNewOrderAlert_({
-        orderId: 'TEST',
+      const testOrder = {
+        orderId: 'A001',
         customerName: 'ทดสอบระบบ',
         total: 50
-      });
+      };
+
+      playNewOrderSound_(
+        testOrder
+      );
+
+      showNewOrderAlert_(
+        testOrder
+      );
 
     }
 
@@ -2532,12 +2574,17 @@
         newOrders.length > 0
       ) {
 
-        playNewOrderSound_();
-
-        showNewOrderAlert_(
+        const latestNewOrder =
           newOrders[
             newOrders.length - 1
-          ]
+          ];
+
+        playNewOrderSound_(
+          latestNewOrder
+        );
+
+        showNewOrderAlert_(
+          latestNewOrder
         );
 
       }
