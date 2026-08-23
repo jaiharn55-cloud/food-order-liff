@@ -228,6 +228,8 @@
       promptPayNumber: '',
   
       promptPayQrUrl: '',
+
+      promptPayQrData: '',
   
       governmentActive: false,
   
@@ -1563,7 +1565,7 @@
 
 
   ${
-    DATA.payment?.promptPayQrUrl
+    DATA.payment?.promptPayQrData
       ? `
 
         <img
@@ -2632,37 +2634,64 @@ showOrderSuccess(
 
   function savePaymentQR() {
 
-  const url =
-    DATA.payment &&
-    DATA.payment.promptPayQrUrl;
-
-
-  if (!url) {
-
-    alert(
-      'ยังไม่มี QR พร้อมเพย์ของร้าน'
-    );
-
-    return;
-
+    const dataUrl =
+      DATA.payment &&
+      DATA.payment.promptPayQrData;
+  
+  
+    if (!dataUrl) {
+  
+      alert(
+        'ยังไม่พบรูป QR พร้อมเพย์'
+      );
+  
+      return;
+  
+    }
+  
+  
+    try {
+  
+      const link =
+        document.createElement('a');
+  
+  
+      link.href =
+        dataUrl;
+  
+  
+      link.download =
+        'PromptPay_QR.png';
+  
+  
+      document.body.appendChild(
+        link
+      );
+  
+  
+      link.click();
+  
+  
+      document.body.removeChild(
+        link
+      );
+  
+  
+    } catch (error) {
+  
+      console.error(
+        'SAVE QR ERROR:',
+        error
+      );
+  
+  
+      alert(
+        'ไม่สามารถบันทึก QR อัตโนมัติได้ กรุณากดค้างที่รูป QR แล้วเลือกบันทึกรูป'
+      );
+  
+    }
+  
   }
-
-
-  /*
-   * เปิด QR ในหน้าต่างใหม่
-   * เพื่อให้ลูกค้าบันทึกรูปลงเครื่องได้
-   *
-   * วิธีนี้ปลอดภัยกว่าการบังคับ
-   * download จาก Google Drive
-   * ซึ่งบาง Browser/LINE ไม่อนุญาต
-   */
-
-  window.open(
-    url,
-    '_blank'
-  );
-
-}
   
   function removeItem(index) {
 
