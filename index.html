@@ -1611,7 +1611,7 @@
           style="margin-top:12px;"
           onclick="savePaymentQR()">
 
-          💾 บันทึก QR ไว้ในเครื่อง
+          📱 เปิด QR สำหรับบันทึก
 
         </button>
 
@@ -2634,9 +2634,102 @@ showOrderSuccess(
 
   function savePaymentQR() {
 
-  alert('กดปุ่มบันทึก QR สำเร็จ');
-
-}
+    const dataUrl =
+      DATA.payment &&
+      DATA.payment.promptPayQrData;
+  
+    if (!dataUrl) {
+  
+      alert(
+        'ไม่พบรูป QR พร้อมเพย์'
+      );
+  
+      return;
+  
+    }
+  
+    const win =
+      window.open(
+        '',
+        '_blank'
+      );
+  
+    if (!win) {
+  
+      alert(
+        'เบราว์เซอร์ไม่อนุญาตให้เปิด QR กรุณากดค้างที่รูป QR แล้วเลือกบันทึกรูปภาพ'
+      );
+  
+      return;
+  
+    }
+  
+    win.document.write(`
+      <!DOCTYPE html>
+  
+      <html lang="th">
+  
+      <head>
+  
+        <meta
+          charset="UTF-8"
+        >
+  
+        <meta
+          name="viewport"
+          content="width=device-width,initial-scale=1"
+        >
+  
+        <title>
+          QR พร้อมเพย์
+        </title>
+  
+      </head>
+  
+      <body
+        style="
+          margin:0;
+          padding:20px;
+          text-align:center;
+          background:#f5f5f5;
+          font-family:Arial,sans-serif;
+        "
+      >
+  
+        <div
+          style="
+            margin-bottom:15px;
+            font-size:16px;
+            color:#555;
+          "
+        >
+          📱 กดค้างที่ QR
+          <br>
+          แล้วเลือก
+          <b>บันทึกรูปภาพ</b>
+        </div>
+  
+        <img
+          src="${dataUrl}"
+          alt="QR พร้อมเพย์"
+          style="
+            width:100%;
+            max-width:500px;
+            height:auto;
+            display:block;
+            margin:auto;
+            background:white;
+          "
+        >
+  
+      </body>
+  
+      </html>
+    `);
+  
+    win.document.close();
+  
+  }
   
   function removeItem(index) {
 
