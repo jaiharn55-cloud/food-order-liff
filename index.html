@@ -272,6 +272,30 @@ async function startApp(){
 
     await loadData();
 
+
+    /*
+     * Rich Menu B
+     * เปิด:
+     * https://liff.line.me/2011202604-C2aNSUPF?page=orders
+     */
+    const requestedPage =
+      new URLSearchParams(
+        window.location.search
+      ).get('page');
+
+
+    if (
+      requestedPage ===
+      'orders' &&
+      typeof openMyOrders ===
+      'function'
+    ) {
+
+      await openMyOrders();
+
+    }
+
+
   }catch(error){
     showError(
       error.message || String(error)
