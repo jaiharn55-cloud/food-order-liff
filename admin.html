@@ -448,6 +448,102 @@
     }
 
 
+    .payment-status {
+
+      margin-top: 6px;
+
+      font-size: 13px;
+
+      font-weight: bold;
+
+    }
+
+
+    .payment-unpaid {
+
+      color: #c62828;
+
+    }
+
+
+    .payment-pending {
+
+      color: #b26a00;
+
+    }
+
+
+    .payment-paid {
+
+      color: #087a37;
+
+    }
+
+
+    .payment-refunded {
+
+      color: #666;
+
+    }
+
+
+    .payment-actions {
+
+      display: flex;
+
+      flex-wrap: wrap;
+
+      gap: 7px;
+
+      margin-top: 9px;
+
+    }
+
+
+    .payment-btn {
+
+      border: none;
+
+      padding: 9px 10px;
+
+      border-radius: 8px;
+
+      font-size: 12px;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+    }
+
+
+    .payment-btn-green {
+
+      background: #e5f8ec;
+
+      color: #087a37;
+
+    }
+
+
+    .payment-btn-yellow {
+
+      background: #fff4d6;
+
+      color: #8a5a00;
+
+    }
+
+
+    .payment-btn-gray {
+
+      background: #eeeeee;
+
+      color: #555;
+
+    }
+
+
     .actions {
 
       display: flex;
@@ -1321,12 +1417,7 @@
                     : '📱 QR Payment'
                 }
 
-                ${
-                  order.paymentStatus ===
-                  'PAID'
-                    ? ' • ชำระแล้ว'
-                    : ' • ยังไม่ชำระ'
-                }
+                ${renderPaymentStatus(order)}
 
               </div>
 
@@ -1352,148 +1443,327 @@
 
     function renderActions(order) {
 
-  if (order.status === 'NEW') {
+      let orderActions = '';
 
-    return `
-      <div class="actions">
+      if (order.status === 'NEW') {
 
-        <button
-          class="btn btn-primary"
-          onclick="
-            updateStatus(
-              '${escapeJs(order.orderId)}',
-              '${escapeJs(order.date)}',
-              'PREPARING'
-            )
-          ">
+        orderActions = `
+          <div class="actions">
 
-          👨‍🍳 รับออเดอร์
+            <button
+              class="btn btn-primary"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'PREPARING'
+                )
+              ">
 
-        </button>
+              👨‍🍳 รับออเดอร์
 
-        <button
-          class="btn btn-red"
-          onclick="
-            updateStatus(
-              '${escapeJs(order.orderId)}',
-              '${escapeJs(order.date)}',
-              'CANCELLED'
-            )
-          ">
+            </button>
 
-          ❌ ยกเลิก
+            <button
+              class="btn btn-red"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'CANCELLED'
+                )
+              ">
 
-        </button>
+              ❌ ยกเลิก
 
-      </div>
-    `;
+            </button>
 
-  }
+          </div>
+        `;
+
+      } else if (order.status === 'PREPARING') {
+
+        orderActions = `
+          <div class="actions">
+
+            <button
+              class="btn btn-blue"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'READY'
+                )
+              ">
+
+              ✅ พร้อมรับ
+
+            </button>
+
+          </div>
+        `;
+
+      } else if (order.status === 'READY') {
+
+        orderActions = `
+          <div class="actions">
+
+            <button
+              class="btn btn-primary"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'COMPLETED'
+                )
+              ">
+
+              ✔️ ลูกค้ารับแล้ว
+
+            </button>
+
+          </div>
+        `;
+
+      } else if (order.status === 'COMPLETED') {
+
+        orderActions = `
+          <div class="actions">
+
+            <div
+              style="
+                width:100%;
+                text-align:center;
+                padding:10px;
+                color:#666;
+                background:#f3f3f3;
+                border-radius:9px;
+              ">
+
+              ✔️ ออเดอร์เสร็จสิ้น
+
+            </div>
+
+          </div>
+        `;
+
+      } else if (order.status === 'CANCELLED') {
+
+        orderActions = `
+          <div class="actions">
+
+            <div
+              style="
+                width:100%;
+                text-align:center;
+                padding:10px;
+                color:#b00020;
+                background:#ffe8e8;
+                border-radius:9px;
+              ">
+
+              ❌ ออเดอร์ถูกยกเลิก
+
+            </div>
+
+          </div>
+        `;
+
+      }
+
+      /*
+       * Payment actions are intentionally independent
+       * from order status, so COMPLETED orders can still
+       * be marked PAID.
+       */
+
+      return (
+        orderActions +
+        renderPaymentActions(order)
+      );
+
+    }
 
 
-  if (order.status === 'PREPARING') {
+    function renderPaymentStatus(order) {
 
-    return `
-      <div class="actions">
+      const status =
+        String(
+          order.paymentStatus ||
+          'UNPAID'
+        ).toUpperCase();
 
-        <button
-          class="btn btn-blue"
-          onclick="
-            updateStatus(
-              '${escapeJs(order.orderId)}',
-              '${escapeJs(order.date)}',
-              'READY'
-            )
-          ">
+      const map = {
 
-          ✅ พร้อมรับ
+        UNPAID: {
+          text: '🔴 ยังไม่ชำระ',
+          cls: 'payment-unpaid'
+        },
 
-        </button>
+        PENDING: {
+          text: '🟡 รอตรวจสอบ',
+          cls: 'payment-pending'
+        },
 
-      </div>
-    `;
+        PAID: {
+          text: '🟢 ชำระแล้ว',
+          cls: 'payment-paid'
+        },
 
-  }
+        REFUNDED: {
+          text: '⚪ คืนเงินแล้ว',
+          cls: 'payment-refunded'
+        }
 
+      };
 
-  if (order.status === 'READY') {
+      const item =
+        map[status] ||
+        map.UNPAID;
 
-    return `
-      <div class="actions">
+      return `
+        <div
+          class="payment-status ${item.cls}"
+        >
+          ${item.text}
+        </div>
+      `;
 
-        <button
-          class="btn btn-primary"
-          onclick="
-            updateStatus(
-              '${escapeJs(order.orderId)}',
-              '${escapeJs(order.date)}',
-              'COMPLETED'
-            )
-          ">
-
-          ✔️ ลูกค้ารับแล้ว
-
-        </button>
-
-      </div>
-    `;
-
-  }
+    }
 
 
-  if (order.status === 'COMPLETED') {
+    function renderPaymentActions(order) {
 
-    return `
-      <div class="actions">
+      if (
+        String(order.status || '')
+          .toUpperCase() ===
+        'CANCELLED'
+      ) {
 
+        return '';
+
+      }
+
+      const paymentStatus =
+        String(
+          order.paymentStatus ||
+          'UNPAID'
+        ).toUpperCase();
+
+      let buttons = '';
+
+      if (paymentStatus !== 'PAID') {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-green"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'PAID'
+              )
+            "
+          >
+            💰 รับชำระแล้ว
+          </button>
+        `;
+
+      }
+
+      if (paymentStatus !== 'PENDING') {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-yellow"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'PENDING'
+              )
+            "
+          >
+            ⏳ รอตรวจสอบ
+          </button>
+        `;
+
+      }
+
+      if (
+        paymentStatus === 'PAID'
+      ) {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-gray"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'REFUNDED'
+              )
+            "
+          >
+            ↩️ คืนเงิน
+          </button>
+        `;
+
+      }
+
+      if (
+        paymentStatus === 'REFUNDED'
+      ) {
+
+        buttons += `
+          <button
+            class="payment-btn payment-btn-green"
+            onclick="
+              updatePaymentStatus(
+                '${escapeJs(order.orderId)}',
+                '${escapeJs(order.date)}',
+                'PAID'
+              )
+            "
+          >
+            ↩️ เปลี่ยนกลับเป็นชำระแล้ว
+          </button>
+        `;
+
+      }
+
+      if (!buttons) {
+        return '';
+      }
+
+      return `
         <div
           style="
-            width:100%;
-            text-align:center;
-            padding:10px;
-            color:#666;
-            background:#f3f3f3;
-            border-radius:9px;
-          ">
+            margin-top:10px;
+            padding-top:10px;
+            border-top:1px dashed #ddd;
+          "
+        >
 
-          ✔️ ออเดอร์เสร็จสิ้น
+          <div
+            style="
+              font-size:12px;
+              color:#777;
+              margin-bottom:4px;
+              font-weight:bold;
+            "
+          >
+            💳 การชำระเงิน
+          </div>
 
-        </div>
-
-      </div>
-    `;
-
-  }
-
-
-  if (order.status === 'CANCELLED') {
-
-    return `
-      <div class="actions">
-
-        <div
-          style="
-            width:100%;
-            text-align:center;
-            padding:10px;
-            color:#b00020;
-            background:#ffe8e8;
-            border-radius:9px;
-          ">
-
-          ❌ ออเดอร์ถูกยกเลิก
+          <div class="payment-actions">
+            ${buttons}
+          </div>
 
         </div>
+      `;
 
-      </div>
-    `;
-
-  }
-
-
-  return '';
-
-}
+    }
 
 
     /*
@@ -1602,6 +1872,115 @@
 
 
       } catch (error) {
+
+        alert(
+          error.message ||
+          String(error)
+        );
+
+      }
+
+    }
+
+
+    async function updatePaymentStatus(
+      orderId,
+      orderDate,
+      paymentStatus
+    ) {
+
+      const names = {
+
+        UNPAID:
+          'ยังไม่ชำระ',
+
+        PENDING:
+          'รอตรวจสอบ',
+
+        PAID:
+          'ชำระแล้ว',
+
+        REFUNDED:
+          'คืนเงินแล้ว'
+
+      };
+
+      const target =
+        names[paymentStatus] ||
+        paymentStatus;
+
+      if (
+        !confirm(
+          'เปลี่ยนสถานะการชำระเงินของ ' +
+          orderId +
+          ' เป็น "' +
+          target +
+          '" ?'
+        )
+      ) {
+
+        return;
+
+      }
+
+      try {
+
+        const response =
+          await fetch(
+            API_URL,
+            {
+
+              method: 'POST',
+
+              headers: {
+
+                'Content-Type':
+                  'text/plain;charset=utf-8'
+
+              },
+
+              body:
+                JSON.stringify({
+
+                  action:
+                    'updatePaymentStatus',
+
+                  orderId:
+                    orderId,
+
+                  orderDate:
+                    orderDate,
+
+                  paymentStatus:
+                    paymentStatus
+
+                })
+
+            }
+          );
+
+        const result =
+          await response.json();
+
+        if (
+          !result.success
+        ) {
+
+          throw new Error(
+            result.error ||
+            'เปลี่ยนสถานะการชำระเงินไม่สำเร็จ'
+          );
+
+        }
+
+        await loadOrders();
+
+      } catch (error) {
+
+        console.error(
+          'PAYMENT STATUS ERROR:',
+          error
+        );
 
         alert(
           error.message ||
