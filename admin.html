@@ -1382,6 +1382,72 @@
       }
     }
 
+
+    .menu-tabs {
+      display:flex;
+      gap:6px;
+      overflow-x:auto;
+      margin-bottom:12px;
+      border-bottom:1px solid #eee;
+    }
+    .menu-tab-btn {
+      border:none;
+      background:#f3f3f3;
+      color:#555;
+      border-radius:9px 9px 0 0;
+      padding:9px 12px;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .menu-tab-btn.active {
+      background:#06c755;
+      color:white;
+    }
+    .menu-system-panel { display:none; }
+    .menu-system-panel.show { display:block; }
+    .daily-summary, .special-summary {
+      background:#f8f8f8;
+      border-radius:10px;
+      padding:10px;
+      margin-bottom:10px;
+      font-size:12px;
+      color:#666;
+    }
+    .daily-item-card, .special-item-card {
+      display:grid;
+      grid-template-columns:64px minmax(0,1fr) auto;
+      gap:10px;
+      align-items:center;
+      border:1px solid #e6e6e6;
+      border-radius:11px;
+      padding:8px;
+      margin-bottom:8px;
+      background:#fff;
+    }
+    .daily-item-image, .special-item-image {
+      width:64px;height:64px;border-radius:9px;object-fit:cover;background:#f3f3f3;
+    }
+    .date-input {
+      border:1px solid #ddd;border-radius:9px;padding:9px 10px;font-size:14px;
+    }
+    .install-box {
+      border:1px solid #f1cf70;
+      background:#fff9e6;
+      border-radius:11px;
+      padding:11px;
+      margin-bottom:12px;
+    }
+    .install-btn {
+      border:none;border-radius:9px;padding:9px 11px;
+      background:#9a6700;color:white;font-weight:900;cursor:pointer;
+    }
+    @media (max-width:700px) {
+      .daily-item-card, .special-item-card { grid-template-columns:52px minmax(0,1fr); }
+      .daily-item-image, .special-item-image { width:52px;height:52px; }
+      .daily-item-card .menu-item-actions, .special-item-card .menu-item-actions { grid-column:1/-1; justify-content:stretch; }
+      .daily-item-card button, .special-item-card button { flex:1; }
+    }
   </style>
 
 </head>
@@ -1497,45 +1563,93 @@
 
       <div class="menu-manager-body">
 
-        <div class="menu-toolbar">
+        <div class="menu-tabs">
 
-          <input
-            id="menuSearchInput"
-            class="menu-search"
-            type="search"
-            placeholder="🔎 ค้นหาเมนู..."
-            oninput="renderMenuManager()"
-          >
+          <button id="menuTabMain" class="menu-tab-btn active" onclick="selectMenuManagerTab('main')">
+            🍛 เมนูหลัก
+          </button>
 
-          <select
-            id="menuStatusFilter"
-            class="menu-filter"
-            onchange="renderMenuManager()"
-          >
-            <option value="ALL">ทั้งหมด</option>
-            <option value="ON">🟢 กำลังขาย</option>
-            <option value="OFF">🔴 ของหมด / ปิดขาย</option>
-          </select>
+          <button id="menuTabDaily" class="menu-tab-btn" onclick="selectMenuManagerTab('daily')">
+            🍲 แกงวันนี้
+          </button>
 
-          <button
-            class="menu-add-btn"
-            onclick="openMenuForm()"
-          >
-            ➕ เพิ่มเมนู
+          <button id="menuTabSpecial" class="menu-tab-btn" onclick="selectMenuManagerTab('special')">
+            ⭐ เมนูพิเศษ
           </button>
 
         </div>
 
-        <div
-          id="menuManagerList"
-          class="menu-manager-list"
-        ></div>
+
+        <div id="menuPanelMain" class="menu-system-panel show">
+
+          <div class="install-box">
+            <b>🧰 ชุดเมนูแนะนำ</b>
+            <div class="menu-manager-note">
+              จะสำรอง Menu และ Menu_Options เดิมก่อน แล้วติดตั้งเมนูตามสั่ง + ข้าวราดแกง 1/2/3 อย่าง + ตัวเลือกพื้นฐานให้ใหม่
+            </div>
+            <div class="settings-actions">
+              <button class="install-btn" onclick="installRecommendedMenus()">
+                🧰 ติดตั้งชุดเมนูแนะนำ
+              </button>
+            </div>
+          </div>
+
+          <div class="menu-toolbar">
+            <input id="menuSearchInput" class="menu-search" type="search" placeholder="🔎 ค้นหาเมนู..." oninput="renderMenuManager()">
+            <select id="menuStatusFilter" class="menu-filter" onchange="renderMenuManager()">
+              <option value="ALL">ทั้งหมด</option>
+              <option value="ON">🟢 กำลังขาย</option>
+              <option value="OFF">🔴 ของหมด / ปิดขาย</option>
+            </select>
+            <button class="menu-add-btn" onclick="openMenuForm()">➕ เพิ่มเมนู</button>
+          </div>
+
+          <div id="menuManagerList" class="menu-manager-list"></div>
+
+          <div class="menu-manager-note">
+            💡 เมนูที่มีออเดอร์เก่า แนะนำให้ใช้ “ปิดขาย” แทนการลบ
+          </div>
+
+        </div>
+
+
+        <div id="menuPanelDaily" class="menu-system-panel">
+
+          <div class="daily-summary">
+            🍲 รายการนี้เป็น “กับข้าวของวันนี้” ลูกค้าจะเลือกจากรายการนี้เมื่อสั่งข้าวราดแกง 1 / 2 / 3 อย่าง
+          </div>
+
+          <div class="menu-toolbar">
+            <input id="dailyDateInput" class="date-input" type="date">
+            <button class="menu-add-btn" onclick="loadDailyDishesForDate()">🔄 โหลด</button>
+            <button class="menu-add-btn" onclick="openDailyDishForm()">➕ เพิ่มกับข้าว</button>
+          </div>
+
+          <div id="dailyDishList"></div>
+
+        </div>
+
+
+        <div id="menuPanelSpecial" class="menu-system-panel">
+
+          <div class="special-summary">
+            ⭐ เมนูพิเศษใช้กำหนดช่วงวันที่ขายได้ เช่น ข้าวน้ำพริก ข้าวหมูแดง หรือเมนูที่ทำเฉพาะบางวัน
+          </div>
+
+          <div class="menu-toolbar">
+            <button class="menu-add-btn" onclick="openSpecialMenuForm()">➕ เพิ่มเมนูพิเศษ</button>
+          </div>
+
+          <div id="specialMenuList"></div>
+
+        </div>
 
         <div class="menu-manager-note">
-          💡 แนะนำให้ใช้ “ปิดขาย” เมื่อของหมดแทนการลบ เพื่อไม่ให้กระทบข้อมูลออเดอร์เก่า
+          เมนูแกงวันนี้และเมนูพิเศษจะไม่ปะปนกับเมนูหลัก ทำให้เปลี่ยนรายวันได้ง่าย
         </div>
 
       </div>
+
 
     </div>
 
@@ -1680,6 +1794,62 @@
 
     </div>
 
+  </div>
+
+
+  <div id="dailyDishFormBackdrop" class="menu-form-backdrop" onclick="dailyDishFormBackdropClick(event)">
+    <div class="menu-form-panel">
+      <div class="menu-manager-head">
+        <div id="dailyDishFormTitle" class="menu-manager-head-title">➕ เพิ่มกับข้าว</div>
+        <button class="menu-manager-close" onclick="closeDailyDishForm()">×</button>
+      </div>
+      <div class="menu-form-body">
+        <form class="menu-form-grid" onsubmit="saveDailyDishFromForm(event)">
+          <input id="dailyDishFormId" type="hidden">
+          <div><label>วันที่</label><input id="dailyDishFormDate" class="date-input" type="date" required></div>
+          <div><label>ชื่อกับข้าว</label><input id="dailyDishFormName" required maxlength="120" placeholder="เช่น แกงเขียวหวานไก่"></div>
+          <div><label>รายละเอียด</label><textarea id="dailyDishFormDescription" maxlength="300" placeholder="เช่น ไม่เผ็ด / มีมะเขือ"></textarea></div>
+          <div>
+            <label>รูปกับข้าว</label>
+            <input id="dailyDishFormImageFile" type="file" accept="image/*" onchange="previewDailyDishImage(event)">
+            <img id="dailyDishFormImagePreview" class="menu-form-image-preview" alt="รูปกับข้าว" style="margin-top:8px">
+          </div>
+          <div class="menu-form-actions">
+            <button type="button" class="menu-form-cancel" onclick="closeDailyDishForm()">ยกเลิก</button>
+            <button type="submit" class="menu-form-save">💾 บันทึก</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="specialMenuFormBackdrop" class="menu-form-backdrop" onclick="specialMenuFormBackdropClick(event)">
+    <div class="menu-form-panel">
+      <div class="menu-manager-head">
+        <div id="specialMenuFormTitle" class="menu-manager-head-title">⭐ เพิ่มเมนูพิเศษ</div>
+        <button class="menu-manager-close" onclick="closeSpecialMenuForm()">×</button>
+      </div>
+      <div class="menu-form-body">
+        <form class="menu-form-grid" onsubmit="saveSpecialMenuFromForm(event)">
+          <input id="specialMenuFormId" type="hidden">
+          <div><label>เริ่มขายวันที่</label><input id="specialMenuFormStart" class="date-input" type="date" required></div>
+          <div><label>ถึงวันที่</label><input id="specialMenuFormEnd" class="date-input" type="date" required></div>
+          <div><label>ชื่อเมนูพิเศษ</label><input id="specialMenuFormName" required maxlength="120" placeholder="เช่น ชุดข้าวน้ำพริก"></div>
+          <div><label>ราคา</label><input id="specialMenuFormPrice" type="number" min="0" step="1" required placeholder="60"></div>
+          <div><label>รายละเอียด</label><textarea id="specialMenuFormDescription" maxlength="400" placeholder="รายละเอียดชุดอาหาร"></textarea></div>
+          <div>
+            <label>รูปเมนูพิเศษ</label>
+            <input id="specialMenuFormImageFile" type="file" accept="image/*" onchange="previewSpecialMenuImage(event)">
+            <img id="specialMenuFormImagePreview" class="menu-form-image-preview" alt="รูปเมนูพิเศษ" style="margin-top:8px">
+          </div>
+          <div class="menu-form-actions">
+            <button type="button" class="menu-form-cancel" onclick="closeSpecialMenuForm()">ยกเลิก</button>
+            <button type="submit" class="menu-form-save">💾 บันทึก</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <div
@@ -3271,868 +3441,277 @@
      */
 
 
+
     /* =====================================
-     * STANDALONE MENU MANAGER
+     * MENU MANAGER V2
+     * MAIN + DAILY DISHES + SPECIAL MENUS
      * ===================================== */
 
     let adminMenus_ = [];
+    let adminDailyDishes_ = [];
+    let adminSpecialMenus_ = [];
+    let menuManagerTab_ = 'main';
     let menuFormImageUrl_ = '';
+    let dailyDishImageUrl_ = '';
+    let specialMenuImageUrl_ = '';
+
+
+    function todayYmd_() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    }
 
 
     async function openMenuManager() {
-
-      const modal =
-        document.getElementById(
-          'menuManagerBackdrop'
-        );
-
+      const modal=document.getElementById('menuManagerBackdrop');
       if (!modal) return;
-
       modal.classList.add('show');
-
       try {
-
-        await loadAdminSettings_();
-
-        renderMenuManager();
-
-      } catch (error) {
-
-        alert(
-          error.message ||
-          String(error)
-        );
-
+        await loadMenuSystemData_();
+        const dateEl=document.getElementById('dailyDateInput');
+        if (dateEl && !dateEl.value) dateEl.value=todayYmd_();
+        selectMenuManagerTab(menuManagerTab_);
+      } catch(error) {
+        alert(error.message || String(error));
       }
-
     }
 
 
     function closeMenuManager() {
-
-      const modal =
-        document.getElementById(
-          'menuManagerBackdrop'
-        );
-
-      if (modal) {
-        modal.classList.remove('show');
-      }
-
-      closeMenuForm();
-
+      const modal=document.getElementById('menuManagerBackdrop');
+      if(modal) modal.classList.remove('show');
+      closeMenuForm(); closeDailyDishForm(); closeSpecialMenuForm();
     }
 
 
-    function menuManagerBackdropClick(
-      event
-    ) {
-
-      if (
-        event.target &&
-        event.target.id ===
-        'menuManagerBackdrop'
-      ) {
-        closeMenuManager();
-      }
-
+    function menuManagerBackdropClick(event) {
+      if(event.target && event.target.id==='menuManagerBackdrop') closeMenuManager();
     }
 
 
-    async function loadAdminSettings_() {
+    function selectMenuManagerTab(tab) {
+      menuManagerTab_=tab;
+      ['main','daily','special'].forEach(function(name){
+        const btn=document.getElementById('menuTab'+name.charAt(0).toUpperCase()+name.slice(1));
+        const panel=document.getElementById('menuPanel'+name.charAt(0).toUpperCase()+name.slice(1));
+        if(btn) btn.classList.toggle('active', name===tab);
+        if(panel) panel.classList.toggle('show', name===tab);
+      });
+      if(tab==='main') renderMenuManager();
+      if(tab==='daily') renderDailyDishList();
+      if(tab==='special') renderSpecialMenuList();
+    }
 
-      const response =
-        await fetch(
-          API_URL +
-          '?action=getAdminSettings',
-          {
-            method: 'GET'
-          }
-        );
 
-      if (!response.ok) {
-
-        throw new Error(
-          'โหลดข้อมูลเมนูไม่สำเร็จ'
-        );
-
-      }
-
-      const result =
-        await response.json();
-
-      if (
-        !result ||
-        !result.success
-      ) {
-
-        throw new Error(
-          result &&
-          result.error
-            ? result.error
-            : 'โหลดข้อมูลเมนูไม่สำเร็จ'
-        );
-
-      }
-
-      adminMenus_ =
-        Array.isArray(
-          result.menus
-        )
-          ? result.menus
-          : [];
-
+    async function loadMenuSystemData_() {
+      const response=await fetch(API_URL+'?action=getMenuSystemData',{method:'GET'});
+      if(!response.ok) throw new Error('โหลดระบบเมนูไม่สำเร็จ');
+      const result=await response.json();
+      if(!result || !result.success) throw new Error(result && result.error ? result.error : 'โหลดระบบเมนูไม่สำเร็จ');
+      adminMenus_=Array.isArray(result.menus)?result.menus:[];
+      adminDailyDishes_=Array.isArray(result.dailyDishes)?result.dailyDishes:[];
+      adminSpecialMenus_=Array.isArray(result.specialMenus)?result.specialMenus:[];
       return result;
-
     }
 
 
     function renderMenuManager() {
-
-      const list =
-        document.getElementById(
-          'menuManagerList'
-        );
-
-      if (!list) return;
-
-      const search =
-        String(
-          document.getElementById(
-            'menuSearchInput'
-          )?.value ||
-          ''
-        )
-        .trim()
-        .toLowerCase();
-
-      const filter =
-        String(
-          document.getElementById(
-            'menuStatusFilter'
-          )?.value ||
-          'ALL'
-        );
-
-      const visible =
-        adminMenus_.filter(
-          function(menu) {
-
-            const matchesSearch =
-              !search ||
-              String(
-                menu.name || ''
-              )
-              .toLowerCase()
-              .includes(search) ||
-              String(
-                menu.category || ''
-              )
-              .toLowerCase()
-              .includes(search);
-
-            if (!matchesSearch) {
-              return false;
-            }
-
-            if (
-              filter === 'ON'
-            ) {
-              return !!menu.available;
-            }
-
-            if (
-              filter === 'OFF'
-            ) {
-              return !menu.available;
-            }
-
-            return true;
-
-          }
-        );
-
-      if (!visible.length) {
-
-        list.innerHTML =
-          `
-            <div class="menu-empty">
-              ยังไม่มีเมนูที่ตรงกับการค้นหา
-            </div>
-          `;
-
-        return;
-
-      }
-
-
-      list.innerHTML =
-        visible.map(
-          function(menu) {
-
-            const image =
-              String(
-                menu.image || ''
-              ).trim();
-
-            const imageHtml =
-              image
-                ? `
-                    <img
-                      class="menu-item-image"
-                      src="${escapeHtml(image)}"
-                      alt="${escapeHtml(menu.name)}"
-                    >
-                  `
-                : `
-                    <div
-                      class="menu-item-image empty"
-                    >
-                      🍛
-                    </div>
-                  `;
-
-            const statusClass =
-              menu.available
-                ? 'on'
-                : 'off';
-
-            const statusText =
-              menu.available
-                ? '🟢 กำลังขาย'
-                : '🔴 ปิดขาย / ของหมด';
-
-            return `
-              <div class="menu-item-card">
-
-                ${imageHtml}
-
-                <div>
-
-                  <div class="menu-item-name">
-                    ${escapeHtml(menu.name || '-')}
-                  </div>
-
-                  <div class="menu-item-meta">
-                    ${Number(menu.price || 0).toLocaleString('th-TH')} บาท
-                    ${menu.category ? ' • ' + escapeHtml(menu.category) : ''}
-                  </div>
-
-                  <div
-                    class="menu-item-status ${statusClass}"
-                  >
-                    ${statusText}
-                  </div>
-
-                </div>
-
-                <div class="menu-item-actions">
-
-                  <button
-                    class="menu-action-btn menu-action-edit"
-                    onclick="openMenuForm('${escapeJs(menu.id)}')"
-                  >
-                    ✏️ แก้ไข
-                  </button>
-
-                  ${
-                    menu.available
-                      ? `
-                          <button
-                            class="menu-action-btn menu-action-off"
-                            onclick="toggleMenuAvailability('${escapeJs(menu.id)}', false)"
-                          >
-                            🔴 ปิดขาย
-                          </button>
-                        `
-                      : `
-                          <button
-                            class="menu-action-btn menu-action-on"
-                            onclick="toggleMenuAvailability('${escapeJs(menu.id)}', true)"
-                          >
-                            🟢 เปิดขาย
-                          </button>
-                        `
-                  }
-
-                </div>
-
-              </div>
-            `;
-
-          }
-        )
-        .join('');
-
+      const list=document.getElementById('menuManagerList');
+      if(!list) return;
+      const search=String(document.getElementById('menuSearchInput')?.value||'').trim().toLowerCase();
+      const filter=String(document.getElementById('menuStatusFilter')?.value||'ALL');
+      const visible=adminMenus_.filter(function(menu){
+        const matches=!search || String(menu.name||'').toLowerCase().includes(search) || String(menu.category||'').toLowerCase().includes(search);
+        if(!matches) return false;
+        if(filter==='ON') return !!menu.available;
+        if(filter==='OFF') return !menu.available;
+        return true;
+      });
+      if(!visible.length){list.innerHTML='<div class="menu-empty">ยังไม่มีเมนูที่ตรงกับการค้นหา</div>';return;}
+      list.innerHTML=visible.map(function(menu){
+        const image=String(menu.image||'');
+        return `<div class="menu-item-card">
+          ${image ? `<img class="menu-item-image" src="${escapeHtml(image)}" alt="${escapeHtml(menu.name)}">` : `<div class="menu-item-image empty">🍛</div>`}
+          <div>
+            <div class="menu-item-name">${escapeHtml(menu.name||'-')}</div>
+            <div class="menu-item-meta">${Number(menu.price||0).toLocaleString('th-TH')} บาท${menu.category?' • '+escapeHtml(menu.category):''}</div>
+            <div class="menu-item-status ${menu.available?'on':'off'}">${menu.available?'🟢 กำลังขาย':'🔴 ปิดขาย / ของหมด'}</div>
+          </div>
+          <div class="menu-item-actions">
+            <button class="menu-action-btn menu-action-edit" onclick="openMenuForm('${escapeJs(menu.id)}')">✏️ แก้ไข</button>
+            ${menu.available ? `<button class="menu-action-btn menu-action-off" onclick="toggleMenuAvailability('${escapeJs(menu.id)}',false)">🔴 ปิดขาย</button>` : `<button class="menu-action-btn menu-action-on" onclick="toggleMenuAvailability('${escapeJs(menu.id)}',true)">🟢 เปิดขาย</button>`}
+          </div>
+        </div>`;
+      }).join('');
     }
 
 
-    function findAdminMenu_(
-      menuId
-    ) {
-
-      return adminMenus_.find(
-        function(menu) {
-
-          return String(
-            menu.id
-          ) === String(
-            menuId
-          );
-
-        }
-      );
-
+    async function installRecommendedMenus() {
+      const ok=confirm('ระบบจะสำรอง Menu และ Menu_Options เดิม แล้วติดตั้งชุดเมนูแนะนำใหม่\n\nต้องการทำต่อหรือไม่?');
+      if(!ok) return;
+      try{
+        const response=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action:'installRecommendedMenuSystem',confirm:'YES'})});
+        const result=await response.json();
+        if(!result.success) throw new Error(result.error||'ติดตั้งเมนูไม่สำเร็จ');
+        alert('ติดตั้งเมนูแนะนำสำเร็จ\nเมนู '+result.mainMenus+' รายการ\nตัวเลือก '+result.options+' รายการ');
+        await loadMenuSystemData_();
+        selectMenuManagerTab('main');
+        if(typeof loadOrders==='function') loadOrders();
+      }catch(error){alert(error.message||String(error));}
     }
 
 
-    function openMenuForm(
-      menuId
-    ) {
+    function findAdminMenu_(menuId){return adminMenus_.find(function(menu){return String(menu.id)===String(menuId);});}
 
-      const modal =
-        document.getElementById(
-          'menuFormBackdrop'
-        );
-
-      if (!modal) return;
-
-      const menu =
-        menuId
-          ? findAdminMenu_(
-              menuId
-            )
-          : null;
-
-      document.getElementById(
-        'menuFormTitle'
-      ).textContent =
-        menu
-          ? '✏️ แก้ไขเมนู'
-          : '➕ เพิ่มเมนู';
-
-
-      document.getElementById(
-        'menuFormId'
-      ).value =
-        menu
-          ? String(
-              menu.id || ''
-            )
-          : '';
-
-
-      document.getElementById(
-        'menuFormName'
-      ).value =
-        menu
-          ? String(
-              menu.name || ''
-            )
-          : '';
-
-
-      document.getElementById(
-        'menuFormPrice'
-      ).value =
-        menu
-          ? String(
-              menu.price || 0
-            )
-          : '';
-
-
-      document.getElementById(
-        'menuFormCategory'
-      ).value =
-        menu
-          ? String(
-              menu.category || ''
-            )
-          : '';
-
-
-      document.getElementById(
-        'menuFormDescription'
-      ).value =
-        menu
-          ? String(
-              menu.description || ''
-            )
-          : '';
-
-
-      menuFormImageUrl_ =
-        menu
-          ? String(
-              menu.image || ''
-            )
-          : '';
-
-
-      document.getElementById(
-        'menuFormImageFile'
-      ).value =
-        '';
-
-
-      document.getElementById(
-        'menuFormImagePreview'
-      ).src =
-        menuFormImageUrl_ ||
-        createPlaceholderMenuImage_();
-
-
-      modal.classList.add(
-        'show'
-      );
-
+    function openMenuForm(menuId){
+      const modal=document.getElementById('menuFormBackdrop'); if(!modal)return;
+      const menu=menuId?findAdminMenu_(menuId):null;
+      document.getElementById('menuFormTitle').textContent=menu?'✏️ แก้ไขเมนู':'➕ เพิ่มเมนู';
+      document.getElementById('menuFormId').value=menu?String(menu.id):'';
+      document.getElementById('menuFormName').value=menu?String(menu.name||''):'';
+      document.getElementById('menuFormPrice').value=menu?String(menu.price||0):'';
+      document.getElementById('menuFormCategory').value=menu?String(menu.category||''):'';
+      document.getElementById('menuFormDescription').value=menu?String(menu.description||''):'';
+      menuFormImageUrl_=menu?String(menu.image||''):'';
+      document.getElementById('menuFormImageFile').value='';
+      document.getElementById('menuFormImagePreview').src=menuFormImageUrl_||createPlaceholderMenuImage_();
+      modal.classList.add('show');
     }
 
+    function closeMenuForm(){const modal=document.getElementById('menuFormBackdrop');if(modal)modal.classList.remove('show');}
+    function menuFormBackdropClick(event){if(event.target&&event.target.id==='menuFormBackdrop')closeMenuForm();}
+    function previewMenuImage(event){const file=event.target.files&&event.target.files[0];if(!file)return;if(file.size>4*1024*1024){alert('รูปใหญ่เกิน 4 MB');event.target.value='';return;}const reader=new FileReader();reader.onload=e=>document.getElementById('menuFormImagePreview').src=e.target.result;reader.readAsDataURL(file);}
 
-    function closeMenuForm() {
-
-      const modal =
-        document.getElementById(
-          'menuFormBackdrop'
-        );
-
-      if (modal) {
-        modal.classList.remove(
-          'show'
-        );
-      }
-
-    }
-
-
-    function menuFormBackdropClick(
-      event
-    ) {
-
-      if (
-        event.target &&
-        event.target.id ===
-        'menuFormBackdrop'
-      ) {
-
-        closeMenuForm();
-
-      }
-
-    }
-
-
-    function createPlaceholderMenuImage_() {
-
-      return (
-        'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(
-          `
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="180"
-              height="180"
-            >
-              <rect
-                width="100%"
-                height="100%"
-                fill="#f3f3f3"
-              />
-              <text
-                x="50%"
-                y="52%"
-                text-anchor="middle"
-                font-size="70"
-              >
-                🍛
-              </text>
-            </svg>
-          `
-        )
-      );
-
-    }
-
-
-    function previewMenuImage(
-      event
-    ) {
-
-      const file =
-        event &&
-        event.target &&
-        event.target.files &&
-        event.target.files[0];
-
-      if (!file) {
-        return;
-      }
-
-      if (
-        !file.type.startsWith(
-          'image/'
-        )
-      ) {
-
-        alert(
-          'กรุณาเลือกไฟล์รูปภาพ'
-        );
-
-        return;
-
-      }
-
-      if (
-        file.size >
-        4 * 1024 * 1024
-      ) {
-
-        alert(
-          'รูปใหญ่เกิน 4 MB'
-        );
-
-        event.target.value =
-          '';
-
-        return;
-
-      }
-
-      const reader =
-        new FileReader();
-
-      reader.onload =
-        function(loadEvent) {
-
-          document.getElementById(
-            'menuFormImagePreview'
-          ).src =
-            loadEvent.target.result;
-
-        };
-
-      reader.readAsDataURL(
-        file
-      );
-
-    }
-
-
-    async function saveMenuFromForm(
-      event
-    ) {
-
+    async function saveMenuFromForm(event){
       event.preventDefault();
+      const id=String(document.getElementById('menuFormId').value||'').trim();
+      const oldMenu=id?findAdminMenu_(id):null;
+      const file=document.getElementById('menuFormImageFile').files[0];
+      let imageUrl=menuFormImageUrl_||'';
+      try{
+        if(file) imageUrl=await uploadAdminImageFromFile_(file);
+        const menu={id:id,name:document.getElementById('menuFormName').value.trim(),price:Number(document.getElementById('menuFormPrice').value||0),category:document.getElementById('menuFormCategory').value.trim(),description:document.getElementById('menuFormDescription').value.trim(),image:imageUrl,available:oldMenu?!!oldMenu.available:true};
+        const action=id?'saveMenu':'createMenu';
+        const result=await postAdminAction_({action:action,menu:menu});
+        if(!result.success)throw new Error(result.error||'บันทึกเมนูไม่สำเร็จ');
+        closeMenuForm();await loadMenuSystemData_();renderMenuManager();
+      }catch(error){alert(error.message||String(error));}
+    }
 
-      const id =
-        String(
-          document.getElementById(
-            'menuFormId'
-          ).value ||
-          ''
-        ).trim();
+    async function uploadAdminImageFromFile_(file){
+      const dataUrl=await readFileAsDataUrl_(file);
+      const result=await postAdminAction_({action:'uploadAdminImage',image:{dataUrl:dataUrl,fileName:file.name}});
+      if(!result.success)throw new Error(result.error||'อัปโหลดรูปไม่สำเร็จ');
+      return result.url||'';
+    }
 
-      const oldMenu =
-        id
-          ? findAdminMenu_(
-              id
-            )
-          : null;
+    async function postAdminAction_(payload){
+      const response=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+      return await response.json();
+    }
 
-      const file =
-        document.getElementById(
-          'menuFormImageFile'
-        ).files[0];
+    function readFileAsDataUrl_(file){return new Promise(function(resolve,reject){const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('อ่านรูปไม่สำเร็จ'));r.readAsDataURL(file);});}
+    function createPlaceholderMenuImage_(){return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><rect width="100%" height="100%" fill="#f3f3f3"/><text x="50%" y="55%" text-anchor="middle" font-size="70">🍛</text></svg>');}
 
-      let imageUrl =
-        menuFormImageUrl_ || '';
-
-
-      try {
-
-        if (file) {
-
-          const dataUrl =
-            await readFileAsDataUrl_(
-              file
-            );
-
-          const uploadResponse =
-            await fetch(
-              API_URL,
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type':
-                    'text/plain;charset=utf-8'
-                },
-                body:
-                  JSON.stringify({
-                    action:
-                      'uploadAdminImage',
-                    image: {
-                      dataUrl:
-                        dataUrl,
-                      fileName:
-                        file.name
-                    }
-                  })
-              }
-            );
-
-          const uploadResult =
-            await uploadResponse.json();
-
-          if (
-            !uploadResult.success
-          ) {
-
-            throw new Error(
-              uploadResult.error ||
-              'อัปโหลดรูปไม่สำเร็จ'
-            );
-
-          }
-
-          imageUrl =
-            uploadResult.url || '';
-
-        }
-
-
-        const menu = {
-
-          id: id,
-
-          name:
-            document.getElementById(
-              'menuFormName'
-            ).value.trim(),
-
-          price:
-            Number(
-              document.getElementById(
-                'menuFormPrice'
-              ).value || 0
-            ),
-
-          category:
-            document.getElementById(
-              'menuFormCategory'
-            ).value.trim(),
-
-          description:
-            document.getElementById(
-              'menuFormDescription'
-            ).value.trim(),
-
-          image:
-            imageUrl,
-
-          available:
-            oldMenu
-              ? !!oldMenu.available
-              : true
-
-        };
-
-
-        let action =
-          id
-            ? 'saveMenu'
-            : 'createMenu';
-
-
-        const response =
-          await fetch(
-            API_URL,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type':
-                  'text/plain;charset=utf-8'
-              },
-              body:
-                JSON.stringify({
-                  action:
-                    action,
-                  menu:
-                    menu
-                })
-            }
-          );
-
-
-        const result =
-          await response.json();
-
-
-        if (
-          !result ||
-          !result.success
-        ) {
-
-          throw new Error(
-            result &&
-            result.error
-              ? result.error
-              : 'บันทึกเมนูไม่สำเร็จ'
-          );
-
-        }
-
-
-        closeMenuForm();
-
-        await loadAdminSettings_();
-
-        renderMenuManager();
-
-
-      } catch (error) {
-
-        alert(
-          error.message ||
-          String(error)
-        );
-
-      }
-
+    async function toggleMenuAvailability(menuId,available){
+      const menu=findAdminMenu_(menuId);if(!menu)return;
+      if(!confirm((available?'เปิดขาย ':'ปิดขาย ')+menu.name+' ใช่หรือไม่?'))return;
+      try{const result=await postAdminAction_({action:'toggleMenuAvailable',menuId:menuId,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');menu.available=available;renderMenuManager();}catch(error){alert(error.message||String(error));}
     }
 
 
-    function readFileAsDataUrl_(
-      file
-    ) {
-
-      return new Promise(
-        function(resolve, reject) {
-
-          const reader =
-            new FileReader();
-
-          reader.onload =
-            function() {
-
-              resolve(
-                reader.result
-              );
-
-            };
-
-          reader.onerror =
-            function() {
-
-              reject(
-                new Error(
-                  'อ่านรูปไม่สำเร็จ'
-                )
-              );
-
-            };
-
-          reader.readAsDataURL(
-            file
-          );
-
-        }
-      );
-
+    function renderDailyDishList(){
+      const list=document.getElementById('dailyDishList');if(!list)return;
+      const date=document.getElementById('dailyDateInput')?.value||todayYmd_();
+      const visible=adminDailyDishes_.filter(function(d){return String(d.date||'')===date;});
+      const activeCount=visible.filter(d=>d.available).length;
+      if(!visible.length){list.innerHTML=`<div class="menu-empty">วันนี้ยังไม่มีรายการกับข้าว<br>กด “➕ เพิ่มกับข้าว” เพื่อเริ่มเพิ่ม</div>`;return;}
+      list.innerHTML=`<div class="daily-summary">วันที่ ${escapeHtml(date)} • มี ${activeCount} รายการที่เปิดขาย</div>`+visible.map(function(d){return `<div class="daily-item-card">
+        ${d.image?`<img class="daily-item-image" src="${escapeHtml(d.image)}" alt="${escapeHtml(d.name)}">`:`<div class="daily-item-image" style="display:flex;align-items:center;justify-content:center;font-size:25px">🍲</div>`}
+        <div><div class="menu-item-name">${escapeHtml(d.name)}</div><div class="menu-item-meta">${escapeHtml(d.description||'')}</div><div class="menu-item-status ${d.available?'on':'off'}">${d.available?'🟢 ใช้ขายวันนี้':'🔴 ปิด'}</div></div>
+        <div class="menu-item-actions"><button class="menu-action-btn menu-action-edit" onclick="openDailyDishForm('${escapeJs(d.id)}')">✏️</button>${d.available?`<button class="menu-action-btn menu-action-off" onclick="toggleDailyDishUI('${escapeJs(d.id)}',false)">🔴 ปิด</button>`:`<button class="menu-action-btn menu-action-on" onclick="toggleDailyDishUI('${escapeJs(d.id)}',true)">🟢 เปิด</button>`}</div>
+      </div>`;}).join('');
     }
 
-
-    async function toggleMenuAvailability(
-      menuId,
-      available
-    ) {
-
-      const menu =
-        findAdminMenu_(
-          menuId
-        );
-
-      if (!menu) {
-        return;
-      }
-
-      const actionText =
-        available
-          ? 'เปิดขาย'
-          : 'ปิดขาย';
-
-      if (
-        !confirm(
-          actionText +
-          ' "' +
-          menu.name +
-          '" ใช่หรือไม่?'
-        )
-      ) {
-        return;
-      }
-
-
-      try {
-
-        const response =
-          await fetch(
-            API_URL,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type':
-                  'text/plain;charset=utf-8'
-              },
-              body:
-                JSON.stringify({
-                  action:
-                    'toggleMenuAvailable',
-                  menuId:
-                    menuId,
-                  available:
-                    available
-                })
-            }
-          );
-
-
-        const result =
-          await response.json();
-
-
-        if (
-          !result ||
-          !result.success
-        ) {
-
-          throw new Error(
-            result &&
-            result.error
-              ? result.error
-              : 'เปลี่ยนสถานะเมนูไม่สำเร็จ'
-          );
-
-        }
-
-
-        menu.available =
-          available;
-
-        renderMenuManager();
-
-
-      } catch (error) {
-
-        alert(
-          error.message ||
-          String(error)
-        );
-
-      }
-
+    async function loadDailyDishesForDate(){
+      try{await loadMenuSystemData_();renderDailyDishList();}catch(error){alert(error.message||String(error));}
     }
 
+    function openDailyDishForm(id){
+      const d=id?adminDailyDishes_.find(x=>String(x.id)===String(id)):null;
+      const modal=document.getElementById('dailyDishFormBackdrop');if(!modal)return;
+      document.getElementById('dailyDishFormTitle').textContent=d?'✏️ แก้ไขกับข้าว':'➕ เพิ่มกับข้าว';
+      document.getElementById('dailyDishFormId').value=d?d.id:'';
+      document.getElementById('dailyDishFormDate').value=d?d.date:(document.getElementById('dailyDateInput')?.value||todayYmd_());
+      document.getElementById('dailyDishFormName').value=d?d.name:'';
+      document.getElementById('dailyDishFormDescription').value=d?d.description||'':'';
+      dailyDishImageUrl_=d?d.image||'':'';
+      document.getElementById('dailyDishFormImageFile').value='';
+      document.getElementById('dailyDishFormImagePreview').src=dailyDishImageUrl_||createPlaceholderMenuImage_();
+      modal.classList.add('show');
+    }
+    function closeDailyDishForm(){const m=document.getElementById('dailyDishFormBackdrop');if(m)m.classList.remove('show');}
+    function dailyDishFormBackdropClick(event){if(event.target&&event.target.id==='dailyDishFormBackdrop')closeDailyDishForm();}
+    function previewDailyDishImage(event){const file=event.target.files&&event.target.files[0];if(!file)return;const r=new FileReader();r.onload=e=>document.getElementById('dailyDishFormImagePreview').src=e.target.result;r.readAsDataURL(file);}
+    async function saveDailyDishFromForm(event){
+      event.preventDefault();
+      try{
+        const id=document.getElementById('dailyDishFormId').value.trim();
+        const old=id?adminDailyDishes_.find(x=>String(x.id)===String(id)):null;
+        const file=document.getElementById('dailyDishFormImageFile').files[0];
+        let imageUrl=dailyDishImageUrl_||''; if(file) imageUrl=await uploadAdminImageFromFile_(file);
+        const dish={id:id,date:document.getElementById('dailyDishFormDate').value,name:document.getElementById('dailyDishFormName').value.trim(),description:document.getElementById('dailyDishFormDescription').value.trim(),image:imageUrl,available:old?!!old.available:true};
+        const action=id?'saveDailyDish':'createDailyDish';
+        const result=await postAdminAction_({action:action,dish:dish});if(!result.success)throw new Error(result.error||'บันทึกกับข้าวไม่สำเร็จ');
+        closeDailyDishForm();await loadMenuSystemData_();document.getElementById('dailyDateInput').value=dish.date;renderDailyDishList();
+      }catch(error){alert(error.message||String(error));}
+    }
+    async function toggleDailyDishUI(id,available){try{const result=await postAdminAction_({action:'toggleDailyDish',dishId:id,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');await loadMenuSystemData_();renderDailyDishList();}catch(error){alert(error.message||String(error));}}
+
+
+    function renderSpecialMenuList(){
+      const list=document.getElementById('specialMenuList');if(!list)return;
+      if(!adminSpecialMenus_.length){list.innerHTML='<div class="menu-empty">ยังไม่มีเมนูพิเศษ</div>';return;}
+      list.innerHTML=adminSpecialMenus_.map(function(m){return `<div class="special-item-card">
+        ${m.image?`<img class="special-item-image" src="${escapeHtml(m.image)}" alt="${escapeHtml(m.name)}">`:`<div class="special-item-image" style="display:flex;align-items:center;justify-content:center;font-size:25px">⭐</div>`}
+        <div><div class="menu-item-name">${escapeHtml(m.name)}</div><div class="menu-item-meta">${Number(m.price||0).toLocaleString('th-TH')} บาท • ${escapeHtml(m.startDate)} ถึง ${escapeHtml(m.endDate)}</div><div class="menu-item-status ${m.available?'on':'off'}">${m.available?'🟢 เปิด':'🔴 ปิด'}</div></div>
+        <div class="menu-item-actions"><button class="menu-action-btn menu-action-edit" onclick="openSpecialMenuForm('${escapeJs(m.id)}')">✏️</button>${m.available?`<button class="menu-action-btn menu-action-off" onclick="toggleSpecialMenuUI('${escapeJs(m.id)}',false)">🔴 ปิด</button>`:`<button class="menu-action-btn menu-action-on" onclick="toggleSpecialMenuUI('${escapeJs(m.id)}',true)">🟢 เปิด</button>`}</div>
+      </div>`;}).join('');
+    }
+
+    function openSpecialMenuForm(id){
+      const m=id?adminSpecialMenus_.find(x=>String(x.id)===String(id)):null;
+      const modal=document.getElementById('specialMenuFormBackdrop');if(!modal)return;
+      document.getElementById('specialMenuFormTitle').textContent=m?'✏️ แก้ไขเมนูพิเศษ':'⭐ เพิ่มเมนูพิเศษ';
+      document.getElementById('specialMenuFormId').value=m?m.id:'';
+      document.getElementById('specialMenuFormStart').value=m?m.startDate:todayYmd_();
+      document.getElementById('specialMenuFormEnd').value=m?m.endDate:todayYmd_();
+      document.getElementById('specialMenuFormName').value=m?m.name:'';
+      document.getElementById('specialMenuFormPrice').value=m?m.price:'';
+      document.getElementById('specialMenuFormDescription').value=m?m.description||'':'';
+      specialMenuImageUrl_=m?m.image||'':'';
+      document.getElementById('specialMenuFormImageFile').value='';
+      document.getElementById('specialMenuFormImagePreview').src=specialMenuImageUrl_||createPlaceholderMenuImage_();
+      modal.classList.add('show');
+    }
+    function closeSpecialMenuForm(){const m=document.getElementById('specialMenuFormBackdrop');if(m)m.classList.remove('show');}
+    function specialMenuFormBackdropClick(event){if(event.target&&event.target.id==='specialMenuFormBackdrop')closeSpecialMenuForm();}
+    function previewSpecialMenuImage(event){const file=event.target.files&&event.target.files[0];if(!file)return;const r=new FileReader();r.onload=e=>document.getElementById('specialMenuFormImagePreview').src=e.target.result;r.readAsDataURL(file);}
+    async function saveSpecialMenuFromForm(event){
+      event.preventDefault();
+      try{
+        const id=document.getElementById('specialMenuFormId').value.trim();
+        const old=id?adminSpecialMenus_.find(x=>String(x.id)===String(id)):null;
+        const file=document.getElementById('specialMenuFormImageFile').files[0];
+        let imageUrl=specialMenuImageUrl_||'';if(file)imageUrl=await uploadAdminImageFromFile_(file);
+        const menu={id:id,startDate:document.getElementById('specialMenuFormStart').value,endDate:document.getElementById('specialMenuFormEnd').value,name:document.getElementById('specialMenuFormName').value.trim(),price:Number(document.getElementById('specialMenuFormPrice').value||0),description:document.getElementById('specialMenuFormDescription').value.trim(),image:imageUrl,available:old?!!old.available:true};
+        const action=id?'saveSpecialMenu':'createSpecialMenu';
+        const result=await postAdminAction_({action:action,menu:menu});if(!result.success)throw new Error(result.error||'บันทึกเมนูพิเศษไม่สำเร็จ');
+        closeSpecialMenuForm();await loadMenuSystemData_();renderSpecialMenuList();
+      }catch(error){alert(error.message||String(error));}
+    }
+    async function toggleSpecialMenuUI(id,available){try{const result=await postAdminAction_({action:'toggleSpecialMenu',menuId:id,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');await loadMenuSystemData_();renderSpecialMenuList();}catch(error){alert(error.message||String(error));}}
 
     /* =====================================
      * SETTINGS / SOUND / WAKE LOCK
