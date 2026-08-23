@@ -1671,7 +1671,15 @@
 
       }
 
-      if (paymentStatus !== 'PENDING') {
+      /*
+       * PENDING ใช้กับการชำระแบบ QR เท่านั้น
+       * เงินสดที่ PAID แล้วไม่ควรมีปุ่ม "รอตรวจสอบ"
+       */
+      if (
+        paymentStatus !== 'PENDING' &&
+        paymentStatus !== 'PAID' &&
+        order.payment !== 'CASH'
+      ) {
 
         buttons += `
           <button
