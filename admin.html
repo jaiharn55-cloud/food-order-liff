@@ -2530,6 +2530,15 @@ async function loadOrders() {
 
   isLoadingOrders = true;
 
+  const appEl = document.getElementById('app');
+  if (appEl) {
+    appEl.innerHTML = `
+      <div class="loading">
+        🔄 กำลังเชื่อมต่อระบบออเดอร์...
+      </div>
+    `;
+  }
+
   try {
 
     const controller =
@@ -2576,9 +2585,23 @@ async function loadOrders() {
     }
 
 
-    const data =
-      await response.json();
+    let data;
 
+    try {
+      data = await Promise.race([
+        response.json(),
+        new Promise(function(_, reject) {
+          setTimeout(function() {
+            reject(new Error('Backend ตอบกลับข้อมูลช้าเกิน 10 วินาที'));
+          }, 10000);
+        })
+      ]);
+    } catch (jsonError) {
+      throw new Error(
+        'อ่านข้อมูลจาก Backend ไม่สำเร็จ: ' +
+        (jsonError.message || String(jsonError))
+      );
+    }
 
     console.log(
       'ORDERS:',
