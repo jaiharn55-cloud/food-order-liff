@@ -1031,7 +1031,7 @@
     });
 
 
-    alert(
+    showNotice(
       'เพิ่ม ' +
       menu.name +
       ' ลงตะกร้าแล้ว'
@@ -1135,12 +1135,128 @@
 
   }
 
+  function showNotice(message) {
+
+  const old =
+    document.getElementById(
+      'noticeModal'
+    );
+
+  if (old) {
+    old.remove();
+  }
+
+
+  const modal =
+    document.createElement(
+      'div'
+    );
+
+
+  modal.id =
+    'noticeModal';
+
+
+  modal.innerHTML = `
+
+    <div
+      style="
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.35);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:99999;
+        padding:20px;
+      "
+      onclick="closeNotice()"
+    >
+
+      <div
+        style="
+          width:min(320px,90vw);
+          background:white;
+          border-radius:18px;
+          padding:25px 20px 18px;
+          text-align:center;
+          box-shadow:0 10px 35px rgba(0,0,0,.25);
+        "
+        onclick="event.stopPropagation()"
+      >
+
+        <div
+          style="
+            font-size:20px;
+            font-weight:bold;
+            margin-bottom:12px;
+          "
+        >
+          ✅ สำเร็จ
+        </div>
+
+
+        <div
+          style="
+            font-size:15px;
+            color:#666;
+            line-height:1.6;
+          "
+        >
+          ${escapeHtml(message)}
+        </div>
+
+
+        <button
+          type="button"
+          onclick="closeNotice()"
+          style="
+            margin-top:18px;
+            width:100%;
+            border:0;
+            border-radius:10px;
+            padding:11px;
+            background:#06c755;
+            color:white;
+            font-size:15px;
+            font-weight:bold;
+          "
+        >
+          ตกลง
+        </button>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document.body.appendChild(
+    modal
+  );
+
+}
+
+
+function closeNotice() {
+
+  const modal =
+    document.getElementById(
+      'noticeModal'
+    );
+
+  if (modal) {
+    modal.remove();
+  }
+
+}
 
   function showCart() {
 
   if (cart.length === 0) {
 
-    alert('กรุณาเลือกอาหารก่อน');
+    showNotice('กรุณาเลือกอาหารก่อน');
 
     return;
 
@@ -2640,7 +2756,7 @@ showOrderSuccess(
   
     if (!dataUrl) {
   
-      alert(
+      showNotice(
         'ไม่พบรูป QR พร้อมเพย์'
       );
   
@@ -2656,7 +2772,7 @@ showOrderSuccess(
   
     if (!win) {
   
-      alert(
+      showNotice(
         'เบราว์เซอร์ไม่อนุญาตให้เปิด QR กรุณากดค้างที่รูป QR แล้วเลือกบันทึกรูปภาพ'
       );
   
