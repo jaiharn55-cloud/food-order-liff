@@ -338,18 +338,92 @@ function cartTotal(){
 function cartCount(){return cart.reduce((sum,item)=>sum+Number(item.qty||1),0);}
 
 function renderMenu(){
-  const mainCats=["ทั้งหมด",...new Set(DATA.menus.filter(m=>m.menuType!=="SPECIAL").map(m=>m.category).filter(Boolean))];
-  document.getElementById("app").innerHTML=
-    '<div class="header"><h1>🍱 ร้านข้าวแกง ตามสั่ง</h1><p>สั่งล่วงหน้า • เลือกเวลารับได้ • ไม่ต้องรอคิวนาน</p></div>'+
-    '<div class="container">'+
-      renderSpecialSection()+
-      renderDailySection()+
-      '<button class="my-orders-btn" onclick="openMyOrders()">📋 ออเดอร์ของฉัน</button>'+
-      '<div class="section"><h2>🍛 เมนูตามสั่ง</h2><small>เมนูประจำร้าน</small></div>'+
-      '<div class="category-bar">'+mainCats.map(cat=>'<button class="category-btn '+(currentCategory===cat?'active':'')+'" onclick="selectCategory(\''+escapeJs(cat)+'\')">'+escapeHtml(cat)+'</button>').join("")+'</div>'+
-      '<div id="menuList"></div>'+
-    '</div>'+
-    '<button class="floating-cart" onclick="openCart()"><span>🛒 ตะกร้า '+cartCount()+' รายการ</span><span>'+cartTotal().toLocaleString("th-TH")+' บาท →</span></button>';
+
+  const mainCategories = [
+    ...new Set(
+      (DATA.menus || [])
+        .filter(function(menu){
+          return menu.menuType !== 'SPECIAL' &&
+            !['M022','M023','M024'].includes(
+              String(menu.id)
+            );
+        })
+        .map(function(menu){
+          return String(menu.category || '').trim();
+        })
+        .filter(Boolean)
+    )
+  ];
+
+  const categories = [
+    'ทั้งหมด',
+    'อาหารตามสั่ง',
+    '🍲 ข้าวราดแกง',
+    '⭐ เมนูพิเศษ'
+  ];
+
+  // กัน category ซ้ำ และเพิ่ม category อื่นที่มีอยู่จริง
+  mainCategories.forEach(function(category){
+    if (
+      category &&
+      !categories.includes(category)
+    ) {
+      categories.splice(
+        categories.length - 2,
+        0,
+        category
+      );
+    }
+  });
+
+  document.getElementById("app").innerHTML =
+    '<div class="header">' +
+      '<h1>🍱 ร้านข้าวแกง ตามสั่ง</h1>' +
+      '<p>สั่งล่วงหน้า • เลือกเวลารับได้ • ไม่ต้องรอคิวนาน</p>' +
+    '</div>' +
+
+    '<div class="container">' +
+
+      '<button class="my-orders-btn" onclick="openMyOrders()">' +
+        '📋 ออเดอร์ของฉัน' +
+      '</button>' +
+
+      '<div class="category-bar">' +
+
+        categories.map(function(category){
+
+          return (
+            '<button class="category-btn ' +
+              (
+                currentCategory === category
+                  ? 'active'
+                  : ''
+              ) +
+            '" onclick="selectCategory(\'' +
+              escapeJs(category) +
+            '\')">' +
+              escapeHtml(category) +
+            '</button>'
+          );
+
+        }).join("") +
+
+      '</div>' +
+
+      '<div id="menuList"></div>' +
+
+    '</div>' +
+
+    '<button class="floating-cart" onclick="openCart()">' +
+      '<span>🛒 ตะกร้า ' +
+        cartCount() +
+        ' รายการ</span>' +
+      '<span>' +
+        cartTotal().toLocaleString("th-TH") +
+        ' บาท →' +
+      '</span>' +
+    '</button>';
+
   renderMenuList();
 }
 
@@ -439,23 +513,194 @@ function renderMenuList(){
 
   if (!list) return;
 
-  let menus =
-    DATA.menus.filter(function(m) {
+  const allMenus =
+    (DATA.menus || [])
+      .filter(function(menu){
+        return menu.available !== false;
+      });
 
-      return m.available !== false &&
-        m.menuType !== "SPECIAL" &&
-        !["M022","M023","M024"].includes(m.id);
+  const dailyPackages =
+    allMenus.filter(function(menu){
+      return [
+        'M022',
+        'M023',
+        'M024'
+      ].includes(
+        String(menu.id)
+      );
+    });
+
+  const normalMenus =
+    allMenus.filter(function(menu){
+
+      return menu.menuType !== 'SPECIAL' &&
+        ![
+          'M022',
+          'M023',
+          'M024'
+        ].includes(
+          String(menu.id)
+        );
 
     });
 
-  if (currentCategory !== "ทั้งหมด") {
-
-    menus =
-      menus.filter(function(m) {
-        return m.category === currentCategory;
+  const specialMenus =
+    (DATA.specialMenus || [])
+      .filter(function(menu){
+        return menu.available !== false;
       });
 
+  let html = '';
+
+  // ==============================
+  // ทั้งหมด
+  // ==============================
+  if (currentCategory === 'ทั้งหมด') {
+
+    if (specialMenus.length) {
+
+      html +=
+        '<div class="section">' +
+          '<h2>⭐ เมนูพิเศษวันนี้</h2>' +
+          '<small>เมนูเฉพาะวัน</small>' +
+        '</div>' +
+
+        '<div class="menu-grid">' +
+          specialMenus
+            .map(function(menu){
+              return menuCardHtml(
+                menu,
+                true
+              );
+            })
+            .join("") +
+        '</div>';
+
+    }
+
+    const dishes =
+      (DATA.dailyDishes || [])
+        .filter(function(dish){
+          return dish.available;
+        });
+
+    if (
+      dishes.length &&
+      dailyPackages.length
+    ) {
+
+      html +=
+        '<div class="section">' +
+          '<h2>🍲 ข้าวราดแกงวันนี้</h2>' +
+          '<small>' +
+            dishes.length +
+            ' อย่าง' +
+          '</small>' +
+        '</div>' +
+
+        '<div class="menu-grid">' +
+          dailyPackages
+            .map(function(menu){
+              return menuCardHtml(
+                menu,
+                false
+              );
+            })
+            .join("") +
+        '</div>';
+
+    }
+
+    if (normalMenus.length) {
+
+      html +=
+        '<div class="section">' +
+          '<h2>🍛 อาหารตามสั่ง</h2>' +
+        '</div>' +
+
+        '<div class="menu-grid">' +
+          normalMenus
+            .map(menuCardHtml)
+            .join("") +
+        '</div>';
+
+    }
+
+    list.innerHTML =
+      html ||
+      '<div class="card empty">ไม่พบเมนู</div>';
+
+    return;
   }
+
+  // ==============================
+  // เมนูพิเศษ
+  // ==============================
+  if (
+    currentCategory === '⭐ เมนูพิเศษ'
+  ) {
+
+    list.innerHTML =
+      specialMenus.length
+        ? '<div class="menu-grid">' +
+            specialMenus
+              .map(function(menu){
+                return menuCardHtml(
+                  menu,
+                  true
+                );
+              })
+              .join("") +
+          '</div>'
+        : '<div class="card empty">' +
+            'วันนี้ไม่มีเมนูพิเศษ' +
+          '</div>';
+
+    return;
+  }
+
+  // ==============================
+  // ข้าวราดแกง
+  // ==============================
+  if (
+    currentCategory === '🍲 ข้าวราดแกง'
+  ) {
+
+    const dishes =
+      (DATA.dailyDishes || [])
+        .filter(function(dish){
+          return dish.available;
+        });
+
+    list.innerHTML =
+      dishes.length && dailyPackages.length
+        ? '<div class="menu-grid">' +
+            dailyPackages
+              .map(function(menu){
+                return menuCardHtml(
+                  menu,
+                  false
+                );
+              })
+              .join("") +
+          '</div>'
+        : '<div class="card empty">' +
+            'วันนี้ยังไม่มีรายการข้าวราดแกง' +
+          '</div>';
+
+    return;
+  }
+
+  // ==============================
+  // category ปกติ
+  // ==============================
+  const menus =
+    normalMenus.filter(function(menu){
+
+      return String(menu.category || '') ===
+        String(currentCategory);
+
+    });
 
   list.innerHTML =
     menus.length
@@ -471,7 +716,43 @@ function openMenu(menuId){
   const menu=DATA.menus.find(m=>m.id===menuId);
   if(!menu)return;
   currentMenu=menu;tempQty=1;
-  let options =   (DATA.options || [])     .filter(function(o) {       return String(o.menuId) === String(menuId) &&         o.available !== false;     });  /*  * Fallback:  * M022 = 1 อย่าง  * M023 = 2 อย่าง  * M024 = 3 อย่าง  *  * ใช้ Daily_Dishes ของวันนี้โดยตรง  * เผื่อ Backend version เก่ายังไม่ได้สร้าง dynamic option  */ const curryRules = {   M022: 1,   M023: 2,   M024: 3 };  const required =   curryRules[String(menuId)] || 0;  if (required > 0) {    const dailyDishes =     (DATA.dailyDishes || [])       .filter(function(dish) {         return dish.available;       });    const hasDailyOptions =     options.some(function(option) {       return option.group === 'เลือกกับข้าว';     });    if (!hasDailyOptions) {      dailyDishes.forEach(function(dish) {        options.push({         menuId: String(menuId),         group: 'เลือกกับข้าว',         name: dish.name,         price: 0,         available: true,         minSelect: required,         maxSelect: required,         dynamicDailyDish: true       });      });    } }
+  let options =   (DATA.options || [])     .filter(function(o) {       return String(o.menuId) === String(menuId) &&         o.available !== false;     });  /*  * Fallback:  * M022 = 1 อย่าง  * M023 = 2 อย่าง  * M024 = 3 อย่าง  *  * ใช้ Daily_Dishes ของวันนี้โดยตรง  * เผื่อ Backend version เก่ายังไม่ได้สร้าง dynamic option  */ const curryRules = {   M022: 1,   M023: 2,   M024: 3 };  const required =   curryRules[String(menuId)] || 0;  if (required > 0) {    const dailyDishes =     (DATA.dailyDishes || [])       .filter(function(dish) {         return dish.available;       });    const hasDailyOptions =     options.some(function(option) {       return option.group === 'เลือกกับข้าว';     });        if (!hasDailyOptions) {
+
+      dailyDishes.forEach(function(dish) {
+
+        options.push({
+          menuId: String(menuId),
+          group: 'เลือกกับข้าว',
+          name: dish.name,
+          price: 0,
+          available: true,
+          minSelect: required,
+          maxSelect: required,
+          dynamicDailyDish: true
+        });
+
+      });
+
+    }
+
+    // ถ้าเป็นเมนูข้าวราดแกง แต่ไม่มีแกงของวันนี้
+    // ให้หยุดและแจ้งลูกค้า
+    if (
+      required > 0 &&
+      !options.some(function(option) {
+        return option.group === 'เลือกกับข้าว';
+      })
+    ) {
+
+      showToast(
+        'วันนี้ยังไม่มีรายการกับข้าว'
+      );
+
+      return;
+    }
+
+  }
+
   const groups={};
   options.forEach(o=>{if(!groups[o.group])groups[o.group]=[];groups[o.group].push(o);});
 
@@ -790,25 +1071,125 @@ function openCart(){
 }
 
 
-function renderSlots(){
-  if(!Array.isArray(DATA.slots)||!DATA.slots.length){
-    return '<div class="mini-help" style="margin-top:8px">ไม่มีช่วงเวลาที่เปิดรับ</div>';
+function timeToMinutes_(timeText){
+
+  const match =
+    String(timeText || '')
+      .match(/^(\d{1,2}):(\d{2})/);
+
+  if (!match) {
+    return 9999;
   }
 
-  return '<div class="slot-list">'+DATA.slots.map(s=>{
-    const full=Number(s.remaining||0)<=0;
-    const waiting=Number(
-      s.waitingCount ??
-      s.waiting ??
-      0
-    );
+  return (
+    Number(match[1]) * 60 +
+    Number(match[2])
+  );
+}
 
-    return '<label class="slot-row '+(full?'full':'')+'">'+
-      '<input type="radio" name="pickupSlot" value="'+escapeHtml(s.id)+'" '+(full?'disabled':'')+'>'+
-      '<span><b>'+escapeHtml(s.start)+' - '+escapeHtml(s.end)+'</b><br>'+
-      '<small>'+(full?'ช่วงนี้เต็มแล้ว':'กำลังรอ '+waiting+' คิว')+'</small></span>'+
-      '</label>';
-  }).join('')+'</div>';
+
+function getCurrentMinutes_(){
+
+  const now =
+    new Date();
+
+  return (
+    now.getHours() * 60 +
+    now.getMinutes()
+  );
+}
+
+
+function renderSlots(){
+
+  if (
+    !Array.isArray(DATA.slots) ||
+    !DATA.slots.length
+  ) {
+
+    return `
+      <div class="mini-help"
+        style="margin-top:8px">
+        ไม่มีช่วงเวลาที่เปิดรับ
+      </div>
+    `;
+
+  }
+
+  const nowMinutes =
+    getCurrentMinutes_();
+
+  let options =
+    '<option value="">-- เลือกเวลารับอาหาร --</option>';
+
+  DATA.slots.forEach(function(slot){
+
+    const startMinutes =
+      timeToMinutes_(
+        slot.start
+      );
+
+    const expired =
+      startMinutes <= nowMinutes;
+
+    const waiting =
+      Number(
+        slot.waiting ||
+        slot.waitingCount ||
+        0
+      );
+
+    const disabled =
+      expired;
+
+    let label = '';
+
+    if (expired) {
+
+      label =
+        slot.start +
+        ' - ' +
+        slot.end +
+        ' • ผ่านเวลาแล้ว';
+
+    } else {
+
+      label =
+        slot.start +
+        ' - ' +
+        slot.end +
+        ' • รอทำ ' +
+        waiting +
+        ' คิว';
+
+    }
+
+    options += `
+      <option
+        value="${escapeHtml(slot.id)}"
+        ${disabled ? 'disabled' : ''}
+      >
+        ${escapeHtml(label)}
+      </option>
+    `;
+
+  });
+
+  return `
+    <select
+      id="pickupSlotSelect"
+      name="pickupSlot"
+      class="field"
+      style="
+        width:100%;
+        padding:12px;
+        font-size:16px;
+        margin-top:8px;
+      "
+    >
+      ${options}
+    </select>
+  `;
 }
 
 function togglePickupMode(){const type=document.querySelector('input[name=pickupType]:checked')?.value;const box=document.getElementById("slotBox");if(box)box.style.display=type==="SCHEDULED"?"block":"none";}
@@ -1036,11 +1417,33 @@ async function submitOrderV3(){
     if(!pickupType)throw new Error("กรุณาเลือกเวลารับอาหาร");
     let pickupSlot="";
     if(pickupType.value==="SCHEDULED"){
-      pickupSlot=document.querySelector('input[name=pickupSlot]:checked')?.value||"";
-      if(!pickupSlot)throw new Error("กรุณาเลือกช่วงเวลารับอาหาร");
+      const slot =
+        document.getElementById(
+          'pickupSlotSelect'
+        );
+      
+      if (
+        !slot ||
+        !slot.value
+      ) {
+        throw new Error(
+          'กรุณาเลือกช่วงเวลารับอาหาร'
+        );
+      }
+      
+      pickupSlot =
+        slot.value;
     }
-    const payment=document.querySelector('input[name=payment]:checked')?.value||"";
-    if(!payment)throw new Error("กรุณาเลือกวิธีชำระเงิน");
+    const payment =
+      document.querySelector(
+        'input[name="payment"]:checked'
+      )?.value || "";
+    
+    if (!payment) {
+      throw new Error(
+        "กรุณาเลือกวิธีชำระเงิน"
+      );
+    }
     const customerName=document.getElementById("customerName")?.value.trim()||"";
     if(!customerName)throw new Error("กรุณาใส่ชื่อผู้สั่ง");
 
