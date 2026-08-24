@@ -4483,9 +4483,48 @@ function initializeAdminLock_() {
         closeDailyDishForm();await loadMenuSystemData_();document.getElementById('dailyDateInput').value=dish.date;renderDailyDishList();
       }catch(error){alert(error.message||String(error));}
     }
-    async function toggleDailyDishUI(id,available){try{const result=await postAdminAction_({action:'toggleDailyDish',
-                          adminToken:
-                            adminAuthToken_(),dishId:id,available:available});if(!result.success)throw new Error(result.error||'เปลี่ยนสถานะไม่สำเร็จ');await loadMenuSystemData_();renderDailyDishList();}catch(error){alert(error.message||String(error));}}
+    async function toggleDailyDishUI(id, available) {
+
+  try {
+
+    const token =
+      adminAuthToken_();
+
+    if (!token) {
+      throw new Error(
+        'Admin Session หมดอายุ กรุณาเข้าสู่ระบบใหม่'
+      );
+    }
+
+    const result =
+      await postAdminAction_({
+        action: 'toggleDailyDish',
+        adminToken: token,
+        dishId: id,
+        available: available
+      });
+
+    if (!result.success) {
+      throw new Error(
+        result.error ||
+        'เปลี่ยนสถานะเมนูไม่สำเร็จ'
+      );
+    }
+
+    await loadMenuSystemData_();
+
+    renderDailyDishList();
+
+  } catch (error) {
+
+    alert(
+      error.message ||
+      String(error)
+    );
+
+  }
+
+}
 
 
     function renderSpecialMenuList(){
