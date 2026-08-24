@@ -4085,7 +4085,13 @@ function initializeAdminLock_() {
 
 
     async function loadMenuSystemData_() {
-      const response=await fetch(API_URL+'?action=getMenuSystemData',{method:'GET'});
+      const response=await fetch(API_URL+'?action=getMenuSystemData&adminToken=' +
+                                  encodeURIComponent(
+                                    adminAuthToken_()
+                                  ),
+                                  {
+                                    method:'GET'
+      });
       if(!response.ok) throw new Error('โหลดระบบเมนูไม่สำเร็จ');
       const result=await response.json();
       if(!result || !result.success) throw new Error(result && result.error ? result.error : 'โหลดระบบเมนูไม่สำเร็จ');
@@ -4426,7 +4432,10 @@ function initializeAdminLock_() {
         const response =
           await fetch(
             API_URL +
-            '?action=getAdminSettings'
+            '?action=getAdminSettings&adminToken=' +
+            encodeURIComponent(
+              adminAuthToken_()
+            )
           );
 
         const result =
