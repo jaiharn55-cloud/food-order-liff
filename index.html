@@ -319,29 +319,15 @@ async function loadData(){
   DATA =
     await response.json();
 
-  // Debug ตรวจข้อมูลที่ Customer ได้จริง
-  console.log(
-    "CUSTOMER FRONTEND VERSION =",
-    FRONTEND_VERSION
-  );
-
-  console.log(
-    "CUSTOMER DAILY DISH COUNT =",
-    (DATA.dailyDishes || []).length
-  );
-
-  console.log(
-    "CUSTOMER CURRY MENUS =",
-    (DATA.menus || []).filter(function(menu){
-      return [
-        "M022",
-        "M023",
-        "M024"
-      ].includes(
-        String(menu.id)
+  DATA.dailyDishes =
+    (DATA.dailyDishes || []).map(function(dish) {
+      return Object.assign(
+        {
+          available: true
+        },
+        dish
       );
-    })
-  );
+    });
 
   if (
     !DATA ||
@@ -482,7 +468,7 @@ function renderDailySection(){
   const dishes =
     (DATA.dailyDishes || [])
       .filter(function(d) {
-        return d.available;
+        return d.available !== false;
       });
 
   if (!dishes.length) {
@@ -625,7 +611,7 @@ function renderMenuList(){
     const dishes =
       (DATA.dailyDishes || [])
         .filter(function(dish){
-          return dish.available;
+          return dish.available !== false;
         });
 
     if (
@@ -713,7 +699,7 @@ function renderMenuList(){
     const dishes =
       (DATA.dailyDishes || [])
         .filter(function(dish){
-          return dish.available;
+          return dish.available !== false;
         });
 
     list.innerHTML =
@@ -760,7 +746,11 @@ function openMenu(menuId){
   const menu=DATA.menus.find(m=>m.id===menuId);
   if(!menu)return;
   currentMenu=menu;tempQty=1;
-  let options =   (DATA.options || [])     .filter(function(o) {       return String(o.menuId) === String(menuId) &&         o.available !== false;     });  /*  * Fallback:  * M022 = 1 อย่าง  * M023 = 2 อย่าง  * M024 = 3 อย่าง  *  * ใช้ Daily_Dishes ของวันนี้โดยตรง  * เผื่อ Backend version เก่ายังไม่ได้สร้าง dynamic option  */ const curryRules = {   M022: 1,   M023: 2,   M024: 3 };  const required =   curryRules[String(menuId)] || 0;  if (required > 0) {    const dailyDishes =     (DATA.dailyDishes || [])       .filter(function(dish) {         return dish.available;       });    const hasDailyOptions =     options.some(function(option) {       return option.group === 'เลือกกับข้าว';     });        if (!hasDailyOptions) {
+  let options =   (DATA.options || [])     .filter(function(o) {       return String(o.menuId) === String(menuId) &&         o.available !== false;     });  /*  * Fallback:  * M022 = 1 อย่าง  * M023 = 2 อย่าง  * M024 = 3 อย่าง  *  * ใช้ Daily_Dishes ของวันนี้โดยตรง  * เผื่อ Backend version เก่ายังไม่ได้สร้าง dynamic option  */ const curryRules = {   M022: 1,   M023: 2,   M024: 3 };  const required =   curryRules[String(menuId)] || 0;  if (required > 0) {    const dailyDishes =
+  (DATA.dailyDishes || [])
+    .filter(function(dish) {
+      return dish.available !== false;
+    });    const hasDailyOptions =     options.some(function(option) {       return option.group === 'เลือกกับข้าว';     });        if (!hasDailyOptions) {
 
       dailyDishes.forEach(function(dish) {
 
