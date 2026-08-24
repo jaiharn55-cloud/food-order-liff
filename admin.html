@@ -3837,34 +3837,36 @@ function initializeAdminLock_() {
      * =====================================
      */
 
+    const updatingOrderStatus_ =
+      new Set();
+
     async function updateStatus(
       orderId,
       orderDate,
       status
     ) {
-
+    
+      const key =
+        String(orderDate) +
+        '|' +
+        String(orderId);
+    
+      // กันกดซ้ำขณะกำลังบันทึก
+      if (updatingOrderStatus_.has(key)) {
+        return;
+      }
+    
       const statusNames = {
-
-        PREPARING:
-          'กำลังทำ',
-
-        READY:
-          'พร้อมรับ',
-
-        COMPLETED:
-          'เสร็จแล้ว',
-
-        CANCELLED:
-          'ยกเลิก'
-
+        PREPARING: 'กำลังทำ',
+        READY: 'พร้อมรับ',
+        COMPLETED: 'เสร็จแล้ว',
+        CANCELLED: 'ยกเลิก'
       };
-
-
+    
       const text =
         statusNames[status] ||
         status;
-
-
+    
       if (
         !confirm(
           'เปลี่ยน ' +
@@ -3874,190 +3876,297 @@ function initializeAdminLock_() {
           '" ?'
         )
       ) {
-
         return;
-
       }
-
-
+    
+      updatingOrderStatus_.add(key);
+    
       try {
-
+    
         const response =
           await fetch(
             API_URL,
             {
-
               method: 'POST',
-
+    
               headers: {
-
                 'Content-Type':
                   'text/plain;charset=utf-8'
-
               },
-
+    
               body:
                 JSON.stringify({
-
                   action:
                     'updateOrderStatus',
-                    adminToken:
-                      adminAuthToken_(),
-
+    
+                  adminToken:
+                    adminAuthToken_(),
+    
                   orderId:
                     orderId,
-
+    
                   orderDate:
                     orderDate,
-
+    
                   status:
                     status
-
                 })
-
             }
           );
-
-
-        const result =
-          await response.json();
-
-
-        if (
-          !result.success
-        ) {
-
+    
+        if (!response.ok) {
+          throw new Error(
+            'Backend HTTP Error: ' +
+            response.status
+          );
+        }
+    
+        const textResponse =
+          await response.text();
+    
+        let result;
+    
+        try {
+          result =
+            JSON.parse(
+              textResponse
+            );
+        } catch (parseError) {
+    
+          console.error(
+            'UPDATE STATUS RAW RESPONSE:',
+            textResponse
+          );
+    
+          throw new Error(
+            'Backend ตอบกลับไม่ถูกต้อง กรุณารอสักครู่แล้วลองใหม่'
+          );
+        }
+    
+        if (!result.success) {
           throw new Error(
             result.error ||
             'เปลี่ยนสถานะไม่สำเร็จ'
           );
-
         }
-
-
-        await loadOrders();
-
-
-      } catch (error) {
-
-        alert(
-          error.message ||
-          String(error)
-        );
-
-      }
-
-    }
-
-
-    async function updatePaymentStatus(
-      orderId,
-      orderDate,
-      paymentStatus
-    ) {
-
-      const names = {
-
-        UNPAID:
-          'ยังไม่ชำระ',
-
-        PENDING:
-          'รอตรวจสอบ',
-
-        PAID:
-          'ชำระแล้ว',
-
-        REFUNDED:
-          'คืนเงินแล้ว'
-
-      };
-
-      const target =
-        names[paymentStatus] ||
-        paymentStatus;
-
-      if (
-        !confirm(
-          'เปลี่ยนสถานะการชำระเงินของ ' +
-          orderId +
-          ' เป็น "' +
-          target +
-          '" ?'
-        )
-      ) {
-
-        return;
-
-      }
-
-      try {
-
-        const response =
-          await fetch(
-            API_URL,
-            {
-
-              method: 'POST',
-
-              headers: {
-
-                'Content-Type':
-                  'text/plain;charset=utf-8'
-
-              },
-
-              body:
-                JSON.stringify({
-
-                  action:
-                    'updatePaymentStatus',
-                          adminToken:
-                            adminAuthToken_(),orderId:
-                    orderId,
-
-                  orderDate:
-                    orderDate,
-
-                  paymentStatus:
-                    paymentStatus
-
-                })
-
+    
+        // =====================================
+        // อัปเดตหน้าจอทันที
+        // ไม่ต้องรอ Auto Refresh
+        // =====================================
+    
+        const localOrder =
+          orders.find(
+            function(order) {
+    
+              return String(
+                order.orderId
+              ) === String(orderId);
+    
             }
           );
-
-        const result =
-          await response.json();
-
-        if (
-          !result.success
-        ) {
-
-          throw new Error(
-            result.error ||
-            'เปลี่ยนสถานะการชำระเงินไม่สำเร็จ'
-          );
-
+    
+        if (localOrder) {
+          localOrder.status =
+            status;
         }
-
+    
+        renderSummary();
+        renderOrders();
+    
+        // โหลดข้อมูลจาก Backend อีกครั้ง
+        // เพื่อยืนยันสถานะจริง
         await loadOrders();
-
+    
       } catch (error) {
-
+    
         console.error(
-          'PAYMENT STATUS ERROR:',
+          'UPDATE STATUS ERROR:',
           error
         );
-
+    
         alert(
           error.message ||
           String(error)
         );
-
+    
+      } finally {
+    
+        updatingOrderStatus_.delete(
+          key
+        );
+    
       }
+    
+    }
+
+
+    const updatingPaymentStatus_ =
+      new Set();
+
+
+async function updatePaymentStatus(
+  orderId,
+  orderDate,
+  paymentStatus
+) {
+
+  const key =
+    String(orderDate) +
+    '|' +
+    String(orderId);
+
+  // กันกดสถานะการเงินซ้ำ
+  if (
+    updatingPaymentStatus_.has(key)
+  ) {
+    return;
+  }
+
+  const names = {
+    UNPAID: 'ยังไม่ชำระ',
+    PENDING: 'รอตรวจสอบ',
+    PAID: 'ชำระแล้ว',
+    REFUNDED: 'คืนเงินแล้ว'
+  };
+
+  const target =
+    names[paymentStatus] ||
+    paymentStatus;
+
+  if (
+    !confirm(
+      'เปลี่ยนสถานะการชำระเงินของ ' +
+      orderId +
+      ' เป็น "' +
+      target +
+      '" ?'
+    )
+  ) {
+    return;
+  }
+
+  updatingPaymentStatus_.add(key);
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body:
+            JSON.stringify({
+              action:
+                'updatePaymentStatus',
+
+              adminToken:
+                adminAuthToken_(),
+
+              orderId:
+                orderId,
+
+              orderDate:
+                orderDate,
+
+              paymentStatus:
+                paymentStatus
+            })
+        }
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        'Backend HTTP Error: ' +
+        response.status
+      );
+    }
+
+    const textResponse =
+      await response.text();
+
+    let result;
+
+    try {
+
+      result =
+        JSON.parse(
+          textResponse
+        );
+
+    } catch (parseError) {
+
+      console.error(
+        'UPDATE PAYMENT RAW RESPONSE:',
+        textResponse
+      );
+
+      throw new Error(
+        'Backend ตอบกลับไม่ถูกต้อง กรุณารอสักครู่แล้วลองใหม่'
+      );
+    }
+
+    if (!result.success) {
+
+      throw new Error(
+        result.error ||
+        'เปลี่ยนสถานะการชำระเงินไม่สำเร็จ'
+      );
 
     }
 
+    // อัปเดตหน้าจอทันที
+    const localOrder =
+      orders.find(
+        function(order) {
+
+          return String(
+            order.orderId
+          ) === String(orderId);
+
+        }
+      );
+
+    if (localOrder) {
+
+      localOrder.paymentStatus =
+        paymentStatus;
+
+    }
+
+    renderSummary();
+    renderOrders();
+
+    // โหลด Backend เพื่อยืนยันข้อมูลจริง
+    await loadOrders();
+
+  } catch (error) {
+
+    console.error(
+      'PAYMENT STATUS ERROR:',
+      error
+    );
+
+    alert(
+      error.message ||
+      String(error)
+    );
+
+  } finally {
+
+    updatingPaymentStatus_.delete(
+      key
+    );
+
+  }
+
+}
 
     /*
      * =====================================
