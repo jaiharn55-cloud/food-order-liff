@@ -6576,23 +6576,24 @@ setInterval(
 
 
 function getAdminTokenSafe_() {
-
   const token =
-    window.adminToken ||
-    localStorage.getItem('adminToken') ||
-    sessionStorage.getItem('adminToken') ||
-    '';
+    typeof adminAuthToken_ === 'function'
+      ? adminAuthToken_()
+      : (
+          window.adminToken ||
+          localStorage.getItem('adminToken') ||
+          sessionStorage.getItem('adminToken') ||
+          sessionStorage.getItem('adminAuthToken') ||
+          ''
+        );
 
   if (!token) {
-
     throw new Error(
       'ไม่พบ Admin Token กรุณาเข้าสู่ระบบใหม่'
     );
-
   }
 
   return token;
-
 }
 
 
