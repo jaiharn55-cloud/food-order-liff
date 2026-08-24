@@ -6576,14 +6576,17 @@ setInterval(
 
 
 function getAdminTokenSafe_() {
+
+  // ใช้ Token ตัวเดียวกับระบบ Admin Login
   const token =
     typeof adminAuthToken_ === 'function'
       ? adminAuthToken_()
       : (
-          window.adminToken ||
-          localStorage.getItem('adminToken') ||
-          sessionStorage.getItem('adminToken') ||
           sessionStorage.getItem('adminAuthToken') ||
+          localStorage.getItem('adminAuthToken') ||
+          window.adminToken ||
+          sessionStorage.getItem('adminToken') ||
+          localStorage.getItem('adminToken') ||
           ''
         );
 
