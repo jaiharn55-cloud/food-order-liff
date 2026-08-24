@@ -4479,7 +4479,11 @@ function initializeAdminLock_() {
         let imageUrl=dailyDishImageUrl_||''; if(file) imageUrl=await uploadAdminImageFromFile_(file);
         const dish={id:id,date:document.getElementById('dailyDishFormDate').value,name:document.getElementById('dailyDishFormName').value.trim(),description:document.getElementById('dailyDishFormDescription').value.trim(),image:imageUrl,available:old?!!old.available:true};
         const action=id?'saveDailyDish':'createDailyDish';
-        const result=await postAdminAction_({action:action,dish:dish});if(!result.success)throw new Error(result.error||'บันทึกกับข้าวไม่สำเร็จ');
+        const result = await postAdminAction_({
+          action: action,
+          adminToken: adminAuthToken_(),
+          dish: dish
+        });if(!result.success)throw new Error(result.error||'บันทึกกับข้าวไม่สำเร็จ');
         closeDailyDishForm();await loadMenuSystemData_();document.getElementById('dailyDateInput').value=dish.date;renderDailyDishList();
       }catch(error){alert(error.message||String(error));}
     }
@@ -4641,38 +4645,57 @@ function initializeAdminLock_() {
 
     async function apiPost_(payload) {
 
+      const token =
+        typeof adminAuthToken_ === 'function'
+          ? adminAuthToken_()
+          : '';
+    
+      if (!token) {
+        throw new Error(
+          'ต้องเข้าสู่ระบบ Admin ก่อน'
+        );
+      }
+    
+      const requestPayload =
+        Object.assign(
+          {},
+          payload,
+          {
+            adminToken: token
+          }
+        );
+    
       const response =
         await fetch(
           API_URL,
           {
             method: 'POST',
+    
             headers: {
               'Content-Type':
                 'text/plain;charset=utf-8'
             },
+    
             body:
               JSON.stringify(
-                payload
+                requestPayload
               )
           }
         );
-
+    
       const result =
         await response.json();
-
-      if (
-        !result.success
-      ) {
-
+    
+      if (!result.success) {
+    
         throw new Error(
           result.error ||
           'บันทึกไม่สำเร็จ'
         );
-
+    
       }
-
+    
       return result;
-
     }
 
 
