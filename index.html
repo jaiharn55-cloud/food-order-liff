@@ -213,7 +213,7 @@ textarea.field,input.field{width:100%;border:1px solid #ddd;border-radius:10px;p
 <script>
 const LIFF_ID = "2011202604-C2aNSUPF";
 const API_URL = "https://script.google.com/macros/s/AKfycbxawZU8dYjnixWed3eVoUPqA88PAtZmCwTgyJghOtcP9e4iqJQDghzrrQslK2X2CO3S/exec";
-const FRONTEND_VERSION = "FRONT-V3-CUSTOMER";
+const FRONTEND_VERSION = "FRONT-V4-CUSTOMER-CURRY-FIX";
 
 let DATA={menus:[],options:[],slots:[],dailyDishes:[],specialMenus:[],payment:{}};
 let cart=[];
@@ -304,10 +304,54 @@ async function startApp(){
 }
 
 async function loadData(){
-  const response=await fetch(API_URL+"?action=getInitialData");
-  if(!response.ok) throw new Error("โหลดข้อมูลร้านไม่สำเร็จ");
-  DATA=await response.json();
-  if(!DATA||!Array.isArray(DATA.menus)) throw new Error("ข้อมูลเมนูจากร้านไม่ถูกต้อง");
+
+  const response =
+    await fetch(
+      API_URL + "?action=getInitialData"
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      "โหลดข้อมูลร้านไม่สำเร็จ"
+    );
+  }
+
+  DATA =
+    await response.json();
+
+  // Debug ตรวจข้อมูลที่ Customer ได้จริง
+  console.log(
+    "CUSTOMER FRONTEND VERSION =",
+    FRONTEND_VERSION
+  );
+
+  console.log(
+    "CUSTOMER DAILY DISH COUNT =",
+    (DATA.dailyDishes || []).length
+  );
+
+  console.log(
+    "CUSTOMER CURRY MENUS =",
+    (DATA.menus || []).filter(function(menu){
+      return [
+        "M022",
+        "M023",
+        "M024"
+      ].includes(
+        String(menu.id)
+      );
+    })
+  );
+
+  if (
+    !DATA ||
+    !Array.isArray(DATA.menus)
+  ) {
+    throw new Error(
+      "ข้อมูลเมนูจากร้านไม่ถูกต้อง"
+    );
+  }
+
   renderMenu();
 }
 
