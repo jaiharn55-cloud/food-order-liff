@@ -360,12 +360,66 @@ function renderSpecialSection(){
 }
 
 function renderDailySection(){
-  const dishes=(DATA.dailyDishes||[]).filter(d=>d.available);
-  if(!dishes.length)return "";
-  return '<div class="section"><h2>🍲 ข้าวราดแกงวันนี้</h2><small>'+dishes.length+' อย่าง</small></div>'+
-    '<div class="card daily-wrap"><div class="mini-help">เลือก 1 / 2 / 3 อย่าง แล้วเลือกกับข้าวในขั้นถัดไป</div><div class="menu-grid" style="margin-top:9px">'+
-      ["M022","M023","M024"].map(id=>{const m=DATA.menus.find(x=>x.id===id);return m?menuCardHtml(m,false):"";}).join("")+
-    '</div></div>';
+
+  const dishes =
+    (DATA.dailyDishes || [])
+      .filter(function(d) {
+        return d.available;
+      });
+
+  if (!dishes.length) {
+    return "";
+  }
+
+  const packageIds = [
+    "M022",
+    "M023",
+    "M024"
+  ];
+
+  const packages =
+    packageIds
+      .map(function(id) {
+        return DATA.menus.find(function(menu) {
+          return menu.id === id;
+        });
+      })
+      .filter(Boolean);
+
+  return (
+    '<div class="section">' +
+      '<h2>🍲 ข้าวราดแกงวันนี้</h2>' +
+      '<small>' +
+        dishes.length +
+        ' อย่าง' +
+      '</small>' +
+    '</div>' +
+
+    '<div class="card daily-wrap">' +
+
+      '<div class="mini-help">' +
+        'วันนี้มี ' +
+        dishes.length +
+        ' อย่าง • ' +
+        'เลือก 1 / 2 / 3 อย่าง ' +
+        'แล้วเลือกกับข้าวในขั้นถัดไป' +
+      '</div>' +
+
+      '<div class="menu-grid" style="margin-top:9px">' +
+
+        packages
+          .map(function(menu) {
+            return menuCardHtml(
+              menu,
+              false
+            );
+          })
+          .join("") +
+
+      '</div>' +
+
+    '</div>'
+  );
 }
 
 function menuCardHtml(menu,specialBadge=true){
@@ -379,11 +433,36 @@ function menuCardHtml(menu,specialBadge=true){
 }
 
 function renderMenuList(){
-  const list=document.getElementById("menuList");
-  if(!list)return;
-  let menus=DATA.menus.filter(m=>m.menuType!=="SPECIAL"&&!["M022","M023","M024"].includes(m.id));
-  if(currentCategory!=="ทั้งหมด")menus=menus.filter(m=>m.category===currentCategory);
-  list.innerHTML=menus.length?'<div class="menu-grid">'+menus.map(menuCardHtml).join("")+'</div>':'<div class="card empty">ไม่พบเมนู</div>';
+
+  const list =
+    document.getElementById("menuList");
+
+  if (!list) return;
+
+  let menus =
+    DATA.menus.filter(function(m) {
+
+      return m.available !== false &&
+        m.menuType !== "SPECIAL" &&
+        !["M022","M023","M024"].includes(m.id);
+
+    });
+
+  if (currentCategory !== "ทั้งหมด") {
+
+    menus =
+      menus.filter(function(m) {
+        return m.category === currentCategory;
+      });
+
+  }
+
+  list.innerHTML =
+    menus.length
+      ? '<div class="menu-grid">' +
+          menus.map(menuCardHtml).join("") +
+        '</div>'
+      : '<div class="card empty">ไม่พบเมนู</div>';
 }
 
 function selectCategory(category){currentCategory=category;renderMenu();}
@@ -392,7 +471,7 @@ function openMenu(menuId){
   const menu=DATA.menus.find(m=>m.id===menuId);
   if(!menu)return;
   currentMenu=menu;tempQty=1;
-  const options=(DATA.options||[]).filter(o=>String(o.menuId)===String(menuId)&&o.available!==false);
+  let options =   (DATA.options || [])     .filter(function(o) {       return String(o.menuId) === String(menuId) &&         o.available !== false;     });  /*  * Fallback:  * M022 = 1 อย่าง  * M023 = 2 อย่าง  * M024 = 3 อย่าง  *  * ใช้ Daily_Dishes ของวันนี้โดยตรง  * เผื่อ Backend version เก่ายังไม่ได้สร้าง dynamic option  */ const curryRules = {   M022: 1,   M023: 2,   M024: 3 };  const required =   curryRules[String(menuId)] || 0;  if (required > 0) {    const dailyDishes =     (DATA.dailyDishes || [])       .filter(function(dish) {         return dish.available;       });    const hasDailyOptions =     options.some(function(option) {       return option.group === 'เลือกกับข้าว';     });    if (!hasDailyOptions) {      dailyDishes.forEach(function(dish) {        options.push({         menuId: String(menuId),         group: 'เลือกกับข้าว',         name: dish.name,         price: 0,         available: true,         minSelect: required,         maxSelect: required,         dynamicDailyDish: true       });      });    } }
   const groups={};
   options.forEach(o=>{if(!groups[o.group])groups[o.group]=[];groups[o.group].push(o);});
 
