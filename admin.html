@@ -222,7 +222,137 @@
 
     }
 
+    .daily-dish-toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
 
+.daily-dish-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.daily-dish-modal-box {
+  max-width: 700px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.25);
+}
+
+.daily-dish-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.daily-dish-modal-header h2 {
+  margin: 0 0 10px;
+}
+
+.daily-dish-date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.daily-dish-date input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.daily-dish-close {
+  border: 0;
+  background: transparent;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.daily-dish-library-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.daily-dish-library-actions button {
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.daily-dish-library-list {
+  padding: 12px 20px;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.daily-dish-library-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+}
+
+.daily-dish-library-item:hover {
+  background: #f8f8f8;
+}
+
+.daily-dish-library-item input {
+  width: 20px;
+  height: 20px;
+}
+
+.daily-dish-library-name {
+  font-weight: 600;
+}
+
+.daily-dish-library-description {
+  font-size: 13px;
+  color: #777;
+  margin-top: 3px;
+}
+
+.daily-dish-modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+}
+
+.daily-dish-modal-footer button {
+  padding: 9px 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #111;
+  color: #fff;
+  border-color: #111 !important;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #111;
+}
     
     /* =====================================
      * LOCAL NEW ORDER NOTIFICATION
@@ -1732,21 +1862,61 @@
       <div class="menu-manager-body">
 
         <div class="menu-tabs">
-
-          <button id="menuTabMain" class="menu-tab-btn active" onclick="selectMenuManagerTab('main')">
+      
+          <button
+            id="menuTabMain"
+            class="menu-tab-btn active"
+            onclick="selectMenuManagerTab('main')"
+          >
             🍛 เมนูหลัก
           </button>
-
-          <button id="menuTabDaily" class="menu-tab-btn" onclick="selectMenuManagerTab('daily')">
+      
+      
+          <button
+            id="menuTabDaily"
+            class="menu-tab-btn"
+            onclick="selectMenuManagerTab('daily')"
+          >
             🍲 แกงวันนี้
           </button>
-
-          <button id="menuTabSpecial" class="menu-tab-btn" onclick="selectMenuManagerTab('special')">
+      
+      
+          <button
+            id="menuTabSpecial"
+            class="menu-tab-btn"
+            onclick="selectMenuManagerTab('special')"
+          >
             ⭐ เมนูพิเศษ
           </button>
-
+      
         </div>
-
+      
+      
+        <!-- ปุ่มจัดการแกงวันนี้ -->
+        <div
+          id="dailyDishToolbar"
+          class="daily-dish-toolbar"
+          style="display:none;"
+        >
+      
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="openDailyDishLibrary()"
+          >
+            📚 เพิ่มจากคลังเมนู
+          </button>
+      
+      
+          <button
+            type="button"
+            class="btn btn-secondary"
+            onclick="openCreateDailyDish()"
+          >
+            ➕ เพิ่มเมนูใหม่
+          </button>
+      
+        </div>
 
         <div id="menuPanelMain" class="menu-system-panel show">
 
@@ -1790,7 +1960,7 @@
           <div class="menu-toolbar">
             <input id="dailyDateInput" class="date-input" type="date">
             <button class="menu-add-btn" onclick="loadDailyDishesForDate()">🔄 โหลด</button>
-            <button class="menu-add-btn" onclick="openDailyDishForm()">➕ เพิ่มกับข้าว</button>
+            <button class="menu-add-btn" onclick="openDailyDishForm()">➕ เพิ่มเมนูใหม่</button>
           </div>
 
           <div id="dailyDishList"></div>
@@ -4071,16 +4241,70 @@ function initializeAdminLock_() {
 
 
     function selectMenuManagerTab(tab) {
-      menuManagerTab_=tab;
+
+      menuManagerTab_ = tab;
+    
       ['main','daily','special'].forEach(function(name){
-        const btn=document.getElementById('menuTab'+name.charAt(0).toUpperCase()+name.slice(1));
-        const panel=document.getElementById('menuPanel'+name.charAt(0).toUpperCase()+name.slice(1));
-        if(btn) btn.classList.toggle('active', name===tab);
-        if(panel) panel.classList.toggle('show', name===tab);
+    
+        const btn =
+          document.getElementById(
+            'menuTab' +
+            name.charAt(0).toUpperCase() +
+            name.slice(1)
+          );
+    
+        const panel =
+          document.getElementById(
+            'menuPanel' +
+            name.charAt(0).toUpperCase() +
+            name.slice(1)
+          );
+    
+        if (btn) {
+          btn.classList.toggle(
+            'active',
+            name === tab
+          );
+        }
+    
+        if (panel) {
+          panel.classList.toggle(
+            'show',
+            name === tab
+          );
+        }
+    
       });
-      if(tab==='main') renderMenuManager();
-      if(tab==='daily') renderDailyDishList();
-      if(tab==='special') renderSpecialMenuList();
+    
+    
+      // แสดงปุ่มจัดการคลังเฉพาะแท็บ "แกงวันนี้"
+      const dailyToolbar =
+        document.getElementById(
+          'dailyDishToolbar'
+        );
+    
+      if (dailyToolbar) {
+    
+        dailyToolbar.style.display =
+          tab === 'daily'
+            ? 'flex'
+            : 'none';
+    
+      }
+    
+    
+      if (tab === 'main') {
+        renderMenuManager();
+      }
+    
+      if (tab === 'daily') {
+        renderDailyDishList();
+      }
+    
+      if (tab === 'special') {
+        renderSpecialMenuList();
+      }
+    
     }
 
 
@@ -6243,8 +6467,99 @@ setInterval(
 
   </script>
 
+  <div
+  id="dailyDishLibraryModal"
+  class="daily-dish-modal"
+  style="display:none;"
+>
+
+  <div class="daily-dish-modal-box">
+
+    <div class="daily-dish-modal-header">
+
+      <div>
+        <h2>📚 เพิ่มจากคลังเมนู</h2>
+
+        <div class="daily-dish-date">
+          วันที่
+          <input
+            type="date"
+            id="dailyDishLibraryDate"
+          >
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onclick="closeDailyDishLibrary()"
+        class="daily-dish-close"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="daily-dish-library-actions">
+
+      <button
+        type="button"
+        onclick="selectAllDailyDishLibrary(true)"
+      >
+        ☑ เลือกทั้งหมด
+      </button>
+
+      <button
+        type="button"
+        onclick="selectAllDailyDishLibrary(false)"
+      >
+        ☐ ยกเลิกทั้งหมด
+      </button>
+
+    </div>
+
+
+    <div
+      id="dailyDishLibraryList"
+      class="daily-dish-library-list"
+    >
+      กำลังโหลดคลังเมนู...
+    </div>
+
+
+    <div class="daily-dish-modal-footer">
+
+      <span id="dailyDishLibraryCount">
+        เลือก 0 รายการ
+      </span>
+
+      <div>
+
+        <button
+          type="button"
+          onclick="closeDailyDishLibrary()"
+        >
+          ยกเลิก
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          onclick="addSelectedDailyDishes()"
+        >
+          📥 เพิ่มเมนูที่เลือก
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
 <script>
+
   window.addEventListener(
     "load",
     function() {
@@ -6256,6 +6571,480 @@ setInterval(
       }
     }
   );
+
+  let dailyDishLibraryData = [];
+
+
+function getAdminTokenSafe_() {
+
+  const token =
+    window.adminToken ||
+    localStorage.getItem('adminToken') ||
+    sessionStorage.getItem('adminToken') ||
+    '';
+
+  if (!token) {
+
+    throw new Error(
+      'ไม่พบ Admin Token กรุณาเข้าสู่ระบบใหม่'
+    );
+
+  }
+
+  return token;
+
+}
+
+
+function getTodayDateInput_() {
+
+  const now = new Date();
+
+  const y =
+    now.getFullYear();
+
+  const m =
+    String(
+      now.getMonth() + 1
+    ).padStart(2, '0');
+
+  const d =
+    String(
+      now.getDate()
+    ).padStart(2, '0');
+
+  return y + '-' + m + '-' + d;
+
+}
+
+
+async function openDailyDishLibrary() {
+
+  const modal =
+    document.getElementById(
+      'dailyDishLibraryModal'
+    );
+
+  const dateInput =
+    document.getElementById(
+      'dailyDishLibraryDate'
+    );
+
+  const list =
+    document.getElementById(
+      'dailyDishLibraryList'
+    );
+
+
+  modal.style.display = 'block';
+
+  dateInput.value =
+    getTodayDateInput_();
+
+  list.innerHTML =
+    'กำลังโหลดคลังเมนู...';
+
+
+  try {
+
+    const token =
+      getAdminTokenSafe_();
+
+    const url =
+      API_URL +
+      '?action=getDailyDishLibrary' +
+      '&adminToken=' +
+      encodeURIComponent(token);
+
+
+    const response =
+      await fetch(url);
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        'โหลดคลังเมนูไม่สำเร็จ'
+      );
+
+    }
+
+
+    dailyDishLibraryData =
+      data.menus || [];
+
+
+    renderDailyDishLibrary();
+
+  } catch (error) {
+
+    console.error(
+      'openDailyDishLibrary:',
+      error
+    );
+
+    list.innerHTML =
+      '<div style="color:#c00;padding:20px;">' +
+      'ไม่สามารถโหลดคลังเมนูได้<br>' +
+      String(error.message || error) +
+      '</div>';
+
+  }
+
+}
+
+
+function renderDailyDishLibrary() {
+
+  const list =
+    document.getElementById(
+      'dailyDishLibraryList'
+    );
+
+
+  if (
+    !dailyDishLibraryData.length
+  ) {
+
+    list.innerHTML =
+      '<div style="padding:20px;text-align:center;">' +
+      'ยังไม่มีเมนูในคลัง' +
+      '</div>';
+
+    updateDailyDishLibraryCount();
+
+    return;
+
+  }
+
+
+  list.innerHTML =
+    dailyDishLibraryData
+      .map(function(menu) {
+
+        return `
+          <label class="daily-dish-library-item">
+
+            <input
+              type="checkbox"
+              class="daily-dish-library-check"
+              value="${escapeHtml_(menu.libraryId)}"
+              onchange="updateDailyDishLibraryCount()"
+            >
+
+            <div>
+
+              <div class="daily-dish-library-name">
+                ${escapeHtml_(menu.name)}
+              </div>
+
+              ${
+                menu.description
+                  ? `
+                    <div class="daily-dish-library-description">
+                      ${escapeHtml_(menu.description)}
+                    </div>
+                  `
+                  : ''
+              }
+
+            </div>
+
+          </label>
+        `;
+
+      })
+      .join('');
+
+
+  updateDailyDishLibraryCount();
+
+}
+
+
+function escapeHtml_(value) {
+
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
+}
+
+
+function selectAllDailyDishLibrary(
+  checked
+) {
+
+  document
+    .querySelectorAll(
+      '.daily-dish-library-check'
+    )
+    .forEach(function(input) {
+
+      input.checked =
+        checked;
+
+    });
+
+
+  updateDailyDishLibraryCount();
+
+}
+
+
+function updateDailyDishLibraryCount() {
+
+  const count =
+    document.querySelectorAll(
+      '.daily-dish-library-check:checked'
+    ).length;
+
+
+  const element =
+    document.getElementById(
+      'dailyDishLibraryCount'
+    );
+
+
+  if (element) {
+
+    element.textContent =
+      'เลือก ' +
+      count +
+      ' รายการ';
+
+  }
+
+}
+
+
+function closeDailyDishLibrary() {
+
+  const modal =
+    document.getElementById(
+      'dailyDishLibraryModal'
+    );
+
+  if (modal) {
+
+    modal.style.display =
+      'none';
+
+  }
+
+}
+
+
+async function addSelectedDailyDishes() {
+
+  const selected =
+    Array.from(
+      document.querySelectorAll(
+        '.daily-dish-library-check:checked'
+      )
+    )
+    .map(function(input) {
+
+      return input.value;
+
+    });
+
+
+  if (!selected.length) {
+
+    alert(
+      'กรุณาเลือกเมนูอย่างน้อย 1 รายการ'
+    );
+
+    return;
+
+  }
+
+
+  const date =
+    document.getElementById(
+      'dailyDishLibraryDate'
+    ).value;
+
+
+  if (!date) {
+
+    alert(
+      'กรุณาเลือกวันที่'
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !confirm(
+      'เพิ่มเมนูที่เลือก ' +
+      selected.length +
+      ' รายการสำหรับวันที่ ' +
+      date +
+      ' ?'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  try {
+
+    const token =
+      getAdminTokenSafe_();
+
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type':
+              'text/plain;charset=utf-8'
+          },
+
+          body:
+            JSON.stringify({
+
+              action:
+                'addDailyDishesFromLibrary',
+
+              adminToken:
+                token,
+
+              date:
+                date,
+
+              libraryIds:
+                selected
+
+            })
+
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.error ||
+        'เพิ่มเมนูไม่สำเร็จ'
+      );
+
+    }
+
+
+    let message =
+      'เพิ่มเมนูสำเร็จ ' +
+      result.addedCount +
+      ' รายการ';
+
+
+    if (
+      result.skippedCount
+    ) {
+
+      message +=
+        '\nข้ามเมนูที่มีอยู่แล้ว ' +
+        result.skippedCount +
+        ' รายการ';
+
+    }
+
+
+    alert(message);
+
+
+    closeDailyDishLibrary();
+
+
+    // โหลดรายการแกงวันนี้ใหม่
+    if (
+      typeof loadDailyDishes ===
+      'function'
+    ) {
+
+      await loadDailyDishes();
+
+    }
+
+    else if (
+      typeof loadMenuSystem ===
+      'function'
+    ) {
+
+      await loadMenuSystem();
+
+    }
+
+    else if (
+      typeof loadData ===
+      'function'
+    ) {
+
+      await loadData();
+
+    }
+
+
+  } catch (error) {
+
+    console.error(
+      'addSelectedDailyDishes:',
+      error
+    );
+
+    alert(
+      'เพิ่มเมนูไม่สำเร็จ\n' +
+      String(
+        error.message ||
+        error
+      )
+    );
+
+  }
+
+}
+  
 </script>
 </body>
 
