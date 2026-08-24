@@ -7000,6 +7000,17 @@ async function addSelectedDailyDishes() {
 
     closeDailyDishLibrary();
 
+    await loadMenuSystemData_();
+    
+    const dailyDateEl =
+      document.getElementById('dailyDateInput');
+    
+    if (dailyDateEl) {
+      dailyDateEl.value = date;
+    }
+    
+    renderDailyDishList();
+
 
     // โหลดรายการแกงวันนี้ใหม่
     if (
