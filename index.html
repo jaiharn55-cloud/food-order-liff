@@ -305,14 +305,43 @@ async function startApp(){
 
 async function loadData(){
 
+  const url =
+    API_URL +
+    "?action=getInitialData";
+
+  console.log(
+    "CUSTOMER API URL =",
+    url
+  );
+
   const response =
-    await fetch(
-      API_URL + "?action=getInitialData"
-    );
+    await fetch(url);
 
   if (!response.ok) {
+
+    let detail = "";
+
+    try {
+      detail =
+        await response.text();
+    } catch (e) {}
+
+    console.error(
+      "GET INITIAL DATA ERROR",
+      {
+        status:
+          response.status,
+        statusText:
+          response.statusText,
+        body:
+          detail
+      }
+    );
+
     throw new Error(
-      "โหลดข้อมูลร้านไม่สำเร็จ"
+      "โหลดข้อมูลร้านไม่สำเร็จ (" +
+      response.status +
+      ")"
     );
   }
 
@@ -320,14 +349,15 @@ async function loadData(){
     await response.json();
 
   DATA.dailyDishes =
-    (DATA.dailyDishes || []).map(function(dish) {
-      return Object.assign(
-        {
-          available: true
-        },
-        dish
-      );
-    });
+    (DATA.dailyDishes || [])
+      .map(function(dish) {
+        return Object.assign(
+          {
+            available: true
+          },
+          dish
+        );
+      });
 
   if (
     !DATA ||
