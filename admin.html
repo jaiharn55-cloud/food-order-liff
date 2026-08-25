@@ -3539,10 +3539,9 @@ function initializeAdminLock_() {
         `;
 
       } else if (order.status === 'PREPARING') {
-
         orderActions = `
           <div class="actions">
-
+      
             <button
               class="btn btn-blue"
               onclick="
@@ -3552,19 +3551,29 @@ function initializeAdminLock_() {
                   'READY'
                 )
               ">
-
               ✅ พร้อมรับ
-
             </button>
-
+      
+            <button
+              class="btn btn-red"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'CANCELLED'
+                )
+              ">
+              ❌ ยกเลิก
+            </button>
+      
           </div>
         `;
+      }
 
       } else if (order.status === 'READY') {
-
         orderActions = `
           <div class="actions">
-
+      
             <button
               class="btn btn-primary"
               onclick="
@@ -3574,13 +3583,24 @@ function initializeAdminLock_() {
                   'COMPLETED'
                 )
               ">
-
               ✔️ ลูกค้ารับแล้ว
-
             </button>
-
+      
+            <button
+              class="btn btn-red"
+              onclick="
+                updateStatus(
+                  '${escapeJs(order.orderId)}',
+                  '${escapeJs(order.date)}',
+                  'CANCELLED'
+                )
+              ">
+              ❌ ยกเลิก
+            </button>
+      
           </div>
         `;
+      }
 
       } else if (order.status === 'COMPLETED') {
 
