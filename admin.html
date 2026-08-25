@@ -3974,10 +3974,6 @@ function initializeAdminLock_() {
         renderSummary();
         renderOrders();
     
-        // โหลดข้อมูลจาก Backend อีกครั้ง
-        // เพื่อยืนยันสถานะจริง
-        await loadOrders();
-    
       } catch (error) {
     
         console.error(
@@ -4143,8 +4139,6 @@ async function updatePaymentStatus(
     renderSummary();
     renderOrders();
 
-    // โหลด Backend เพื่อยืนยันข้อมูลจริง
-    await loadOrders();
 
   } catch (error) {
 
