@@ -5316,48 +5316,6 @@ async function updatePaymentStatus(
 
     }
 
-
-    async function previewMenuImage(
-      event
-    ) {
-
-      const file =
-        event.target.files &&
-        event.target.files[0];
-
-      if (!file) {
-        return;
-      }
-
-      try {
-
-        menuEditorImageDataUrl_ =
-          await resizeImageFile_(
-            file
-          );
-
-        const preview =
-          document.getElementById(
-            'menuEditorImagePreview'
-          );
-
-        preview.src =
-          menuEditorImageDataUrl_;
-
-        preview.style.display =
-          'block';
-
-      } catch (error) {
-
-        alert(
-          'อ่านรูปไม่สำเร็จ'
-        );
-
-      }
-
-    }
-
-
     async function uploadAdminImage_(
       dataUrl,
       fileName
