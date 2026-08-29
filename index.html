@@ -1419,13 +1419,184 @@ function togglePaymentQR(){
   }else{box.innerHTML="";box.style.display="none";return;}
   box.style.display="block";
 }
-function openQr(){
-  const data=(DATA.payment||{}).promptPayQrData||"";
-  if(!data){showToast("ยังไม่มี QR ของร้าน");return;}
-  const win=window.open("","_blank");
-  if(!win){showToast("Browser ไม่อนุญาตให้เปิด QR");return;}
-  win.document.write('<html><head><title>QR พร้อมเพย์</title></head><body style="margin:0;padding:20px;text-align:center;background:#f5f5f5;font-family:Arial,sans-serif"><p>กดค้างที่ QR แล้วเลือกบันทึกรูปภาพ</p><img src="'+data+'" style="width:100%;max-width:500px;height:auto"></body></html>');win.document.close();
+
+function openQr() {
+
+  const data =
+    (DATA.payment || {})
+      .promptPayQrData || "";
+
+  if (!data) {
+    showToast("ยังไม่มี QR ของร้าน");
+    return;
+  }
+
+  closeQr();
+
+  const overlay =
+    document.createElement("div");
+
+  overlay.id = "qrLargeModal";
+
+  overlay.style.cssText = `
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    background:rgba(0,0,0,.82);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    box-sizing:border-box;
+  `;
+
+  const panel =
+    document.createElement("div");
+
+  panel.style.cssText = `
+    width:min(94vw,520px);
+    max-height:94vh;
+    background:#fff;
+    border-radius:18px;
+    padding:16px;
+    box-sizing:border-box;
+    text-align:center;
+    overflow:auto;
+    box-shadow:0 10px 40px rgba(0,0,0,.35);
+  `;
+
+  const title =
+    document.createElement("div");
+
+  title.textContent =
+    "📱 QR พร้อมเพย์";
+
+  title.style.cssText = `
+    font-size:20px;
+    font-weight:900;
+    margin-bottom:6px;
+  `;
+
+  const name =
+    document.createElement("div");
+
+  name.textContent =
+    (DATA.payment || {})
+      .promptPayName || "";
+
+  name.style.cssText = `
+    font-size:13px;
+    color:#666;
+    margin-bottom:12px;
+  `;
+
+  const img =
+    document.createElement("img");
+
+  img.src = data;
+
+  img.alt =
+    "QR พร้อมเพย์";
+
+  img.style.cssText = `
+    display:block;
+    width:min(88vw,450px);
+    max-width:100%;
+    height:auto;
+    margin:0 auto 14px;
+    border-radius:10px;
+    background:#fff;
+  `;
+
+  const note =
+    document.createElement("div");
+
+  note.textContent =
+    "กดค้างที่ QR เพื่อบันทึกหรือสแกน";
+
+  note.style.cssText = `
+    font-size:12px;
+    color:#666;
+    margin-bottom:12px;
+  `;
+
+  const closeBtn =
+    document.createElement("button");
+
+  closeBtn.type = "button";
+
+  closeBtn.textContent =
+    "ปิด";
+
+  closeBtn.style.cssText = `
+    border:none;
+    background:#06c755;
+    color:#fff;
+    font-weight:900;
+    font-size:15px;
+    border-radius:10px;
+    padding:11px 24px;
+    cursor:pointer;
+  `;
+
+  closeBtn.onclick =
+    function() {
+      closeQr();
+    };
+
+  panel.appendChild(title);
+  panel.appendChild(name);
+  panel.appendChild(img);
+  panel.appendChild(note);
+  panel.appendChild(closeBtn);
+
+  overlay.appendChild(panel);
+
+  overlay.addEventListener(
+    "click",
+    function(event) {
+      if (event.target === overlay) {
+        closeQr();
+      }
+    }
+  );
+
+  document.body.appendChild(overlay);
+
+  document.body.style.overflow =
+    "hidden";
 }
+
+
+function closeQr() {
+
+  const modal =
+    document.getElementById(
+      "qrLargeModal"
+    );
+
+  if (modal) {
+    modal.remove();
+  }
+
+  document.body.style.overflow =
+    "";
+}
+
+
+document.addEventListener(
+  "keydown",
+  function(event) {
+
+    if (
+      event.key === "Escape"
+    ) {
+      closeQr();
+    }
+
+  }
+);
+  
 function removeCartItem(index){
 
   const target =
